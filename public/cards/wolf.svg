@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 560" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a0a1e"/>
+      <stop offset="100%" stop-color="#1a1030"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="560" rx="20" fill="url(#bg)"/>
+  <circle cx="200" cy="200" r="100" fill="#6644aa20" stroke="#6644aa40" stroke-width="2"/>
+  <path d="M150 180 L170 120 L190 170" fill="#444466" stroke="#666688" stroke-width="2"/>
+  <path d="M250 180 L230 120 L210 170" fill="#444466" stroke="#666688" stroke-width="2"/>
+  <ellipse cx="200" cy="210" rx="55" ry="50" fill="#444466"/>
+  <circle cx="182" cy="195" r="8" fill="#aabbff"/>
+  <circle cx="218" cy="195" r="8" fill="#aabbff"/>
+  <circle cx="182" cy="195" r="4" fill="#2a2a4a"/>
+  <circle cx="218" cy="195" r="4" fill="#2a2a4a"/>
+  <ellipse cx="200" cy="225" rx="8" ry="5" fill="#333"/>
+  <path d="M140 300 Q200 340 260 300" stroke="#6644aa40" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+  <text x="200" y="440" text-anchor="middle" fill="#aabbff" font-size="28" font-weight="bold" font-family="serif">Shadow Wolf</text>
+  <text x="200" y="470" text-anchor="middle" fill="#6644aa80" font-size="14" font-family="sans-serif">Mythical Creatures #5</text>
+  <text x="200" y="520" text-anchor="middle" fill="#4488ff" font-size="12" font-family="sans-serif">● RARE ●</text>
+</svg>
