@@ -54,6 +54,96 @@ export const RARITY_PRICE: Record<Rarity, number> = {
 
 export const INITIAL_COINS = 500;
 
+// Rights per rarity
+export const RARITY_RIGHTS: Record<Rarity, number> = {
+  common: 1,
+  rare: 2,
+  epic: 3,
+  legendary: 5,
+};
+
+// A single right allocation record (immutable once created)
+export interface RightAllocation {
+  id: string; // format: `${cardId}_${rightIndex}_${programId}`
+  cardId: string;
+  rightIndex: number; // 0-based, up to RARITY_RIGHTS[rarity]-1
+  programId: string;
+  allocatedAt: string; // ISO string
+}
+
+// A requirement slot within a program
+export interface ProgramRequirement {
+  id: string;
+  label: string;
+  rightPointsNeeded: number;
+  filter?: {
+    themeIds?: string[];
+    rarities?: Rarity[];
+    cardIds?: string[];
+  };
+}
+
+export type ProgramCategory = "collection" | "challenge" | "special";
+
+// A Program that users participate in by consuming card rights
+export interface Program {
+  id: string;
+  title: string;
+  description: string;
+  iconName: string; // lucide icon name
+  accentColor: string;
+  category: ProgramCategory;
+  requirements: ProgramRequirement[];
+  rewardBadgeId?: string;
+  rewardCoins?: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+// User's progress on a specific program
+export interface UserProgramProgress {
+  programId: string;
+  allocations: Record<string, string[]>; // requirementId -> allocation IDs
+  isCompleted: boolean;
+  completedAt: string | null;
+  startedAt: string;
+  rewardsClaimed: boolean;
+}
+
+export type BadgeTriggerType =
+  | "card_count"
+  | "theme_complete"
+  | "rarity_collect"
+  | "program_complete"
+  | "first_purchase"
+  | "all_programs"
+  | "rights_consumed"
+  | "manual";
+
+export interface BadgeTrigger {
+  type: BadgeTriggerType;
+  threshold?: number;
+  targetId?: string;
+  programId?: string;
+}
+
+export interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  iconName: string; // lucide icon name
+  tier: "bronze" | "silver" | "gold" | "platinum";
+  accentColor: string;
+  trigger: BadgeTrigger;
+  sortOrder: number;
+}
+
+export interface UserBadge {
+  badgeId: string;
+  earnedAt: string;
+  seen: boolean;
+}
+
 export const RARITY_CONFIG: Record<
   Rarity,
   {

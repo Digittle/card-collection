@@ -20,6 +20,7 @@ import { CARD_THEMES, getCardsByTheme } from "@/lib/cards-data";
 import { CardFlip } from "@/components/card/CardFlip";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
+import { evaluateBadges } from "@/lib/badge-engine";
 
 type ShopView = "themes" | "cards";
 type ShopState = "browsing" | "confirming" | "revealing" | "complete";
@@ -87,6 +88,7 @@ export default function ShopPage() {
     }
 
     addCard(selectedCard);
+    evaluateBadges();
     setShopState("revealing");
   };
 

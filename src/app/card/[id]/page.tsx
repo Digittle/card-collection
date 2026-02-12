@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Calendar, Hash, Layers, Share2, ArrowLeft } from "lucide-react";
-import { Card, RARITY_CONFIG } from "@/types";
+import { Calendar, Hash, Layers, Share2, ArrowLeft, ArrowRight, Shield } from "lucide-react";
+import { Card, RARITY_CONFIG, RARITY_RIGHTS, RightAllocation } from "@/types";
 import { getCardById, getUser } from "@/lib/store";
+import { getCardRightsSummary } from "@/lib/rights-engine";
+import { getProgramById } from "@/lib/programs-data";
 import { Header } from "@/components/layout/Header";
 import { AppShell } from "@/components/layout/AppShell";
+import { RightsDots } from "@/components/ui/RightsDots";
 
 const GLOW_CLASS: Record<string, string> = {
   common: "card-glow-common",
@@ -22,6 +25,12 @@ export default function CardDetailPage() {
   const router = useRouter();
   const [card, setCard] = useState<Card | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [rightsSummary, setRightsSummary] = useState<{
+    total: number;
+    consumed: number;
+    available: number;
+    allocations: RightAllocation[];
+  } | null>(null);
 
   useEffect(() => {
     const user = getUser();
@@ -39,6 +48,7 @@ export default function CardDetailPage() {
     }
 
     setCard(foundCard);
+    setRightsSummary(getCardRightsSummary(id));
     setMounted(true);
   }, [params.id, router]);
 
@@ -169,6 +179,69 @@ export default function CardDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Rights Section */}
+          {rightsSummary && (
+            <div className="rounded-2xl border border-gray-200 bg-white p-4">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100">
+                  <Shield className="h-4 w-4 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-[14px] font-bold text-gray-900">
+                    権利 (Rights)
+                  </p>
+                  <p className="text-[11px] text-gray-400">
+                    {rightsSummary.available}/{rightsSummary.total} 利用可能
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <RightsDots
+                  total={rightsSummary.total}
+                  consumed={rightsSummary.consumed}
+                  accentColor={config.glowColor}
+                />
+              </div>
+
+              {rightsSummary.consumed > 0 && (
+                <div className="mb-3 space-y-1.5">
+                  <p className="text-[12px] font-medium text-gray-500">
+                    消費先:
+                  </p>
+                  {rightsSummary.allocations.map((allocation) => {
+                    const program = getProgramById(allocation.programId);
+                    return (
+                      <div
+                        key={allocation.id}
+                        className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-1.5"
+                      >
+                        <div className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                        <span className="text-[12px] text-gray-600">
+                          {program?.title ?? allocation.programId}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {rightsSummary.available > 0 ? (
+                <button
+                  onClick={() => router.push("/programs")}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-600 to-primary-500 py-3 text-[14px] font-bold text-white shadow-lg shadow-primary-400/15 transition-all active:scale-[0.98]"
+                >
+                  プログラムに権利を使う
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <p className="text-center text-[13px] text-gray-400">
+                  すべての権利が消費済みです
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Back to collection */}
           <button

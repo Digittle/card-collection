@@ -17,6 +17,7 @@ import { Card } from "@/types";
 import { CardFlip } from "@/components/card/CardFlip";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
+import { evaluateBadges } from "@/lib/badge-engine";
 
 type ClaimState = "input" | "revealing" | "complete";
 
@@ -69,6 +70,7 @@ export default function ClaimPage() {
   const handleRevealComplete = () => {
     if (claimedCard) {
       addCard(claimedCard);
+      evaluateBadges();
       setClaimState("complete");
     }
   };
