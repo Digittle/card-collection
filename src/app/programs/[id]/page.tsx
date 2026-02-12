@@ -31,17 +31,14 @@ import {
   setProgramProgress,
 } from "@/lib/store";
 import { getProgramById } from "@/lib/programs-data";
-import { getBadgeById } from "@/lib/badges-data";
 import {
   getCardRightsSummary,
   executeAllocation,
 } from "@/lib/rights-engine";
-import { evaluateBadges } from "@/lib/badge-engine";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
-import { BadgeIcon } from "@/components/ui/BadgeIcon";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Star,
@@ -167,11 +164,6 @@ export default function ProgramDetailPage() {
   const isCompleted = progress?.isCompleted ?? false;
   const rewardsClaimed = progress?.rewardsClaimed ?? false;
 
-  // Reward badge
-  const rewardBadge = program.rewardBadgeId
-    ? getBadgeById(program.rewardBadgeId)
-    : null;
-
   const handleOpenCardSelection = (requirement: ProgramRequirement) => {
     const eligible = getEligibleCardsForRequirement(requirement, ownedCards);
     setEligibleCards(eligible);
@@ -208,8 +200,6 @@ export default function ProgramDetailPage() {
           setShowSuccess(true);
         }
 
-        // Evaluate badges
-        evaluateBadges();
       }
 
       setIsProcessing(false);
@@ -456,23 +446,6 @@ export default function ProgramDetailPage() {
         <h3 className="mb-3 text-[14px] font-bold text-gray-700">報酬</h3>
         <div className="rounded-xl border border-gray-200 bg-white p-4">
           <div className="flex flex-col items-center gap-4">
-            {/* Reward Badge */}
-            {rewardBadge && (
-              <div className="flex flex-col items-center gap-2">
-                <BadgeIcon
-                  badge={rewardBadge}
-                  size="lg"
-                  earned={isCompleted}
-                />
-                <p className="text-[13px] font-semibold text-gray-700">
-                  {rewardBadge.title}
-                </p>
-                <p className="text-center text-[12px] leading-relaxed text-gray-400">
-                  {rewardBadge.description}
-                </p>
-              </div>
-            )}
-
             {/* Reward Coins */}
             {program.rewardCoins && (
               <div className="flex items-center gap-2 rounded-full bg-gold-400/10 px-4 py-2">

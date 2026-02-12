@@ -94,7 +94,6 @@ export interface Program {
   accentColor: string;
   category: ProgramCategory;
   requirements: ProgramRequirement[];
-  rewardBadgeId?: string;
   rewardCoins?: number;
   isActive: boolean;
   sortOrder: number;
@@ -110,39 +109,6 @@ export interface UserProgramProgress {
   rewardsClaimed: boolean;
 }
 
-export type BadgeTriggerType =
-  | "card_count"
-  | "theme_complete"
-  | "rarity_collect"
-  | "program_complete"
-  | "first_purchase"
-  | "all_programs"
-  | "rights_consumed"
-  | "manual";
-
-export interface BadgeTrigger {
-  type: BadgeTriggerType;
-  threshold?: number;
-  targetId?: string;
-  programId?: string;
-}
-
-export interface Badge {
-  id: string;
-  title: string;
-  description: string;
-  iconName: string; // lucide icon name
-  tier: "bronze" | "silver" | "gold" | "platinum";
-  accentColor: string;
-  trigger: BadgeTrigger;
-  sortOrder: number;
-}
-
-export interface UserBadge {
-  badgeId: string;
-  earnedAt: string;
-  seen: boolean;
-}
 
 export const RARITY_CONFIG: Record<
   Rarity,

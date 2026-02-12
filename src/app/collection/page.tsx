@@ -11,16 +11,14 @@ import {
   hasCompletedOnboarding,
   getCoins,
   hasReceivedFreeCard,
-  getEarnedBadges,
 } from "@/lib/store";
-import { getAllBadges } from "@/lib/badges-data";
 import { CARD_THEMES, DEMO_CARDS, getCardsByTheme } from "@/lib/cards-data";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { CardGrid } from "@/components/card/CardGrid";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
-import { BookOpen, Trophy, Gift, ChevronRight, Award } from "lucide-react";
+import { BookOpen, Trophy, Gift, ChevronRight } from "lucide-react";
 
 export default function CollectionPage() {
   const router = useRouter();
@@ -29,7 +27,6 @@ export default function CollectionPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showZukan, setShowZukan] = useState(false);
-  const [earnedBadgeCount, setEarnedBadgeCount] = useState(0);
 
   useEffect(() => {
     const user = getUser();
@@ -45,7 +42,6 @@ export default function CollectionPage() {
 
     setCards(getCards());
     setCoins(getCoins());
-    setEarnedBadgeCount(getEarnedBadges().length);
     setShowOnboarding(!hasCompletedOnboarding());
     setMounted(true);
   }, [router]);
@@ -155,14 +151,6 @@ export default function CollectionPage() {
           </p>
         </div>
       </motion.div>
-
-      {/* Badge Summary Bar */}
-      <div className="mx-4 mb-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5">
-        <Award className="h-4 w-4 text-gold-300" />
-        <span className="text-[13px] font-medium text-gray-700">
-          獲得バッジ: {earnedBadgeCount}/{getAllBadges().length}
-        </span>
-      </div>
 
       {/* Empty State: no cards at all and not in zukan mode */}
       {ownedCount === 0 && !showZukan ? (

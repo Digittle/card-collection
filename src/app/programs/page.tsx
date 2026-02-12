@@ -3,20 +3,17 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Target, Award } from "lucide-react";
+import { Target } from "lucide-react";
 import { Program, UserProgramProgress } from "@/types";
 import {
   getUser,
   getCoins,
   getProgramProgresses,
-  getEarnedBadges,
 } from "@/lib/store";
 import { getAllPrograms } from "@/lib/programs-data";
-import { getAllBadges } from "@/lib/badges-data";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { ProgramCard } from "@/components/ui/ProgramCard";
-import { BadgeIcon } from "@/components/ui/BadgeIcon";
 
 function getFilledRequirements(
   program: Program,
@@ -35,14 +32,10 @@ export default function ProgramsPage() {
   const [coins, setCoins] = useState(0);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [progresses, setProgresses] = useState<UserProgramProgress[]>([]);
-  const [earnedBadgeIds, setEarnedBadgeIds] = useState<Set<string>>(new Set());
-
   const refreshState = () => {
     setCoins(getCoins());
     setPrograms(getAllPrograms().filter((p) => p.isActive).sort((a, b) => a.sortOrder - b.sortOrder));
     setProgresses(getProgramProgresses());
-    const earned = getEarnedBadges();
-    setEarnedBadgeIds(new Set(earned.map((b) => b.badgeId)));
   };
 
   useEffect(() => {
@@ -75,74 +68,9 @@ export default function ProgramsPage() {
     return <div className="min-h-screen bg-[#F4F5F6]" />;
   }
 
-  const allBadges = getAllBadges();
-  const totalBadges = allBadges.length;
-  const earnedCount = earnedBadgeIds.size;
-
   return (
     <AppShell>
       <Header title="プログラム" coins={coins} />
-
-      {/* Badge Summary Bar */}
-      <motion.div
-        className="px-4 pt-5 pb-2"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <div className="rounded-2xl border border-gray-200 bg-white p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400/15 text-amber-500">
-                <Award className="h-4.5 w-4.5" />
-              </div>
-              <div>
-                <h2 className="text-[15px] font-bold text-gray-900">
-                  獲得バッジ
-                </h2>
-                <p className="text-[12px] text-gray-400">
-                  {totalBadges}個中{" "}
-                  <span className="font-semibold text-gray-600">
-                    {earnedCount}個
-                  </span>{" "}
-                  獲得済み
-                </p>
-              </div>
-            </div>
-            <span className="text-[13px] font-bold tabular-nums text-amber-500">
-              {earnedCount}/{totalBadges}
-            </span>
-          </div>
-
-          {/* Horizontal scroll of badge icons */}
-          {earnedCount > 0 ? (
-            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
-              {allBadges.map((badge) => {
-                const isEarned = earnedBadgeIds.has(badge.id);
-                return (
-                  <motion.div
-                    key={badge.id}
-                    className="flex-shrink-0"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <BadgeIcon
-                      badge={badge}
-                      size="sm"
-                      earned={isEarned}
-                    />
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-center text-[12px] text-gray-400">
-              プログラムを完了してバッジを獲得しましょう！
-            </p>
-          )}
-        </div>
-      </motion.div>
 
       {/* Program List */}
       {programs.length === 0 ? (

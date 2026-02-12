@@ -14,7 +14,7 @@ import {
 } from "@/lib/store";
 import { CARD_THEMES, getCardsByTheme } from "@/lib/cards-data";
 import { CardFlip } from "@/components/card/CardFlip";
-import { evaluateBadges } from "@/lib/badge-engine";
+
 
 type GiftState = "selection" | "confirming" | "revealing" | "complete";
 
@@ -54,7 +54,6 @@ export default function GiftPage() {
     if (selectedCard) {
       setFreeCardReceived();
       addCard(selectedCard);
-      evaluateBadges();
       setState("complete");
     }
   }, [selectedCard]);

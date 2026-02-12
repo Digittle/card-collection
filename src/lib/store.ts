@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, UserProfile, INITIAL_COINS, RightAllocation, UserProgramProgress, UserBadge } from "@/types";
+import { Card, UserProfile, INITIAL_COINS, RightAllocation, UserProgramProgress } from "@/types";
 
 const STORAGE_KEYS = {
   USER: "dcc_user",
@@ -11,8 +11,6 @@ const STORAGE_KEYS = {
   FREE_CARD: "dcc_free_card_received",
   RIGHT_ALLOCATIONS: "dcc_right_allocations",
   PROGRAM_PROGRESS: "dcc_program_progress",
-  BADGES: "dcc_badges",
-  BADGE_QUEUE: "dcc_badge_queue",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
@@ -156,32 +154,3 @@ export function setProgramProgress(progress: UserProgramProgress): void {
   setItem(STORAGE_KEYS.PROGRAM_PROGRESS, progresses);
 }
 
-// Badges
-export function getEarnedBadges(): UserBadge[] {
-  return getItem<UserBadge[]>(STORAGE_KEYS.BADGES, []);
-}
-
-export function addEarnedBadge(badge: UserBadge): void {
-  const badges = getEarnedBadges();
-  if (badges.some((b) => b.badgeId === badge.badgeId)) return;
-  badges.push(badge);
-  setItem(STORAGE_KEYS.BADGES, badges);
-}
-
-export function getBadgeQueue(): string[] {
-  return getItem<string[]>(STORAGE_KEYS.BADGE_QUEUE, []);
-}
-
-export function addToBadgeQueue(badgeId: string): void {
-  const queue = getBadgeQueue();
-  queue.push(badgeId);
-  setItem(STORAGE_KEYS.BADGE_QUEUE, queue);
-}
-
-export function popBadgeQueue(): string | undefined {
-  const queue = getBadgeQueue();
-  if (queue.length === 0) return undefined;
-  const first = queue.shift();
-  setItem(STORAGE_KEYS.BADGE_QUEUE, queue);
-  return first;
-}

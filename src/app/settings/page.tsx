@@ -12,29 +12,10 @@ import {
   ChevronRight,
   AlertTriangle,
   LayoutGrid,
-  Lock,
-  Footprints,
-  Trophy,
-  Star,
-  Crown,
-  ArrowLeftRight,
-  Zap,
 } from "lucide-react";
-import { getUser, getCards, clearUser, getEarnedBadges } from "@/lib/store";
-import { getAllBadges, getBadgeById } from "@/lib/badges-data";
-import { Badge } from "@/types";
+import { getUser, getCards, clearUser } from "@/lib/store";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
-
-const BADGE_ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
-  Footprints,
-  LayoutGrid,
-  Trophy,
-  Star,
-  Crown,
-  ArrowLeftRight,
-  Zap,
-};
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -43,7 +24,6 @@ export default function SettingsPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [earnedBadgeIds, setEarnedBadgeIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const user = getUser();
@@ -53,7 +33,6 @@ export default function SettingsPage() {
     }
     setUserName(user.displayName);
     setCardCount(getCards().length);
-    setEarnedBadgeIds(new Set(getEarnedBadges().map((b) => b.badgeId)));
     setMounted(true);
   }, [router]);
 
@@ -95,59 +74,6 @@ export default function SettingsPage() {
             </div>
           </div>
         </motion.div>
-
-        {/* Badge Collection */}
-        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4">
-          <h3 className="mb-3 text-[14px] font-bold text-gray-900">
-            バッジコレクション
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            {getAllBadges().map((badge) => {
-              const isEarned = earnedBadgeIds.has(badge.id);
-              const IconComponent = BADGE_ICON_MAP[badge.iconName] ?? Star;
-
-              return (
-                <div key={badge.id} className="flex flex-col items-center gap-1">
-                  <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-full ${
-                      isEarned
-                        ? "shadow-sm"
-                        : "bg-gray-100 opacity-40"
-                    }`}
-                    style={
-                      isEarned
-                        ? { backgroundColor: badge.accentColor + "20" }
-                        : undefined
-                    }
-                  >
-                    {isEarned ? (
-                      <IconComponent
-                        className="h-5 w-5"
-                        style={{ color: badge.accentColor }}
-                      />
-                    ) : (
-                      <Lock className="h-4 w-4 text-gray-400" />
-                    )}
-                  </div>
-                  <span
-                    className={`max-w-[52px] truncate text-[10px] ${
-                      isEarned
-                        ? "font-medium text-gray-700"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {isEarned ? badge.title : "???"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          {earnedBadgeIds.size === 0 && (
-            <p className="mt-2 text-[13px] text-gray-400">
-              まだバッジを獲得していません
-            </p>
-          )}
-        </div>
 
         {/* Settings list */}
         <div className="space-y-1.5">
@@ -243,7 +169,7 @@ export default function SettingsPage() {
               </p>
               <p className="text-[13px] text-gray-600">・受け取り履歴</p>
               <p className="text-[13px] text-gray-600">
-                ・プログラムの進捗やバッジもすべて削除されます
+                ・プログラムの進捗もすべて削除されます
               </p>
             </div>
             <p className="mb-6 text-[12px] font-medium text-red-400/80">

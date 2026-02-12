@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Coins,
 } from "lucide-react";
+
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import type { Program, UserProgramProgress } from "@/types";
 
@@ -112,25 +113,15 @@ export function ProgramCard({
         </div>
 
         {/* Rewards row */}
-        {(program.rewardBadgeId || program.rewardCoins) && (
+        {program.rewardCoins && (
           <div className="mt-3 flex items-center gap-3">
             <span className="text-xs text-gray-400">報酬:</span>
-            {program.rewardBadgeId && (
-              <div className="flex items-center gap-1">
-                <Award className="h-3.5 w-3.5 text-gold-300" />
-                <span className="text-xs font-medium text-gray-600">
-                  バッジ
-                </span>
-              </div>
-            )}
-            {program.rewardCoins && (
-              <div className="flex items-center gap-1">
-                <Coins className="h-3.5 w-3.5 text-gold-300" />
-                <span className="text-xs font-medium text-gray-600">
-                  {program.rewardCoins}コイン
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-1">
+              <Coins className="h-3.5 w-3.5 text-gold-300" />
+              <span className="text-xs font-medium text-gray-600">
+                {program.rewardCoins}コイン
+              </span>
+            </div>
           </div>
         )}
       </div>
