@@ -110,6 +110,77 @@ export interface UserProgramProgress {
 }
 
 
+// ============ Collaborative Programs ============
+
+export type CollabProgramStatus = "active" | "completed";
+
+export interface CollaborativeProgram {
+  id: string;
+  title: string;
+  description: string;
+  iconName: string;
+  accentColor: string;
+  goalPoints: number;
+  filter?: {
+    themeIds?: string[];
+    rarities?: Rarity[];
+    cardIds?: string[];
+  };
+  participationRewardCoins: number;
+  topContributorBonusCoins: number;
+  mvpBonusCoins: number;
+  sortOrder: number;
+}
+
+export interface CollabProgramProgress {
+  programId: string;
+  realPoints: number;
+  simulatedPoints: number;
+  status: CollabProgramStatus;
+  completedAt: string | null;
+  startedAt: string;
+  lastSimulatedAt: string;
+  rewardsClaimed: boolean;
+  myRank: number;
+}
+
+export interface CollabContribution {
+  id: string;
+  programId: string;
+  userName: string;
+  cardTitle: string;
+  cardRarity: Rarity;
+  points: number;
+  isReal: boolean;
+  createdAt: string;
+}
+
+export interface CollabFeedItem {
+  id: string;
+  programId: string;
+  type: "contribution" | "milestone" | "completion";
+  userName: string | null;
+  message: string;
+  isReal: boolean;
+  createdAt: string;
+}
+
+export interface CollabLeaderboardEntry {
+  userName: string;
+  totalPoints: number;
+  rank: number;
+  isCurrentUser: boolean;
+}
+
+export type CollabBadgeTier = "participant" | "top_contributor" | "mvp";
+
+export interface CollabBadge {
+  id: string;
+  programId: string;
+  tier: CollabBadgeTier;
+  earnedAt: string;
+}
+
 export const RARITY_CONFIG: Record<
   Rarity,
   {

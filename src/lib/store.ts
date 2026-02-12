@@ -11,6 +11,10 @@ const STORAGE_KEYS = {
   FREE_CARD: "dcc_free_card_received",
   RIGHT_ALLOCATIONS: "dcc_right_allocations",
   PROGRAM_PROGRESS: "dcc_program_progress",
+  COLLAB_PROGRESS: "dcc_collab_progress",
+  COLLAB_CONTRIBUTIONS: "dcc_collab_contributions",
+  COLLAB_FEED: "dcc_collab_feed",
+  COLLAB_BADGES: "dcc_collab_badges",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
