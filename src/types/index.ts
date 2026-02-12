@@ -52,7 +52,7 @@ export const RARITY_PRICE: Record<Rarity, number> = {
   legendary: 1200,
 };
 
-export const INITIAL_COINS = 500;
+export const INITIAL_COINS = 1000000;
 
 // Rights per rarity
 export const RARITY_RIGHTS: Record<Rarity, number> = {
