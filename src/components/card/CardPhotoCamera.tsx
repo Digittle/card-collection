@@ -36,7 +36,7 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
   useEffect(() => {
     if (card.memberImage) {
       const img = document.createElement("img");
-      img.crossOrigin = "anonymous";
+      // Don't set crossOrigin for same-origin images (Next.js public folder)
       img.src = card.memberImage;
       img.onload = () => {
         preloadedImageRef.current = img;
@@ -44,53 +44,52 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     }
   }, [card.memberImage]);
 
-  // Initialize camera
+  // Initialize camera - assign stream to video AFTER video element exists
   useEffect(() => {
     let cancelled = false;
 
     async function startCamera() {
+      // Try rear camera first
+      let stream: MediaStream | null = null;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: "environment",
+            facingMode: { ideal: "environment" },
             width: { ideal: 1920 },
             height: { ideal: 1080 },
           },
         });
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setCameraState("ready");
       } catch {
-        // Fallback to user-facing camera
+        // Fallback to any camera
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: "user",
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
-            },
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
           });
-          if (cancelled) {
-            stream.getTracks().forEach((t) => t.stop());
-            return;
-          }
-          streamRef.current = stream;
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-          setCameraState("ready");
         } catch {
           if (!cancelled) {
             setCameraState("error");
           }
+          return;
         }
       }
+
+      if (cancelled) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+
+      streamRef.current = stream;
+      // Assign to video element - it's always rendered now
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        // Wait for video to actually start playing
+        try {
+          await videoRef.current.play();
+        } catch {
+          // autoplay might handle it
+        }
+      }
+      setCameraState("ready");
     }
 
     startCamera();
@@ -104,16 +103,13 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     };
   }, []);
 
-  // Center the card overlay once camera is ready
+  // If video ref becomes available after stream, wire it up
   useEffect(() => {
-    if (cameraState === "ready" && containerRef.current) {
-      // Keep card centered (0,0 = center of container due to our CSS)
-      cardPosRef.current = { x: 0, y: 0 };
-      if (cardOverlayRef.current) {
-        cardOverlayRef.current.style.transform = `translate(0px, 0px) scale(${cardScale})`;
-      }
+    if (videoRef.current && streamRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
     }
-  }, [cameraState, cardScale]);
+  });
 
   // Touch drag handlers
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -211,7 +207,7 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
   // Capture the composite image
   const handleCapture = useCallback(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) return;
 
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
@@ -220,28 +216,46 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     if (!ctx) return;
 
     // Draw the camera frame
-    ctx.drawImage(video, 0, 0);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // Calculate scale factors from screen to video coordinates
-    const scaleX = video.videoWidth / video.clientWidth;
-    const scaleY = video.videoHeight / video.clientHeight;
+    // object-cover: the video covers the container, so we need to account for cropping
+    const containerW = video.clientWidth;
+    const containerH = video.clientHeight;
+    const videoAspect = video.videoWidth / video.videoHeight;
+    const containerAspect = containerW / containerH;
+
+    let renderW: number, renderH: number, offsetX: number, offsetY: number;
+    if (videoAspect > containerAspect) {
+      // Video is wider: height fills, width is cropped
+      renderH = containerH;
+      renderW = containerH * videoAspect;
+      offsetX = (renderW - containerW) / 2;
+      offsetY = 0;
+    } else {
+      // Video is taller: width fills, height is cropped
+      renderW = containerW;
+      renderH = containerW / videoAspect;
+      offsetX = 0;
+      offsetY = (renderH - containerH) / 2;
+    }
+
+    const scaleToVideo = video.videoWidth / renderW;
 
     // Card overlay dimensions in screen pixels
     const cardW = 140 * cardScale;
     const cardH = 196 * cardScale;
 
     // Card center position on screen: center of container + drag offset
-    const containerW = video.clientWidth;
-    const containerH = video.clientHeight;
     const screenCX = containerW / 2 + cardPosRef.current.x;
     const screenCY = containerH / 2 + cardPosRef.current.y;
 
-    // Card top-left in video coordinates
-    const videoX = (screenCX - cardW / 2) * scaleX;
-    const videoY = (screenCY - cardH / 2) * scaleY;
-    const videoW = cardW * scaleX;
-    const videoH = cardH * scaleY;
-    const videoR = 12 * cardScale * Math.min(scaleX, scaleY);
+    // Map screen position to video coordinates (accounting for object-cover crop)
+    const videoX = (screenCX + offsetX - cardW / 2) * scaleToVideo;
+    const videoY = (screenCY + offsetY - cardH / 2) * scaleToVideo;
+    const videoW = cardW * scaleToVideo;
+    const videoH = cardH * scaleToVideo;
+    const videoR = 12 * cardScale * scaleToVideo;
 
     // Save context and clip to rounded rect
     ctx.save();
@@ -258,7 +272,6 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     // Draw member image if preloaded
     if (preloadedImageRef.current) {
       const img = preloadedImageRef.current;
-      // Cover the card area, align to top
       const imgAspect = img.naturalWidth / img.naturalHeight;
       const cardAspect = videoW / videoH;
       let drawW: number, drawH: number, drawX: number, drawY: number;
@@ -276,14 +289,6 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
     }
 
-    // Draw holo overlay (semi-transparent gradient)
-    const holoGrad = ctx.createLinearGradient(videoX, videoY, videoX + videoW, videoY + videoH);
-    holoGrad.addColorStop(0, "rgba(255,255,255,0.12)");
-    holoGrad.addColorStop(0.5, "rgba(255,255,255,0.04)");
-    holoGrad.addColorStop(1, "rgba(255,255,255,0.12)");
-    ctx.fillStyle = holoGrad;
-    ctx.fillRect(videoX, videoY, videoW, videoH);
-
     // Draw bottom gradient for text
     const textGrad = ctx.createLinearGradient(videoX, videoY + videoH * 0.55, videoX, videoY + videoH);
     textGrad.addColorStop(0, "rgba(0,0,0,0)");
@@ -293,11 +298,11 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     ctx.fillRect(videoX, videoY + videoH * 0.55, videoW, videoH * 0.45);
 
     // Draw member name
-    const fontSize = Math.round(16 * cardScale * Math.min(scaleX, scaleY));
+    const fontSize = Math.round(16 * cardScale * scaleToVideo);
     ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.fillStyle = "white";
     ctx.textBaseline = "bottom";
-    const textPadding = 10 * cardScale * Math.min(scaleX, scaleY);
+    const textPadding = 10 * cardScale * scaleToVideo;
     ctx.fillText(
       card.memberName,
       videoX + textPadding,
@@ -305,7 +310,7 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     );
 
     // Draw rarity stars
-    const starSize = Math.round(10 * cardScale * Math.min(scaleX, scaleY));
+    const starSize = Math.round(10 * cardScale * scaleToVideo);
     ctx.font = `${starSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.fillStyle = config.color;
     ctx.fillText(
@@ -316,9 +321,9 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
 
     ctx.restore();
 
-    // Draw card border (rarity glow color)
+    // Draw card border
     ctx.strokeStyle = config.glowColor + "99";
-    ctx.lineWidth = 2 * cardScale * Math.min(scaleX, scaleY);
+    ctx.lineWidth = 2 * cardScale * scaleToVideo;
     drawRoundedRect(ctx, videoX, videoY, videoW, videoH, videoR);
     ctx.stroke();
 
@@ -327,10 +332,15 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     setCameraState("preview");
   }, [card, cardScale, config]);
 
-  // Retake
+  // Retake - resume the video stream
   const handleRetake = useCallback(() => {
     setCapturedImage(null);
     setCameraState("ready");
+    // Re-assign stream to video since we keep it alive
+    if (videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
   }, []);
 
   // Save
@@ -356,12 +366,23 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
         <X className="h-5 w-5" />
       </button>
 
-      <AnimatePresence mode="wait">
-        {/* Error state */}
+      {/* Video element - ALWAYS rendered, hidden when not ready */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className={`absolute inset-0 h-full w-full object-cover ${
+          cameraState === "ready" ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      {/* Error state */}
+      <AnimatePresence>
         {cameraState === "error" && (
           <motion.div
             key="error"
-            className="flex h-full flex-col items-center justify-center px-8"
+            className="absolute inset-0 flex flex-col items-center justify-center px-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -383,12 +404,14 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
             </button>
           </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Loading state */}
+      {/* Loading state */}
+      <AnimatePresence>
         {cameraState === "loading" && (
           <motion.div
             key="loading"
-            className="flex h-full flex-col items-center justify-center"
+            className="absolute inset-0 flex flex-col items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -397,154 +420,144 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
             <p className="mt-4 text-[14px] text-white/60">カメラを起動中...</p>
           </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Camera / Ready state */}
-        {(cameraState === "ready" || cameraState === "preview") && (
+      {/* Draggable card overlay - shown when camera is ready */}
+      {cameraState === "ready" && (
+        <div
+          ref={containerRef}
+          className="absolute inset-0"
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div
+              ref={cardOverlayRef}
+              className="pointer-events-auto cursor-grab select-none active:cursor-grabbing"
+              style={{
+                width: 140,
+                height: 196,
+                touchAction: "none",
+                transform: `translate(${cardPosRef.current.x}px, ${cardPosRef.current.y}px) scale(${cardScale})`,
+              }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+            >
+              <div
+                className={`card-glow-${card.rarity} relative h-full w-full overflow-hidden rounded-xl border-2`}
+                style={{
+                  background: `linear-gradient(135deg, ${card.memberColor}66 0%, ${card.memberColor}EE 100%)`,
+                  borderColor: `${config.glowColor}99`,
+                }}
+              >
+                {card.memberImage && (
+                  <Image
+                    src={card.memberImage}
+                    alt={card.memberName}
+                    fill
+                    className="pointer-events-none object-cover object-top"
+                    sizes="140px"
+                    draggable={false}
+                  />
+                )}
+                <div
+                  className="card-holo-overlay pointer-events-none"
+                  style={{ opacity: 0.3 }}
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2 pt-8">
+                  <p className="text-[12px] font-bold text-white drop-shadow-md">
+                    {card.memberName}
+                  </p>
+                  <p className="text-[10px] leading-none" style={{ color: config.color }}>
+                    {"\u2605".repeat(config.stars)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview: captured image */}
+      <AnimatePresence>
+        {cameraState === "preview" && capturedImage && (
           <motion.div
-            key="camera"
-            className="relative h-full w-full"
+            key="preview"
+            className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* Video feed */}
-            <div
-              ref={containerRef}
-              className="relative h-full w-full overflow-hidden"
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            >
-              {cameraState === "ready" && (
-                <>
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="h-full w-full object-cover"
-                  />
-
-                  {/* Draggable card overlay */}
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div
-                      ref={cardOverlayRef}
-                      className="pointer-events-auto cursor-grab select-none active:cursor-grabbing"
-                      style={{
-                        width: 140,
-                        height: 196,
-                        touchAction: "none",
-                        transform: `translate(${cardPosRef.current.x}px, ${cardPosRef.current.y}px) scale(${cardScale})`,
-                      }}
-                      onTouchStart={handleTouchStart}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                      onMouseDown={handleMouseDown}
-                    >
-                      <div
-                        className={`card-glow-${card.rarity} relative h-full w-full overflow-hidden rounded-xl border-2`}
-                        style={{
-                          background: `linear-gradient(135deg, ${card.memberColor}66 0%, ${card.memberColor}EE 100%)`,
-                          borderColor: `${config.glowColor}99`,
-                        }}
-                      >
-                        {card.memberImage && (
-                          <Image
-                            src={card.memberImage}
-                            alt={card.memberName}
-                            fill
-                            className="pointer-events-none object-cover object-top"
-                            sizes="140px"
-                            draggable={false}
-                          />
-                        )}
-                        <div
-                          className="card-holo-overlay pointer-events-none"
-                          style={{ opacity: 0.3 }}
-                        />
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2 pt-8">
-                          <p className="text-[12px] font-bold text-white drop-shadow-md">
-                            {card.memberName}
-                          </p>
-                          <p className="text-[10px] leading-none" style={{ color: config.color }}>
-                            {"\u2605".repeat(config.stars)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Preview: captured image */}
-              {cameraState === "preview" && capturedImage && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={capturedImage}
-                    alt="撮影した写真"
-                    className="h-full w-full object-cover"
-                  />
-                </>
-              )}
-            </div>
-
-            {/* Bottom controls */}
-            <div className="absolute inset-x-0 bottom-0 z-40">
-              <div className="bg-black/40 px-6 pb-10 pt-5 backdrop-blur-xl">
-                {cameraState === "ready" && (
-                  <div className="flex items-center justify-between gap-4">
-                    {/* Size slider */}
-                    <div className="flex flex-1 flex-col items-start gap-1">
-                      <span className="text-[10px] text-white/50">カードサイズ</span>
-                      <input
-                        type="range"
-                        min="0.5"
-                        max="1.5"
-                        step="0.05"
-                        value={cardScale}
-                        onChange={(e) => setCardScale(parseFloat(e.target.value))}
-                        className="w-full accent-purple-500"
-                        style={{ height: 20 }}
-                      />
-                    </div>
-
-                    {/* Shutter button */}
-                    <button
-                      onClick={handleCapture}
-                      className="flex h-[68px] w-[68px] flex-shrink-0 items-center justify-center rounded-full border-4 border-white/50 bg-white shadow-lg transition-transform active:scale-95"
-                    >
-                      <span className="block h-[58px] w-[58px] rounded-full bg-white transition-colors active:bg-gray-200" />
-                    </button>
-
-                    {/* Spacer for centering */}
-                    <div className="flex-1" />
-                  </div>
-                )}
-
-                {cameraState === "preview" && (
-                  <div className="flex items-center justify-center gap-6">
-                    <button
-                      onClick={handleRetake}
-                      className="flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-[14px] font-semibold text-white backdrop-blur-sm transition-colors active:bg-white/20"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                      もう一度
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-[14px] font-semibold text-gray-900 transition-colors active:bg-gray-100"
-                    >
-                      <Download className="h-4 w-4" />
-                      保存する
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={capturedImage}
+              alt="撮影した写真"
+              className="h-full w-full object-cover"
+            />
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Bottom controls */}
+      <div className="absolute inset-x-0 bottom-0 z-40">
+        <div className="bg-black/40 px-6 pb-10 pt-5 backdrop-blur-xl">
+          {cameraState === "ready" && (
+            <div className="flex items-center justify-between gap-4">
+              {/* Size slider */}
+              <div className="flex flex-1 flex-col items-start gap-1">
+                <span className="text-[10px] text-white/50">カードサイズ</span>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="1.5"
+                  step="0.05"
+                  value={cardScale}
+                  onChange={(e) => setCardScale(parseFloat(e.target.value))}
+                  className="w-full accent-purple-500"
+                  style={{ height: 20 }}
+                />
+              </div>
+
+              {/* Shutter button */}
+              <button
+                onClick={handleCapture}
+                className="flex h-[68px] w-[68px] flex-shrink-0 items-center justify-center rounded-full border-4 border-white/50 bg-white shadow-lg transition-transform active:scale-95"
+              >
+                <span className="block h-[58px] w-[58px] rounded-full bg-white transition-colors active:bg-gray-200" />
+              </button>
+
+              {/* Spacer for centering */}
+              <div className="flex-1" />
+            </div>
+          )}
+
+          {cameraState === "preview" && (
+            <div className="flex items-center justify-center gap-6">
+              <button
+                onClick={handleRetake}
+                className="flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-[14px] font-semibold text-white backdrop-blur-sm transition-colors active:bg-white/20"
+              >
+                <RotateCcw className="h-4 w-4" />
+                もう一度
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-[14px] font-semibold text-gray-900 transition-colors active:bg-gray-100"
+              >
+                <Download className="h-4 w-4" />
+                保存する
+              </button>
+            </div>
+          )}
+
+          {cameraState === "loading" && (
+            <div className="h-[68px]" />
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 }
