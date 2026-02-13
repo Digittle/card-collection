@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Sparkles, LayoutGrid, Settings } from "lucide-react";
+import { Home, Sparkles, ShoppingBag, LayoutGrid, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/home", label: "ホーム", icon: Home },
   { href: "/gacha", label: "ガチャ", icon: Sparkles },
+  { href: "/shop", label: "ショップ", icon: ShoppingBag },
   { href: "/collection", label: "コレクション", icon: LayoutGrid },
   { href: "/settings", label: "設定", icon: Settings },
 ];

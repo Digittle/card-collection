@@ -10,6 +10,7 @@ export interface RarityConfig {
   glowColor: string;
   probability: number;
   distanceLabel: string;
+  shopPrice: number;
 }
 
 export const RARITY_CONFIG: Record<Rarity, RarityConfig> = {
@@ -21,6 +22,7 @@ export const RARITY_CONFIG: Record<Rarity, RarityConfig> = {
     glowColor: "#94A3B8",
     probability: 0.50,
     distanceLabel: "遠景",
+    shopPrice: 100,
   },
   rare: {
     label: "レア",
@@ -30,6 +32,7 @@ export const RARITY_CONFIG: Record<Rarity, RarityConfig> = {
     glowColor: "#60A5FA",
     probability: 0.30,
     distanceLabel: "パフォーマンス",
+    shopPrice: 300,
   },
   sr: {
     label: "Sレア",
@@ -39,6 +42,7 @@ export const RARITY_CONFIG: Record<Rarity, RarityConfig> = {
     glowColor: "#C084FC",
     probability: 0.15,
     distanceLabel: "ソロショット",
+    shopPrice: 800,
   },
   ur: {
     label: "Uレア",
@@ -48,6 +52,7 @@ export const RARITY_CONFIG: Record<Rarity, RarityConfig> = {
     glowColor: "#FBBF24",
     probability: 0.04,
     distanceLabel: "ファンサ",
+    shopPrice: 2000,
   },
   legend: {
     label: "レジェンド",
@@ -57,6 +62,7 @@ export const RARITY_CONFIG: Record<Rarity, RarityConfig> = {
     glowColor: "#F87171",
     probability: 0.01,
     distanceLabel: "伝説の瞬間",
+    shopPrice: 5000,
   },
 };
 
