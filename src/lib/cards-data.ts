@@ -21,6 +21,7 @@ function makeCard(
     memberName: member.name,
     groupName: group.name,
     memberColor: member.color,
+    memberImage: member.image ? `/members/${member.image}` : undefined,
     title,
     description,
     series,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { Card, RARITY_CONFIG } from "@/types";
@@ -36,9 +37,18 @@ export function CardTile({ card, owned, size = "md" }: CardTileProps) {
           borderColor: `${card.memberColor}66`,
         }}
       >
+        {card.memberImage && (
+          <Image
+            src={card.memberImage}
+            alt={card.memberName}
+            fill
+            className="object-cover object-top"
+            sizes="(max-width: 448px) 33vw, 150px"
+          />
+        )}
         <div className="card-holo-overlay" style={{ opacity: 0.3 }} />
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2 pt-6">
-          <p className={`${nameSize} font-bold text-white`}>
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2 pt-8">
+          <p className={`${nameSize} font-bold text-white drop-shadow-md`}>
             {card.memberName}
           </p>
           <p className={`${starSize} leading-none`} style={{ color: config.color }}>

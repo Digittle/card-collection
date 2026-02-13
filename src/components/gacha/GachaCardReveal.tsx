@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Card, RARITY_CONFIG } from "@/types";
 
 interface GachaCardRevealProps {
@@ -39,6 +40,18 @@ export function GachaCardReveal({ card, isNew, onNext }: GachaCardRevealProps) {
           }}
         />
 
+        {/* Member image */}
+        {card.memberImage && (
+          <Image
+            src={card.memberImage}
+            alt={card.memberName}
+            fill
+            className="object-cover object-top"
+            sizes="280px"
+            priority
+          />
+        )}
+
         {/* Subtle pattern overlay */}
         <div
           className="absolute inset-0 opacity-10"
@@ -66,7 +79,7 @@ export function GachaCardReveal({ card, isNew, onNext }: GachaCardRevealProps) {
         </div>
 
         {/* Card content */}
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-6 pb-14">
           {/* Member name */}
           <h2
             className="text-center text-[28px] font-black leading-tight text-white"

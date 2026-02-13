@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { ALL_CARDS } from "@/lib/cards-data";
 import { RARITY_CONFIG } from "@/types";
@@ -40,9 +41,19 @@ export function FeaturedBanner() {
             background: `linear-gradient(135deg, ${card.memberColor}44 0%, ${card.memberColor}cc 100%)`,
           }}
         >
+          {card.memberImage && (
+            <Image
+              src={card.memberImage}
+              alt={card.memberName}
+              fill
+              className="object-cover object-top opacity-60"
+              sizes="(max-width: 448px) 100vw, 420px"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           {/* Rarity badge */}
           <span
-            className="mb-2 inline-block w-fit rounded-full px-2 py-0.5 text-[11px] font-bold"
+            className="relative z-10 mb-2 inline-block w-fit rounded-full px-2 py-0.5 text-[11px] font-bold"
             style={{
               backgroundColor: rarityConf.color + "33",
               color: rarityConf.color,
@@ -51,16 +62,16 @@ export function FeaturedBanner() {
             {stars} {rarityConf.label}
           </span>
 
-          <h3 className="text-lg font-bold text-white drop-shadow-md">
+          <h3 className="relative z-10 text-lg font-bold text-white drop-shadow-md">
             {card.title}
           </h3>
-          <p className="mt-0.5 text-sm text-white/80">
+          <p className="relative z-10 mt-0.5 text-sm text-white/80">
             {card.memberName} / {card.groupName}
           </p>
 
           <Link
             href="/gacha"
-            className="mt-3 text-sm font-semibold text-white/90 transition-colors hover:text-white"
+            className="relative z-10 mt-3 text-sm font-semibold text-white/90 transition-colors hover:text-white"
           >
             ガチャで入手 →
           </Link>

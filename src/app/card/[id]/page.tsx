@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { ChevronLeft, Share2, Users, Hash, Layers, Calendar, User } from "lucide-react";
 import { Card, OwnedCard, RARITY_CONFIG } from "@/types";
 import { getCardById as storeGetCardById, getUser } from "@/lib/store";
@@ -100,12 +101,22 @@ export default function CardDetailPage() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
         >
+          {card.memberImage && (
+            <Image
+              src={card.memberImage}
+              alt={card.memberName}
+              fill
+              className="object-cover object-top"
+              sizes="280px"
+              priority
+            />
+          )}
           <div className="card-holo-overlay" style={{ opacity: 0.4 }} />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
-            <p className="text-[28px] font-bold leading-tight text-white">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pt-20">
+            <p className="text-[28px] font-bold leading-tight text-white drop-shadow-lg">
               {card.memberName}
             </p>
-            <p className="mt-1 text-[13px] text-white/70">{card.title}</p>
+            <p className="mt-1 text-[13px] text-white/70 drop-shadow-md">{card.title}</p>
             <p className="mt-1 text-[14px]" style={{ color: config.color }}>
               {"★".repeat(config.stars)}
             </p>

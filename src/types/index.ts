@@ -83,6 +83,7 @@ export interface Member {
   nameEn: string;
   color: string;
   colorName: string;
+  image?: string; // path to member image in /members/
 }
 
 // ===== Card =====
@@ -93,6 +94,7 @@ export interface Card {
   memberName: string;
   groupName: string;
   memberColor: string;
+  memberImage?: string;
   title: string;
   description: string;
   series: string;

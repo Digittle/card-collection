@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { User as UserIcon, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { setUser, setCoins, getUser } from "@/lib/store";
 import { GROUPS, MEMBERS, getMembersByGroup } from "@/lib/groups-data";
@@ -204,20 +205,37 @@ export default function LoginPage() {
                             : "none",
                         }}
                       >
-                        {/* Member color circle */}
+                        {/* Member photo */}
                         <div
-                          className="relative flex h-12 w-12 items-center justify-center rounded-full text-[14px] font-bold text-white"
+                          className="relative h-14 w-14 overflow-hidden rounded-full border-2"
                           style={{
-                            backgroundColor: member.color,
+                            borderColor: isSelected
+                              ? member.color
+                              : "rgba(255,255,255,0.1)",
                             boxShadow: isSelected
                               ? `0 0 12px ${member.color}60`
                               : "none",
                           }}
                         >
-                          {member.name.charAt(0)}
+                          {member.image ? (
+                            <Image
+                              src={`/members/${member.image}`}
+                              alt={member.name}
+                              fill
+                              className="object-cover object-top"
+                              sizes="56px"
+                            />
+                          ) : (
+                            <div
+                              className="flex h-full w-full items-center justify-center text-[14px] font-bold text-white"
+                              style={{ backgroundColor: member.color }}
+                            >
+                              {member.name.charAt(0)}
+                            </div>
+                          )}
                           {isSelected && (
                             <motion.div
-                              className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-white"
+                              className="absolute -right-0.5 -bottom-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white"
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
                               transition={{ type: "spring", stiffness: 500 }}
