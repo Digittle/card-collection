@@ -111,7 +111,7 @@ export function executeCollabContribution(
     programId: collabProgramId,
     type: "contribution",
     userName: user.displayName,
-    message: `あなたが「${ownedCard.title}」の権利を貢献しました`,
+    message: `あなたが「${ownedCard.title}」の権利を投じました`,
     isReal: true,
     createdAt: new Date().toISOString(),
   };

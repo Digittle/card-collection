@@ -108,7 +108,7 @@ export function simulateTick(program: CollaborativeProgram): SimulationResult | 
     programId: program.id,
     type: "contribution",
     userName,
-    message: `${userName}さんが「${card.title}」の権利を貢献しました`,
+    message: `${userName}さんが「${card.title}」の権利を投じました`,
     isReal: false,
     createdAt: new Date().toISOString(),
   };
@@ -227,7 +227,7 @@ export function catchUpSimulation(program: CollaborativeProgram): void {
       programId: program.id,
       type: "contribution",
       userName,
-      message: `${userName}さんが「${card.title}」の権利を貢献しました`,
+      message: `${userName}さんが「${card.title}」の権利を投じました`,
       isReal: false,
       createdAt: timestamp,
     });

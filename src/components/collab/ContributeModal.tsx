@@ -33,19 +33,19 @@ export function ContributeModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center"
         >
           <div className="absolute inset-0 bg-black/40" onClick={onClose} />
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="relative w-full max-w-md rounded-t-2xl bg-white pb-safe"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-md rounded-2xl bg-white"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-              <h3 className="text-base font-bold text-gray-900">権利を貢献する</h3>
+              <h3 className="text-base font-bold text-gray-900">権利を投じる</h3>
               <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100">
                 <X className="h-5 w-5 text-gray-400" />
               </button>
@@ -55,7 +55,7 @@ export function ContributeModal({
               /* Card Selection */
               <div className="max-h-[50vh] overflow-y-auto px-5 py-4">
                 <p className="mb-3 text-xs text-gray-500">
-                  貢献するカードを選択してください
+                  投じるカードを選択してください
                 </p>
                 {eligibleCards.length === 0 ? (
                   <div className="py-8 text-center text-sm text-gray-400">
@@ -107,7 +107,7 @@ export function ContributeModal({
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{selectedCard.title}</p>
                     <p className="text-xs text-gray-500">
-                      「{program.title}」に1ポイント貢献
+                      「{program.title}」に1ポイント投入
                     </p>
                   </div>
                 </div>
@@ -133,7 +133,7 @@ export function ContributeModal({
                     className="flex-1 rounded-xl py-3 text-sm font-bold text-white disabled:opacity-50"
                     style={{ backgroundColor: program.accentColor }}
                   >
-                    {isConfirming ? "処理中..." : "貢献する"}
+                    {isConfirming ? "処理中..." : "投じる"}
                   </motion.button>
                 </div>
               </div>

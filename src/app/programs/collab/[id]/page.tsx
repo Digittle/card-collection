@@ -216,7 +216,7 @@ export default function CollabProgramDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            権利を貢献する
+            共闘に参加する
           </motion.button>
         )}
 
@@ -337,7 +337,7 @@ export default function CollabProgramDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
         >
-          権利を貢献しました
+          権利を投じました
         </motion.div>
       )}
     </AppShell>
