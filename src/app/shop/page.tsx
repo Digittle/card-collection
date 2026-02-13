@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Coins, Check, ShoppingBag, Camera, X, BookOpen } from "lucide-react";
+import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { ALL_CARDS } from "@/lib/cards-data";
@@ -295,6 +296,7 @@ function PurchaseModal({
   const [step, setStep] = useState<"confirm" | "success" | "history">("confirm");
   const [memo, setMemo] = useState("");
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // When purchase succeeds, move to success step
@@ -473,6 +475,13 @@ function PurchaseModal({
                 <Camera className="h-4 w-4" />
                 写真を追加
               </button>
+              <button
+                onClick={() => setShowCamera(true)}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-400 py-3 text-[13px] font-bold text-white shadow-sm transition-colors active:opacity-90"
+              >
+                <Camera className="h-4 w-4" />
+                カードと記念写真を撮る
+              </button>
 
               {/* Attached images preview */}
               {attachedImages.length > 0 && (
@@ -590,6 +599,20 @@ function PurchaseModal({
           )}
         </AnimatePresence>
       </motion.div>
+
+      <AnimatePresence>
+        {showCamera && (
+          <CardPhotoCamera
+            card={card}
+            onClose={() => setShowCamera(false)}
+            onSave={(base64) => {
+              addCardImage(card.id, base64);
+              setAttachedImages((prev) => [...prev, base64]);
+              setShowCamera(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

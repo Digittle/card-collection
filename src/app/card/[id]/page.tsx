@@ -8,6 +8,7 @@ import { ChevronLeft, Share2, Users, Hash, Layers, Calendar, User, BookOpen, Cam
 import { Card, OwnedCard, RARITY_CONFIG } from "@/types";
 import { getCardById as storeGetCardById, getUser, updateCardMemo, addCardImage, removeCardImage } from "@/lib/store";
 import { getCardById as catalogGetCardById } from "@/lib/cards-data";
+import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
 
 export default function CardDetailPage() {
   const params = useParams();
@@ -19,6 +20,7 @@ export default function CardDetailPage() {
   const [savedIndicator, setSavedIndicator] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const viewerCount = useMemo(() => Math.floor(Math.random() * 26) + 5, []);
@@ -325,13 +327,22 @@ export default function CardDetailPage() {
                 className="hidden"
                 onChange={handleImageSelect}
               />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-[13px] text-gray-600 transition-colors active:bg-gray-100"
-              >
-                <Camera className="h-4 w-4" />
-                写真を追加
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-[13px] text-gray-600 transition-colors active:bg-gray-100"
+                >
+                  <Camera className="h-4 w-4" />
+                  写真を追加
+                </button>
+                <button
+                  onClick={() => setShowCamera(true)}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-400 px-4 py-2.5 text-[13px] font-bold text-white shadow-sm transition-colors active:opacity-90"
+                >
+                  <Camera className="h-4 w-4" />
+                  カードと記念写真を撮る
+                </button>
+              </div>
 
               {/* Thumbnail grid */}
               {attachedImages.length > 0 && (
@@ -431,6 +442,20 @@ export default function CardDetailPage() {
                 <X className="h-5 w-5" />
               </button>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showCamera && card && (
+            <CardPhotoCamera
+              card={card}
+              onClose={() => setShowCamera(false)}
+              onSave={(base64) => {
+                addCardImage(card.id, base64);
+                reloadCard();
+                setShowCamera(false);
+              }}
+            />
           )}
         </AnimatePresence>
       </div>
