@@ -7,7 +7,7 @@ export const GROUPS: Group[] = [
     nameEn: "Snow Man",
     debutYear: 2020,
     description: "圧巻のダンスパフォーマンスとアクロバットで魅せる9人組",
-    accentColor: "#60A5FA",
+    accentColor: "#5B8CB8",
   },
   {
     id: "sixtones",
@@ -15,7 +15,7 @@ export const GROUPS: Group[] = [
     nameEn: "SixTONES",
     debutYear: 2020,
     description: "6つの音色が重なり合う、唯一無二の音楽性を持つ実力派",
-    accentColor: "#EF4444",
+    accentColor: "#C4515B",
   },
   {
     id: "naniwa",
@@ -23,7 +23,7 @@ export const GROUPS: Group[] = [
     nameEn: "Naniwa Danshi",
     debutYear: 2021,
     description: "関西発の明るさと元気で日本中を笑顔にする",
-    accentColor: "#F59E0B",
+    accentColor: "#E09940",
   },
   {
     id: "travisjapan",
@@ -31,7 +31,7 @@ export const GROUPS: Group[] = [
     nameEn: "Travis Japan",
     debutYear: 2022,
     description: "世界基準のダンススキルを武器にグローバルに活躍",
-    accentColor: "#22C55E",
+    accentColor: "#8B71B0",
   },
 ];
 
