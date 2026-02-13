@@ -68,7 +68,7 @@ export const RARITY_CONFIG: Record<Rarity, RarityConfig> = {
 
 export const RARITY_ORDER: Rarity[] = ["normal", "rare", "sr", "ur", "legend"];
 
-export const INITIAL_COINS = 3000;
+export const INITIAL_COINS = 100000;
 export const GACHA_COST_SINGLE = 300;
 export const GACHA_COST_TEN = 2700;
 
