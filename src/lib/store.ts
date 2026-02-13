@@ -1,16 +1,13 @@
 "use client";
 
-import { Card, UserProfile, INITIAL_COINS } from "@/types";
+import { OwnedCard, Card, User, INITIAL_COINS } from "@/types";
 
 const STORAGE_KEYS = {
-  USER: "dcc_user",
-  CARDS: "dcc_cards",
-  ONBOARDING: "dcc_onboarding_done",
-  CLAIM_HISTORY: "dcc_claim_history",
-  COINS: "dcc_coins",
-  FREE_CARD: "dcc_free_card_received",
-  COMMUNITY_STATE: "dcc_community_state",
-  ACTIVITY_LOG: "dcc_activity_log",
+  USER: "starto_user",
+  CARDS: "starto_cards",
+  COINS: "starto_coins",
+  LAST_FREE_GACHA: "starto_last_free_gacha",
+  ACTIVITY_LOG: "starto_activity_log",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
@@ -29,12 +26,19 @@ function setItem(key: string, value: unknown): void {
 }
 
 // User
-export function getUser(): UserProfile | null {
-  return getItem<UserProfile | null>(STORAGE_KEYS.USER, null);
+export function getUser(): User | null {
+  return getItem<User | null>(STORAGE_KEYS.USER, null);
 }
 
-export function setUser(user: UserProfile): void {
+export function setUser(user: User): void {
   setItem(STORAGE_KEYS.USER, user);
+}
+
+export function updateUser(updates: Partial<User>): void {
+  const user = getUser();
+  if (user) {
+    setItem(STORAGE_KEYS.USER, { ...user, ...updates });
+  }
 }
 
 export function clearUser(): void {
@@ -43,19 +47,47 @@ export function clearUser(): void {
 }
 
 // Cards
-export function getCards(): Card[] {
-  return getItem<Card[]>(STORAGE_KEYS.CARDS, []);
+export function getCards(): OwnedCard[] {
+  return getItem<OwnedCard[]>(STORAGE_KEYS.CARDS, []);
 }
 
-export function addCard(card: Card): void {
+export function addCard(card: Card): { isNew: boolean } {
   const cards = getCards();
-  if (!cards.find((c) => c.id === card.id)) {
-    cards.push({ ...card, claimedAt: new Date().toISOString() });
-    setItem(STORAGE_KEYS.CARDS, cards);
+  const existing = cards.find((c) => c.id === card.id);
+  if (existing) {
+    return { isNew: false };
   }
+  const owned: OwnedCard = {
+    ...card,
+    obtainedAt: new Date().toISOString(),
+    isNew: true,
+  };
+  cards.push(owned);
+  setItem(STORAGE_KEYS.CARDS, cards);
+  return { isNew: true };
 }
 
-export function getCardById(id: string): Card | undefined {
+export function addCards(newCards: Card[]): { newCount: number; dupeCount: number } {
+  const cards = getCards();
+  let newCount = 0;
+  let dupeCount = 0;
+  for (const card of newCards) {
+    if (cards.find((c) => c.id === card.id)) {
+      dupeCount++;
+    } else {
+      cards.push({
+        ...card,
+        obtainedAt: new Date().toISOString(),
+        isNew: true,
+      });
+      newCount++;
+    }
+  }
+  setItem(STORAGE_KEYS.CARDS, cards);
+  return { newCount, dupeCount };
+}
+
+export function getCardById(id: string): OwnedCard | undefined {
   return getCards().find((c) => c.id === id);
 }
 
@@ -63,13 +95,13 @@ export function ownsCard(cardId: string): boolean {
   return getCards().some((c) => c.id === cardId);
 }
 
-// Onboarding
-export function hasCompletedOnboarding(): boolean {
-  return getItem<boolean>(STORAGE_KEYS.ONBOARDING, false);
-}
-
-export function completeOnboarding(): void {
-  setItem(STORAGE_KEYS.ONBOARDING, true);
+export function markCardSeen(cardId: string): void {
+  const cards = getCards();
+  const card = cards.find((c) => c.id === cardId);
+  if (card) {
+    card.isNew = false;
+    setItem(STORAGE_KEYS.CARDS, cards);
+  }
 }
 
 // Coins
@@ -88,35 +120,37 @@ export function deductCoins(amount: number): boolean {
   return true;
 }
 
-// Free card
-export function hasReceivedFreeCard(): boolean {
-  return getItem<boolean>(STORAGE_KEYS.FREE_CARD, false);
+export function addCoins(amount: number): void {
+  setCoins(getCoins() + amount);
 }
 
-export function setFreeCardReceived(): void {
-  setItem(STORAGE_KEYS.FREE_CARD, true);
+// Free gacha
+export function canDoFreeGacha(): boolean {
+  const last = getItem<string | null>(STORAGE_KEYS.LAST_FREE_GACHA, null);
+  if (!last) return true;
+  const today = new Date().toDateString();
+  return new Date(last).toDateString() !== today;
 }
 
-// Claim history (prevent duplicate claims)
-export function getClaimHistory(): string[] {
-  return getItem<string[]>(STORAGE_KEYS.CLAIM_HISTORY, []);
+export function markFreeGachaUsed(): void {
+  setItem(STORAGE_KEYS.LAST_FREE_GACHA, new Date().toISOString());
 }
 
-export function addClaimHistory(token: string): void {
-  const history = getClaimHistory();
-  if (!history.includes(token)) {
-    history.push(token);
-    setItem(STORAGE_KEYS.CLAIM_HISTORY, history);
-  }
+// Clear all data
+export function clearAllData(): void {
+  if (typeof window === "undefined") return;
+  Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
 }
 
-export function hasClaimedToken(token: string): boolean {
-  return getClaimHistory().includes(token);
+// Collection stats
+export function getCollectionStats() {
+  const cards = getCards();
+  const groups = new Set(cards.map((c) => c.groupId));
+  const members = new Set(cards.map((c) => c.memberId));
+  return {
+    totalCards: cards.length,
+    totalGroups: groups.size,
+    totalMembers: members.size,
+    newCards: cards.filter((c) => c.isNew).length,
+  };
 }
-
-// Theme helpers
-export function getOwnedCardsByTheme(themeId: string): Card[] {
-  return getCards().filter((c) => c.themeId === themeId);
-}
-
-

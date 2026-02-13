@@ -1,34 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import Image from "next/image";
-import { Calendar, Hash, Layers, Share2, ChevronLeft } from "lucide-react";
-import { Card, RARITY_CONFIG } from "@/types";
-import { getCardById, getUser } from "@/lib/store";
-import { LiveViewerBadge } from "@/components/community/LiveViewerBadge";
-import { RelatedCards } from "@/components/card/RelatedCards";
-
-const GLOW_CLASS: Record<string, string> = {
-  common: "card-glow-common",
-  rare: "card-glow-rare",
-  epic: "card-glow-epic",
-  legendary: "card-glow-legendary",
-};
-
-const AMBIENT_GLOW: Record<string, string> = {
-  common: "radial-gradient(ellipse at 50% 20%, rgba(191,191,191,0.06) 0%, transparent 70%)",
-  rare: "radial-gradient(ellipse at 50% 20%, rgba(100,129,192,0.10) 0%, transparent 70%)",
-  epic: "radial-gradient(ellipse at 50% 20%, rgba(176,139,190,0.12) 0%, transparent 70%)",
-  legendary: "radial-gradient(ellipse at 50% 20%, rgba(246,171,0,0.15) 0%, transparent 70%)",
-};
+import { ChevronLeft, Share2, Users, Hash, Layers, Calendar, User } from "lucide-react";
+import { Card, OwnedCard, RARITY_CONFIG } from "@/types";
+import { getCardById as storeGetCardById, getUser } from "@/lib/store";
+import { getCardById as catalogGetCardById } from "@/lib/cards-data";
 
 export default function CardDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [card, setCard] = useState<Card | null>(null);
+  const [card, setCard] = useState<Card | OwnedCard | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  const viewerCount = useMemo(() => Math.floor(Math.random() * 26) + 5, []);
 
   useEffect(() => {
     const user = getUser();
@@ -38,7 +24,9 @@ export default function CardDetailPage() {
     }
 
     const id = params.id as string;
-    const foundCard = getCardById(id);
+    const ownedCard = storeGetCardById(id);
+    const catalogCard = catalogGetCardById(id);
+    const foundCard = ownedCard || catalogCard;
 
     if (!foundCard) {
       router.replace("/collection");
@@ -54,12 +42,12 @@ export default function CardDetailPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${card.title} - Digital Card Collection`,
-          text: `「${card.title}」をゲットしました！ #DigitalCardCollection`,
+          title: `${card.title} - STARTO Card Collection`,
+          text: `「${card.title}」をゲットしました！`,
           url: window.location.href,
         });
       } catch {
-        // User cancelled share
+        // cancelled
       }
     }
   };
@@ -69,16 +57,19 @@ export default function CardDetailPage() {
   }
 
   const config = RARITY_CONFIG[card.rarity];
+  const isOwned = "obtainedAt" in card;
 
   return (
     <div className="mx-auto min-h-screen max-w-md bg-[#030712]">
-      {/* Ambient rarity glow */}
+      {/* Ambient glow */}
       <div
         className="pointer-events-none fixed inset-0 z-0"
-        style={{ background: AMBIENT_GLOW[card.rarity] }}
+        style={{
+          background: `radial-gradient(ellipse at 50% 30%, ${card.memberColor}18 0%, transparent 70%)`,
+        }}
       />
 
-      {/* Transparent navigation bar */}
+      {/* Transparent nav */}
       <div className="absolute inset-x-0 top-0 z-50 mx-auto max-w-md">
         <div className="flex h-14 items-center justify-between px-3 pt-safe">
           <button
@@ -98,42 +89,53 @@ export default function CardDetailPage() {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center px-5 pb-24 pt-20">
-        {/* Card Image */}
+        {/* Card visual */}
         <motion.div
-          className={`relative aspect-[5/7] w-full max-w-[280px] overflow-hidden rounded-2xl border-2 ${GLOW_CLASS[card.rarity]}`}
-          style={{ borderColor: config.glowColor }}
+          className={`card-glow-${card.rarity} relative aspect-[5/7] w-full max-w-[280px] overflow-hidden rounded-2xl border-2`}
+          style={{
+            background: `linear-gradient(135deg, ${card.memberColor}40 0%, ${card.memberColor}90 100%)`,
+            borderColor: `${config.glowColor}66`,
+          }}
           initial={{ opacity: 0, scale: 0.85, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
         >
           <div className="card-holo-overlay" style={{ opacity: 0.4 }} />
-          <Image
-            src={card.imageUrl}
-            alt={card.title}
-            fill
-            className="object-cover"
-            priority
-          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
+            <p className="text-[28px] font-bold leading-tight text-white">
+              {card.memberName}
+            </p>
+            <p className="mt-1 text-[13px] text-white/70">{card.title}</p>
+            <p className="mt-1 text-[14px]" style={{ color: config.color }}>
+              {"★".repeat(config.stars)}
+            </p>
+          </div>
         </motion.div>
 
-        {/* Live viewer badge */}
+        {/* Viewer count */}
         <motion.div
-          className="mt-4"
+          className="mt-4 flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1.5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          <LiveViewerBadge cardId={card.id} rarity={card.rarity} />
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+          </span>
+          <span className="text-[12px] text-white/50">
+            今{viewerCount}人が見ています
+          </span>
         </motion.div>
 
-        {/* Glass Info Panel */}
+        {/* Glass info panel */}
         <motion.div
           className="mt-6 w-full rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
-          {/* Rarity badge & title */}
+          {/* Rarity badge */}
           <div className="text-center">
             <span
               className="mb-2 inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide"
@@ -157,6 +159,20 @@ export default function CardDetailPage() {
           {/* Meta grid */}
           <div className="mt-5 grid grid-cols-2 gap-3">
             <div className="rounded-xl bg-white/5 p-3">
+              <Users className="mb-1 h-4 w-4 text-white/30" />
+              <p className="text-[11px] text-white/30">グループ</p>
+              <p className="text-[13px] font-semibold text-white">
+                {card.groupName}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 p-3">
+              <User className="mb-1 h-4 w-4 text-white/30" />
+              <p className="text-[11px] text-white/30">メンバー</p>
+              <p className="text-[13px] font-semibold text-white">
+                {card.memberName}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 p-3">
               <Layers className="mb-1 h-4 w-4 text-white/30" />
               <p className="text-[11px] text-white/30">シリーズ</p>
               <p className="text-[13px] font-semibold text-white">
@@ -170,22 +186,17 @@ export default function CardDetailPage() {
                 #{card.cardNumber}/{card.totalInSeries}
               </p>
             </div>
-            {card.claimedAt && (
+            {isOwned && (
               <div className="col-span-2 rounded-xl bg-white/5 p-3">
                 <Calendar className="mb-1 h-4 w-4 text-white/30" />
                 <p className="text-[11px] text-white/30">取得日</p>
                 <p className="text-[13px] font-semibold text-white">
-                  {new Date(card.claimedAt).toLocaleDateString("ja-JP")}
+                  {new Date((card as OwnedCard).obtainedAt).toLocaleDateString("ja-JP")}
                 </p>
               </div>
             )}
           </div>
         </motion.div>
-
-        {/* Related Cards */}
-        <div className="-mx-5 w-[calc(100%+40px)]">
-          <RelatedCards cardId={card.id} />
-        </div>
       </div>
     </div>
   );

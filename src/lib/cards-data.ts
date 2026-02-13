@@ -1,235 +1,155 @@
-import { Card, CardTheme, ClaimToken, RARITY_PRICE } from "@/types";
+import { Card, Rarity, RARITY_CONFIG } from "@/types";
+import { MEMBERS, GROUPS } from "./groups-data";
 
-export const CARD_THEMES: CardTheme[] = [
-  {
-    id: "theme-stars",
-    name: "STARTO STARS",
-    description: "新世代を牽引するSTARTOの精鋭たち",
-    coverImageUrl: "/cards/snowman.jpg",
-    accentColor: "#ec6d81",
-  },
-  {
-    id: "theme-legends",
-    name: "STARTO LEGENDS",
-    description: "エンタメの頂点を極めた伝説のグループ",
-    coverImageUrl: "/cards/heysayjump.jpg",
-    accentColor: "#6481c0",
-  },
+// Helper to create cards efficiently
+function makeCard(
+  id: string,
+  memberId: string,
+  title: string,
+  description: string,
+  series: string,
+  rarity: Rarity,
+  cardNumber: number,
+  totalInSeries: number
+): Card {
+  const member = MEMBERS.find((m) => m.id === memberId)!;
+  const group = GROUPS.find((g) => g.id === member.groupId)!;
+  return {
+    id,
+    memberId,
+    groupId: member.groupId,
+    memberName: member.name,
+    groupName: group.name,
+    memberColor: member.color,
+    title,
+    description,
+    series,
+    rarity,
+    cardNumber,
+    totalInSeries,
+  };
+}
+
+// ===== All Cards =====
+export const ALL_CARDS: Card[] = [
+  // ──── Snow Man LIVE TOUR Series (9 cards) ────
+  makeCard("sm-tour-01", "sm-iwamoto", "岩本照 - LIVE TOUR", "圧倒的なダンスで会場を支配するセンターの輝き", "Snow Man LIVE TOUR", "sr", 1, 9),
+  makeCard("sm-tour-02", "sm-fukazawa", "深澤辰哉 - LIVE TOUR", "MCで笑いを届ける、グループのムードメーカー", "Snow Man LIVE TOUR", "normal", 2, 9),
+  makeCard("sm-tour-03", "sm-raul", "ラウール - LIVE TOUR", "185cmの長身から繰り出されるダイナミックなダンス", "Snow Man LIVE TOUR", "rare", 3, 9),
+  makeCard("sm-tour-04", "sm-watanabe", "渡辺翔太 - LIVE TOUR", "美しいハイトーンボイスが会場に響き渡る瞬間", "Snow Man LIVE TOUR", "rare", 4, 9),
+  makeCard("sm-tour-05", "sm-mukai", "向井康二 - LIVE TOUR", "関西弁のトークで会場を温めるバラエティの才能", "Snow Man LIVE TOUR", "normal", 5, 9),
+  makeCard("sm-tour-06", "sm-abe", "阿部亮平 - LIVE TOUR", "知性と笑顔で魅せるクイズ王のステージ", "Snow Man LIVE TOUR", "normal", 6, 9),
+  makeCard("sm-tour-07", "sm-meguro", "目黒蓮 - LIVE TOUR", "色気と存在感で観客を魅了するパフォーマンス", "Snow Man LIVE TOUR", "sr", 7, 9),
+  makeCard("sm-tour-08", "sm-miyadate", "宮舘涼太 - LIVE TOUR", "王子様のような華やかさと気品あるダンス", "Snow Man LIVE TOUR", "normal", 8, 9),
+  makeCard("sm-tour-09", "sm-sakuma", "佐久間大介 - LIVE TOUR", "全身全霊のアクロバットで魅せるエンターテイナー", "Snow Man LIVE TOUR", "rare", 9, 9),
+
+  // ──── Snow Man ファンサコレクション (9 cards) ────
+  makeCard("sm-fans-01", "sm-iwamoto", "岩本照 - ファンサ", "ファンに向けた力強い指差しで心を撃ち抜く", "Snow Man ファンサ", "ur", 1, 9),
+  makeCard("sm-fans-02", "sm-fukazawa", "深澤辰哉 - ファンサ", "投げキッスで会場を沸かせる瞬間", "Snow Man ファンサ", "ur", 2, 9),
+  makeCard("sm-fans-03", "sm-raul", "ラウール - ファンサ", "客席に向けたウインクで歓声が止まらない", "Snow Man ファンサ", "ur", 3, 9),
+  makeCard("sm-fans-04", "sm-watanabe", "渡辺翔太 - ファンサ", "うちわに反応して微笑む至福の瞬間", "Snow Man ファンサ", "ur", 4, 9),
+  makeCard("sm-fans-05", "sm-mukai", "向井康二 - ファンサ", "カメラ目線で手を振る笑顔が眩しい", "Snow Man ファンサ", "ur", 5, 9),
+  makeCard("sm-fans-06", "sm-abe", "阿部亮平 - ファンサ", "ファンレターを読み上げる感動の一幕", "Snow Man ファンサ", "ur", 6, 9),
+  makeCard("sm-fans-07", "sm-meguro", "目黒蓮 - ファンサ", "客席を見つめる眼差しに心が溶ける", "Snow Man ファンサ", "legend", 7, 9),
+  makeCard("sm-fans-08", "sm-miyadate", "宮舘涼太 - ファンサ", "エレガントなお手振りで魅了する王子", "Snow Man ファンサ", "ur", 8, 9),
+  makeCard("sm-fans-09", "sm-sakuma", "佐久間大介 - ファンサ", "全力の投げキッスとハートマーク", "Snow Man ファンサ", "ur", 9, 9),
+
+  // ──── SixTONES LIVE TOUR Series (6 cards) ────
+  makeCard("st-tour-01", "st-jesse", "ジェシー - LIVE TOUR", "圧巻の歌唱力で会場を震わせるメインボーカル", "SixTONES LIVE TOUR", "sr", 1, 6),
+  makeCard("st-tour-02", "st-kyomoto", "京本大我 - LIVE TOUR", "ミュージカルで鍛えた美声が響く", "SixTONES LIVE TOUR", "rare", 2, 6),
+  makeCard("st-tour-03", "st-matsumura", "松村北斗 - LIVE TOUR", "クールな表情から一転、情熱的なダンス", "SixTONES LIVE TOUR", "sr", 3, 6),
+  makeCard("st-tour-04", "st-kouchi", "髙地優吾 - LIVE TOUR", "温かい笑顔でファンを包み込むMC", "SixTONES LIVE TOUR", "normal", 4, 6),
+  makeCard("st-tour-05", "st-morimoto", "森本慎太郎 - LIVE TOUR", "ワイルドなダンスでステージを支配する", "SixTONES LIVE TOUR", "rare", 5, 6),
+  makeCard("st-tour-06", "st-tanaka", "田中樹 - LIVE TOUR", "キレのあるラップで会場のボルテージを上げる", "SixTONES LIVE TOUR", "normal", 6, 6),
+
+  // ──── SixTONES ファンサコレクション (6 cards) ────
+  makeCard("st-fans-01", "st-jesse", "ジェシー - ファンサ", "満面の笑みで手を振る瞬間に胸が高鳴る", "SixTONES ファンサ", "ur", 1, 6),
+  makeCard("st-fans-02", "st-kyomoto", "京本大我 - ファンサ", "美しい投げキッスに会場が沸く", "SixTONES ファンサ", "ur", 2, 6),
+  makeCard("st-fans-03", "st-matsumura", "松村北斗 - ファンサ", "クールな視線がこちらに向けられた奇跡の瞬間", "SixTONES ファンサ", "legend", 3, 6),
+  makeCard("st-fans-04", "st-kouchi", "髙地優吾 - ファンサ", "うちわを見つけて嬉しそうに反応してくれた", "SixTONES ファンサ", "ur", 4, 6),
+  makeCard("st-fans-05", "st-morimoto", "森本慎太郎 - ファンサ", "力強いピースサインで応えてくれた瞬間", "SixTONES ファンサ", "ur", 5, 6),
+  makeCard("st-fans-06", "st-tanaka", "田中樹 - ファンサ", "指差しからの笑顔、心臓が止まりそうに", "SixTONES ファンサ", "ur", 6, 6),
+
+  // ──── なにわ男子 LIVE TOUR Series (7 cards) ────
+  makeCard("nw-tour-01", "nw-nishihata", "西畑大吾 - LIVE TOUR", "歌とダンスの実力でグループを牽引するセンター", "なにわ男子 LIVE TOUR", "sr", 1, 7),
+  makeCard("nw-tour-02", "nw-onishi", "大西流星 - LIVE TOUR", "キュートな笑顔と軽快なダンスで魅了", "なにわ男子 LIVE TOUR", "rare", 2, 7),
+  makeCard("nw-tour-03", "nw-michieda", "道枝駿佑 - LIVE TOUR", "甘いルックスと確かな演技力を持つ正統派", "なにわ男子 LIVE TOUR", "sr", 3, 7),
+  makeCard("nw-tour-04", "nw-fujiwara", "藤原丈一郎 - LIVE TOUR", "野球愛とトーク力で盛り上げるムードメーカー", "なにわ男子 LIVE TOUR", "normal", 4, 7),
+  makeCard("nw-tour-05", "nw-ohashi", "大橋和也 - LIVE TOUR", "天然キャラと歌唱力のギャップが魅力", "なにわ男子 LIVE TOUR", "rare", 5, 7),
+  makeCard("nw-tour-06", "nw-takahashi", "高橋恭平 - LIVE TOUR", "スタイル抜群のビジュアルエース", "なにわ男子 LIVE TOUR", "normal", 6, 7),
+  makeCard("nw-tour-07", "nw-nagao", "長尾謙杜 - LIVE TOUR", "最年少ながら堂々としたパフォーマンス", "なにわ男子 LIVE TOUR", "normal", 7, 7),
+
+  // ──── なにわ男子 ファンサコレクション (7 cards) ────
+  makeCard("nw-fans-01", "nw-nishihata", "西畑大吾 - ファンサ", "力強い指差しで「見つけたよ」の合図", "なにわ男子 ファンサ", "ur", 1, 7),
+  makeCard("nw-fans-02", "nw-onishi", "大西流星 - ファンサ", "キラキラの笑顔で手を振ってくれた", "なにわ男子 ファンサ", "ur", 2, 7),
+  makeCard("nw-fans-03", "nw-michieda", "道枝駿佑 - ファンサ", "甘い微笑みでこちらを見つめた瞬間", "なにわ男子 ファンサ", "legend", 3, 7),
+  makeCard("nw-fans-04", "nw-fujiwara", "藤原丈一郎 - ファンサ", "おちゃめなポーズで笑わせてくれた", "なにわ男子 ファンサ", "ur", 4, 7),
+  makeCard("nw-fans-05", "nw-ohashi", "大橋和也 - ファンサ", "天然全開の笑顔にこちらまで幸せに", "なにわ男子 ファンサ", "ur", 5, 7),
+  makeCard("nw-fans-06", "nw-takahashi", "高橋恭平 - ファンサ", "モデルのようなウインクにドキッ", "なにわ男子 ファンサ", "ur", 6, 7),
+  makeCard("nw-fans-07", "nw-nagao", "長尾謙杜 - ファンサ", "可愛いハートを作って見せてくれた", "なにわ男子 ファンサ", "ur", 7, 7),
+
+  // ──── Travis Japan LIVE TOUR Series (7 cards) ────
+  makeCard("tj-tour-01", "tj-miyachika", "宮近海斗 - LIVE TOUR", "世界レベルのダンスでリードするキャプテン", "Travis Japan LIVE TOUR", "sr", 1, 7),
+  makeCard("tj-tour-02", "tj-nakamura", "中村海人 - LIVE TOUR", "華やかなビジュアルと柔らかいダンス", "Travis Japan LIVE TOUR", "rare", 2, 7),
+  makeCard("tj-tour-03", "tj-yoshizawa", "吉澤閑也 - LIVE TOUR", "緻密な振付と安定したパフォーマンス", "Travis Japan LIVE TOUR", "normal", 3, 7),
+  makeCard("tj-tour-04", "tj-matsuda", "松田元太 - LIVE TOUR", "エネルギッシュなダンスで盛り上げる", "Travis Japan LIVE TOUR", "normal", 4, 7),
+  makeCard("tj-tour-05", "tj-matsukura", "松倉海斗 - LIVE TOUR", "繊細な表現力が光るダンスパフォーマンス", "Travis Japan LIVE TOUR", "rare", 5, 7),
+  makeCard("tj-tour-06", "tj-shimekenryuya", "七五三掛龍也 - LIVE TOUR", "個性的なキャラクターで会場を沸かせる", "Travis Japan LIVE TOUR", "normal", 6, 7),
+  makeCard("tj-tour-07", "tj-kawashima", "川島如恵留 - LIVE TOUR", "多才な才能を発揮するオールラウンダー", "Travis Japan LIVE TOUR", "rare", 7, 7),
+
+  // ──── Travis Japan ファンサコレクション (7 cards) ────
+  makeCard("tj-fans-01", "tj-miyachika", "宮近海斗 - ファンサ", "キレキレダンスの最中にこちらへウインク", "Travis Japan ファンサ", "ur", 1, 7),
+  makeCard("tj-fans-02", "tj-nakamura", "中村海人 - ファンサ", "甘い笑顔で手を振る王子様の瞬間", "Travis Japan ファンサ", "ur", 2, 7),
+  makeCard("tj-fans-03", "tj-yoshizawa", "吉澤閑也 - ファンサ", "穏やかな微笑みでファンに応える", "Travis Japan ファンサ", "ur", 3, 7),
+  makeCard("tj-fans-04", "tj-matsuda", "松田元太 - ファンサ", "全力の投げキッスでハートを掴む", "Travis Japan ファンサ", "ur", 4, 7),
+  makeCard("tj-fans-05", "tj-matsukura", "松倉海斗 - ファンサ", "繊細な指差しで「君だよ」のメッセージ", "Travis Japan ファンサ", "legend", 5, 7),
+  makeCard("tj-fans-06", "tj-shimekenryuya", "七五三掛龍也 - ファンサ", "おちゃめなポーズで会場を笑顔にする", "Travis Japan ファンサ", "ur", 6, 7),
+  makeCard("tj-fans-07", "tj-kawashima", "川島如恵留 - ファンサ", "知的な笑顔でこちらを見つめる瞬間", "Travis Japan ファンサ", "ur", 7, 7),
 ];
 
-// Demo cards for MVP
-export const DEMO_CARDS: Card[] = [
-  {
-    id: "card-001",
-    title: "Snow Man",
-    description:
-      "圧巻のダンスパフォーマンスとアクロバットで魅せる9人組。ドーム公演を次々と成功させ、新時代のトップアイドルとして君臨する。",
-    imageUrl: "/cards/snowman.jpg",
-    rarity: "legendary",
-    series: "STARTO STARS",
-    themeId: "theme-stars",
-    cardNumber: 1,
-    totalInSeries: 4,
-    price: RARITY_PRICE.legendary,
-  },
-  {
-    id: "card-002",
-    title: "SixTONES",
-    description:
-      "6つの音色が重なり合うハーモニー。独自の音楽性とパフォーマンスで、国内外に熱狂的なファンを持つ実力派グループ。",
-    imageUrl: "/cards/sixtones.jpg",
-    rarity: "epic",
-    series: "STARTO STARS",
-    themeId: "theme-stars",
-    cardNumber: 2,
-    totalInSeries: 4,
-    price: RARITY_PRICE.epic,
-  },
-  {
-    id: "card-003",
-    title: "King & Prince",
-    description:
-      "キラキラとした王道アイドルの輝き。ポップでキャッチーな楽曲と華やかなステージで多くのファンを魅了し続ける。",
-    imageUrl: "/cards/kingandprince.jpg",
-    rarity: "rare",
-    series: "STARTO STARS",
-    themeId: "theme-stars",
-    cardNumber: 3,
-    totalInSeries: 4,
-    price: RARITY_PRICE.rare,
-  },
-  {
-    id: "card-004",
-    title: "なにわ男子",
-    description:
-      "関西発の明るさと元気で日本中を笑顔にする7人組。バラエティからドラマまで幅広く活躍するマルチな才能の持ち主たち。",
-    imageUrl: "/cards/naniwa.jpg",
-    rarity: "common",
-    series: "STARTO STARS",
-    themeId: "theme-stars",
-    cardNumber: 4,
-    totalInSeries: 4,
-    price: RARITY_PRICE.common,
-  },
-  {
-    id: "card-005",
-    title: "Travis Japan",
-    description:
-      "世界基準のダンススキルを持つグローバルグループ。海外での活動経験を活かし、ワールドワイドに活躍の場を広げている。",
-    imageUrl: "/cards/travisjapan.jpg",
-    rarity: "rare",
-    series: "STARTO LEGENDS",
-    themeId: "theme-legends",
-    cardNumber: 1,
-    totalInSeries: 4,
-    price: RARITY_PRICE.rare,
-  },
-  {
-    id: "card-006",
-    title: "Hey! Say! JUMP",
-    description:
-      "デビューから長年にわたりトップを走り続ける実力派。圧倒的なライブパフォーマンスと楽曲の質で、世代を超えて愛される。",
-    imageUrl: "/cards/heysayjump.jpg",
-    rarity: "epic",
-    series: "STARTO LEGENDS",
-    themeId: "theme-legends",
-    cardNumber: 2,
-    totalInSeries: 4,
-    price: RARITY_PRICE.epic,
-  },
-  {
-    id: "card-007",
-    title: "SUPER EIGHT",
-    description:
-      "関西の笑いとエンターテインメントを極めたグループ。バラエティ、音楽、演技すべてにおいて唯一無二の存在感を放つ。",
-    imageUrl: "/cards/supereight.jpg",
-    rarity: "common",
-    series: "STARTO LEGENDS",
-    themeId: "theme-legends",
-    cardNumber: 3,
-    totalInSeries: 4,
-    price: RARITY_PRICE.common,
-  },
-  {
-    id: "card-008",
-    title: "Kis-My-Ft2",
-    description:
-      "ローラースケートを使った華麗なパフォーマンスが代名詞。長年のキャリアで培った圧倒的なエンタメ力で観客を魅了する。",
-    imageUrl: "/cards/kismyft2.jpg",
-    rarity: "legendary",
-    series: "STARTO LEGENDS",
-    themeId: "theme-legends",
-    cardNumber: 4,
-    totalInSeries: 4,
-    price: RARITY_PRICE.legendary,
-  },
-];
-
-// Demo claim tokens
-export const DEMO_TOKENS: ClaimToken[] = [
-  {
-    token: "SNOWMAN-2024",
-    cardId: "card-001",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-  {
-    token: "SIXTONES-2024",
-    cardId: "card-002",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-  {
-    token: "KINGPRINCE-2024",
-    cardId: "card-003",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-  {
-    token: "NANIWA-2024",
-    cardId: "card-004",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-  {
-    token: "TRAVIS-2024",
-    cardId: "card-005",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-  {
-    token: "HEYSAY-2024",
-    cardId: "card-006",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-  {
-    token: "SUPEREIGHT-2024",
-    cardId: "card-007",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-  {
-    token: "KISMYFT2-2024",
-    cardId: "card-008",
-    used: false,
-    expiresAt: "2026-12-31T23:59:59Z",
-  },
-];
-
-export function findCardByToken(token: string): Card | undefined {
-  const claimToken = DEMO_TOKENS.find(
-    (t) => t.token.toUpperCase() === token.toUpperCase()
-  );
-  if (!claimToken) return undefined;
-  return DEMO_CARDS.find((c) => c.id === claimToken.cardId);
+// ===== Helper Functions =====
+export function getCardById(cardId: string): Card | undefined {
+  return ALL_CARDS.find((c) => c.id === cardId);
 }
 
-export function validateToken(
-  token: string
-): { valid: true; card: Card } | { valid: false; reason: string } {
-  const claimToken = DEMO_TOKENS.find(
-    (t) => t.token.toUpperCase() === token.toUpperCase()
-  );
+export function getCardsByGroup(groupId: string): Card[] {
+  return ALL_CARDS.filter((c) => c.groupId === groupId);
+}
 
-  if (!claimToken) {
-    return { valid: false, reason: "コードが見つかりませんでした。正しいコード（例: SNOWMAN-2024）をご確認ください" };
+export function getCardsByMember(memberId: string): Card[] {
+  return ALL_CARDS.filter((c) => c.memberId === memberId);
+}
+
+export function getCardsBySeries(series: string): Card[] {
+  return ALL_CARDS.filter((c) => c.series === series);
+}
+
+export function getAllSeries(): string[] {
+  return [...new Set(ALL_CARDS.map((c) => c.series))];
+}
+
+export function getSeriesByGroup(groupId: string): string[] {
+  return [...new Set(ALL_CARDS.filter((c) => c.groupId === groupId).map((c) => c.series))];
+}
+
+// ===== Gacha Logic =====
+export function drawGacha(count: number): Card[] {
+  const results: Card[] = [];
+  for (let i = 0; i < count; i++) {
+    const rarity = rollRarity(i === count - 1 && count >= 10);
+    const cardsOfRarity = ALL_CARDS.filter((c) => c.rarity === rarity);
+    const card = cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)];
+    results.push(card);
   }
-
-  if (new Date(claimToken.expiresAt) < new Date()) {
-    return { valid: false, reason: "このコードは有効期限が切れています。新しいコードをお持ちの場合は、そちらをお試しください" };
-  }
-
-  const card = DEMO_CARDS.find((c) => c.id === claimToken.cardId);
-  if (!card) {
-    return { valid: false, reason: "カード情報の読み込みに失敗しました。しばらく時間をおいて再度お試しください" };
-  }
-
-  return { valid: true, card };
+  return results;
 }
 
-export function getCardsByTheme(themeId: string): Card[] {
-  return DEMO_CARDS.filter((c) => c.themeId === themeId);
-}
-
-export function getThemeById(themeId: string): CardTheme | undefined {
-  return CARD_THEMES.find((t) => t.id === themeId);
-}
-
-export function getAllThemes(): CardTheme[] {
-  return CARD_THEMES;
-}
-
-export function getFeaturedCards(): Card[] {
-  // Return legendary and epic cards first, then rare
-  return [...DEMO_CARDS].sort((a, b) => {
-    const order = { legendary: 0, epic: 1, rare: 2, common: 3 };
-    return order[a.rarity] - order[b.rarity];
-  });
-}
-
-export function getRelatedCards(cardId: string): Card[] {
-  const card = DEMO_CARDS.find(c => c.id === cardId);
-  if (!card) return [];
-  return DEMO_CARDS.filter(c => c.themeId === card.themeId && c.id !== cardId);
+function rollRarity(guaranteedRareOrAbove: boolean): Rarity {
+  const roll = Math.random();
+  if (roll < 0.01) return "legend";
+  if (roll < 0.05) return "ur";
+  if (roll < 0.20) return "sr";
+  if (roll < 0.50) return "rare";
+  if (guaranteedRareOrAbove) return "rare";
+  return "normal";
 }

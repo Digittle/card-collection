@@ -1,33 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useMemo, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Card } from "@/types";
-import {
-  getCards,
-  getUser,
-  hasCompletedOnboarding,
-  getCoins,
-  hasReceivedFreeCard,
-} from "@/lib/store";
-import { DEMO_CARDS, getFeaturedCards } from "@/lib/cards-data";
-import { AppShell } from "@/components/layout/AppShell";
-import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
-import { HeroCarousel } from "@/components/discover/HeroCarousel";
-import { CardCarousel } from "@/components/discover/CardCarousel";
-import { CardCarouselTile } from "@/components/discover/CardCarouselTile";
-import { ThemeBrowser } from "@/components/discover/ThemeBrowser";
-import { ActivitySummary } from "@/components/discover/ActivitySummary";
-import { ActivityToast } from "@/components/community/ActivityToast";
 import { Gift } from "lucide-react";
+import { AppShell } from "@/components/layout/AppShell";
+import { Header } from "@/components/layout/Header";
+import { CardTile } from "@/components/card/CardTile";
+import { ALL_CARDS, getCardsByGroup } from "@/lib/cards-data";
+import { getUser, getCards } from "@/lib/store";
+import { GROUPS } from "@/lib/groups-data";
+
+type ViewMode = "owned" | "zukan";
 
 export default function CollectionPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#030712]" />}>
+      <CollectionInner />
+    </Suspense>
+  );
+}
+
+function CollectionInner() {
   const router = useRouter();
-  const [cards, setCards] = useState<Card[]>([]);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("zukan");
 
   useEffect(() => {
     const user = getUser();
@@ -35,97 +35,149 @@ export default function CollectionPage() {
       router.replace("/");
       return;
     }
-
-    if (!hasReceivedFreeCard()) {
-      router.replace("/gift");
-      return;
+    const groupParam = searchParams.get("group");
+    if (groupParam && GROUPS.some((g) => g.id === groupParam)) {
+      setSelectedGroup(groupParam);
     }
-
-    setCards(getCards());
-    setShowOnboarding(!hasCompletedOnboarding());
     setMounted(true);
-  }, [router]);
+  }, [router, searchParams]);
 
-  useEffect(() => {
-    const handleFocus = () => setCards(getCards());
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, []);
+  const ownedCards = useMemo(() => {
+    if (!mounted) return [];
+    return getCards();
+  }, [mounted]);
+
+  const ownedIds = useMemo(
+    () => new Set(ownedCards.map((c) => c.id)),
+    [ownedCards]
+  );
+
+  const filteredCards = useMemo(() => {
+    const base =
+      selectedGroup === "all"
+        ? ALL_CARDS
+        : getCardsByGroup(selectedGroup);
+
+    if (viewMode === "owned") {
+      return base.filter((c) => ownedIds.has(c.id));
+    }
+    return base;
+  }, [selectedGroup, viewMode, ownedIds]);
 
   if (!mounted) {
     return <div className="min-h-screen bg-[#030712]" />;
   }
 
-  const featuredCards = getFeaturedCards().slice(0, 4);
-  const trendingCards = DEMO_CARDS.filter(
-    (c) => !cards.some((owned) => owned.id === c.id)
-  ).slice(0, 6);
+  const ownedCount = ownedCards.length;
 
   return (
     <AppShell>
-      {showOnboarding && (
-        <OnboardingModal onComplete={() => setShowOnboarding(false)} />
-      )}
+      <Header title="コレクション" />
 
-      {/* Hero Carousel */}
-      <HeroCarousel cards={featuredCards} />
+      <div className="px-4 pb-8">
+        {/* Stats */}
+        <div className="mt-4 text-center">
+          <span className="text-[13px] text-white/50">
+            所持: <span className="font-bold text-white">{ownedCount}</span> / {ALL_CARDS.length}枚
+          </span>
+        </div>
 
-      {/* Your Collection */}
-      {cards.length > 0 ? (
-        <CardCarousel title="あなたのコレクション">
-          {cards.map((card, i) => (
-            <CardCarouselTile key={card.id} card={card} index={i} />
+        {/* Group filter pills */}
+        <div className="scrollbar-hide mt-4 flex gap-2 overflow-x-auto pb-1">
+          <button
+            onClick={() => setSelectedGroup("all")}
+            className="shrink-0 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors"
+            style={
+              selectedGroup === "all"
+                ? { backgroundColor: "#ec6d81", color: "#fff" }
+                : { backgroundColor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }
+            }
+          >
+            すべて
+          </button>
+          {GROUPS.map((group) => (
+            <button
+              key={group.id}
+              onClick={() => setSelectedGroup(group.id)}
+              className="shrink-0 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors"
+              style={
+                selectedGroup === group.id
+                  ? { backgroundColor: group.accentColor, color: "#fff" }
+                  : { backgroundColor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }
+              }
+            >
+              {group.name}
+            </button>
           ))}
-        </CardCarousel>
-      ) : (
-        <section className="mt-6 px-5">
+        </div>
+
+        {/* View mode toggle */}
+        <div className="mt-4 flex rounded-xl bg-white/[0.04] p-1">
+          <button
+            onClick={() => setViewMode("owned")}
+            className={`flex-1 rounded-lg py-2 text-[12px] font-bold transition-colors ${
+              viewMode === "owned"
+                ? "bg-white/10 text-white"
+                : "text-white/40"
+            }`}
+          >
+            所持のみ
+          </button>
+          <button
+            onClick={() => setViewMode("zukan")}
+            className={`flex-1 rounded-lg py-2 text-[12px] font-bold transition-colors ${
+              viewMode === "zukan"
+                ? "bg-white/10 text-white"
+                : "text-white/40"
+            }`}
+          >
+            図鑑
+          </button>
+        </div>
+
+        {/* Card grid */}
+        {filteredCards.length > 0 ? (
+          <motion.div
+            className="mt-4 grid grid-cols-3 gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {filteredCards.map((card, i) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i * 0.03, 0.5) }}
+              >
+                <CardTile card={card} owned={ownedIds.has(card.id)} />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center rounded-2xl border border-white/8 bg-white/[0.03] py-12"
+            className="mt-12 flex flex-col items-center"
           >
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
               <Gift className="h-7 w-7 text-white/30" />
             </div>
             <p className="mb-1 text-[15px] font-bold text-white/60">
-              まだカードがありません
+              カードがありません
             </p>
-            <p className="mb-5 text-[13px] text-white/30">
-              ショップでカードを購入しましょう
+            <p className="mb-5 text-center text-[13px] text-white/30">
+              ガチャでカードを集めよう
             </p>
             <Link
-              href="/shop"
+              href="/gacha"
               className="rounded-full bg-gradient-to-r from-primary-600 to-primary-500 px-6 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-primary-500/20 transition-all active:scale-[0.97]"
             >
-              ショップへ行く
+              ガチャを引く
             </Link>
           </motion.div>
-        </section>
-      )}
-
-      {/* Trending Cards */}
-      {trendingCards.length > 0 && (
-        <CardCarousel title="注目のカード" seeAllHref="/shop">
-          {trendingCards.map((card, i) => (
-            <CardCarouselTile
-              key={card.id}
-              card={card}
-              index={i}
-              metric={`${Math.floor(Math.random() * 2000 + 500).toLocaleString()}人`}
-              href="/shop"
-            />
-          ))}
-        </CardCarousel>
-      )}
-
-      {/* Browse by Theme */}
-      <ThemeBrowser />
-
-      {/* Community Activity */}
-      <ActivitySummary />
-
-      {/* Activity Toast */}
-      <ActivityToast />
+        )}
+      </div>
     </AppShell>
   );
 }

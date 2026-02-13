@@ -1,10 +1,58 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { getUser } from "@/lib/store";
+import { MEMBERS } from "@/lib/groups-data";
+
+// Pick a diverse set of member colors for the floating orbs
+const ORB_COLORS = [
+  ...new Set(MEMBERS.map((m) => m.color)),
+].slice(0, 8);
+
+function FloatingOrb({
+  color,
+  size,
+  x,
+  y,
+  delay,
+  duration,
+}: {
+  color: string;
+  size: number;
+  x: number;
+  y: number;
+  delay: number;
+  duration: number;
+}) {
+  return (
+    <motion.div
+      className="absolute rounded-full pointer-events-none"
+      style={{
+        width: size,
+        height: size,
+        left: `${x}%`,
+        top: `${y}%`,
+        background: `radial-gradient(circle, ${color}40 0%, ${color}00 70%)`,
+        filter: "blur(40px)",
+      }}
+      animate={{
+        x: [0, 30, -20, 10, 0],
+        y: [0, -25, 15, -10, 0],
+        scale: [1, 1.2, 0.9, 1.1, 1],
+        opacity: [0.4, 0.7, 0.3, 0.6, 0.4],
+      }}
+      transition={{
+        duration,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay,
+      }}
+    />
+  );
+}
 
 export default function LandingPage() {
   const router = useRouter();
@@ -12,65 +60,33 @@ export default function LandingPage() {
   useEffect(() => {
     const user = getUser();
     if (user) {
-      router.replace("/collection");
+      router.replace("/home");
     }
   }, [router]);
 
+  // Generate stable orb configs
+  const orbs = useMemo(() => {
+    return ORB_COLORS.map((color, i) => ({
+      color,
+      size: 120 + (i % 3) * 80,
+      x: 10 + ((i * 37) % 80),
+      y: 5 + ((i * 29) % 85),
+      delay: i * 0.8,
+      duration: 12 + (i % 4) * 3,
+    }));
+  }, []);
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#030712] px-6">
-      {/* Animated ambient background */}
-      <div className="ambient-glow left-[20%] top-[20%] h-[350px] w-[350px] bg-primary-400/20" />
-      <div
-        className="ambient-glow right-[15%] top-[50%] h-[300px] w-[300px] bg-gold-300/15"
-        style={{ animationDelay: "-7s" }}
-      />
-      <div
-        className="ambient-glow bottom-[10%] left-[30%] h-[250px] w-[250px] bg-rose-300/10"
-        style={{ animationDelay: "-14s" }}
-      />
-
-      {/* Floating card illustrations */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute left-[8%] top-[15%] h-20 w-14 rounded-lg border border-white/10 bg-gradient-to-br from-primary-200/40 to-primary-100/30"
-          animate={{ y: [0, -12, 0], rotate: [-5, -3, -5] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Star className="m-auto mt-5 h-5 w-5 text-primary-400/50" />
-        </motion.div>
-        <motion.div
-          className="absolute right-[10%] top-[22%] h-16 w-11 rounded-lg border border-white/10 bg-gradient-to-br from-gold-300/30 to-gold-200/20"
-          animate={{ y: [0, -10, 0], rotate: [6, 8, 6] }}
-          transition={{
-            duration: 4.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        >
-          <Sparkles className="m-auto mt-4 h-4 w-4 text-gold-300/50" />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-[25%] left-[15%] h-14 w-10 rounded-lg border border-white/10 bg-gradient-to-br from-rose-200/10 to-rose-100/5"
-          animate={{ y: [0, -8, 0], rotate: [-3, -6, -3] }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-        />
-        <motion.div
-          className="absolute bottom-[30%] right-[12%] h-18 w-12 rounded-lg border border-white/10 bg-gradient-to-br from-matcha-300/20 to-matcha-200/15"
-          animate={{ y: [0, -14, 0], rotate: [4, 2, 4] }}
-          transition={{
-            duration: 5.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 0.5,
-          }}
-        />
+      {/* Floating penlight-style colored orbs */}
+      <div className="absolute inset-0 overflow-hidden">
+        {orbs.map((orb, i) => (
+          <FloatingOrb key={i} {...orb} />
+        ))}
       </div>
+
+      {/* Subtle vignette overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/60 via-transparent to-[#030712]/80 pointer-events-none" />
 
       <motion.div
         className="relative z-10 flex flex-col items-center text-center"
@@ -78,46 +94,37 @@ export default function LandingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
       >
-        {/* Logo */}
-        <motion.div
-          className="mb-10 flex h-28 w-28 items-center justify-center rounded-[28px] bg-gradient-to-br from-primary-600 via-primary-500 to-gold-500 shadow-2xl shadow-primary-400/20"
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", duration: 1, delay: 0.2 }}
-        >
-          <Sparkles className="h-14 w-14 text-white" />
-        </motion.div>
-
+        {/* Main title */}
         <motion.h1
-          className="mb-3 text-[32px] font-bold leading-tight tracking-tight text-white"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          className="mb-4 text-[36px] font-extrabold leading-tight tracking-tight"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
         >
-          Digital Card
+          <span className="bg-gradient-to-r from-amber-200 to-amber-400 bg-clip-text text-transparent">
+            STARTO
+          </span>
           <br />
-          <span className="bg-gradient-to-r from-primary-400 to-gold-400 bg-clip-text text-transparent">
-            Collection
+          <span className="bg-gradient-to-r from-amber-200 to-amber-400 bg-clip-text text-transparent">
+            Card Collection
           </span>
         </motion.h1>
 
         <motion.p
-          className="mb-12 max-w-[260px] text-[15px] leading-relaxed text-white/50"
+          className="mb-12 text-[15px] text-white/50"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
         >
-          あなただけのデジタルカードを
-          <br />
-          受け取って、集めて、楽しもう
+          推しのカードを集めよう
         </motion.p>
 
         <motion.button
           onClick={() => router.push("/login")}
-          className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-primary-600 to-primary-500 px-10 py-4 text-[16px] font-bold text-white shadow-xl shadow-primary-500/25 transition-all hover:shadow-primary-500/40 active:scale-[0.97]"
+          className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-primary-500 to-amber-500 px-10 py-4 text-[16px] font-bold text-white shadow-xl shadow-amber-500/20 transition-all hover:shadow-amber-500/30 active:scale-[0.97]"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
           whileTap={{ scale: 0.97 }}
         >
           はじめる

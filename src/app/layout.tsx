@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Digital Card Collection",
-  description: "デジタルカードを受け取り、コレクションしよう",
+  title: "STARTO Card Collection",
+  description: "推しのカードを集めよう",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Card Collect",
+    title: "STARTO Cards",
   },
   icons: {
     icon: "/icons/icon-192.png",
