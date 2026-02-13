@@ -311,7 +311,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <ActivityFeed />
+        <ActivityFeed tanmouMemberId={user?.tanmouMemberId ?? null} />
       </motion.div>
     </AppShell>
   );
