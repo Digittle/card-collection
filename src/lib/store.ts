@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   COINS: "starto_coins",
   LAST_FREE_GACHA: "starto_last_free_gacha",
   ACTIVITY_LOG: "starto_activity_log",
+  GEKIOSHI_CARD: "starto_gekioshi_card",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
@@ -163,6 +164,15 @@ export function canDoFreeGacha(): boolean {
 
 export function markFreeGachaUsed(): void {
   setItem(STORAGE_KEYS.LAST_FREE_GACHA, new Date().toISOString());
+}
+
+// Gekioshi card
+export function getGekioshiCardId(): string | null {
+  return getItem<string | null>(STORAGE_KEYS.GEKIOSHI_CARD, null);
+}
+
+export function setGekioshiCardId(cardId: string | null): void {
+  setItem(STORAGE_KEYS.GEKIOSHI_CARD, cardId);
 }
 
 // Clear all data

@@ -5,24 +5,25 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Calendar, Heart, Sparkles } from "lucide-react";
+import { Clock, Calendar, Heart, Sparkles, Star } from "lucide-react";
 import { MEMBERS } from "@/lib/groups-data";
 import { ALL_CARDS } from "@/lib/cards-data";
 import { RARITY_CONFIG } from "@/types";
-import type { User } from "@/types";
+import type { User, OwnedCard } from "@/types";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { FeaturedBanner } from "@/components/home/FeaturedBanner";
 import { GroupCarousel } from "@/components/home/GroupCarousel";
 import { CollectionProgress } from "@/components/home/CollectionProgress";
 import { ActivityFeed } from "@/components/home/ActivityFeed";
-import { getUser, getCoins, getCards } from "@/lib/store";
+import { getUser, getCoins, getCards, getGekioshiCardId } from "@/lib/store";
 
 export default function HomePage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [coins, setCoins] = useState(0);
   const [user, setUserState] = useState<User | null>(null);
+  const [gekioshiCard, setGekioshiCard] = useState<OwnedCard | null>(null);
 
   useEffect(() => {
     const u = getUser();
@@ -33,6 +34,13 @@ export default function HomePage() {
     setUserState(u);
     setCoins(getCoins());
     setReady(true);
+
+    const gekioshiId = getGekioshiCardId();
+    if (gekioshiId) {
+      const owned = getCards();
+      const gCard = owned.find(c => c.id === gekioshiId);
+      if (gCard) setGekioshiCard(gCard);
+    }
   }, [router]);
 
   if (!ready) return null;
@@ -185,6 +193,79 @@ export default function HomePage() {
                   </>
                 );
               })()}
+            </motion.div>
+          </div>
+        )}
+
+        {/* Gekioshi Card Display */}
+        {gekioshiCard && (
+          <div className="px-4 mb-5">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              {/* Section label */}
+              <div className="flex items-center gap-1.5 mb-2.5">
+                <Star className="h-4 w-4 text-amber-500" fill="currentColor" />
+                <span className="text-[14px] font-bold text-gray-900">激推しカード</span>
+              </div>
+
+              {/* Card showcase */}
+              <Link href={`/card/${gekioshiCard.id}`}>
+                <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                  {/* Card visual - horizontal layout */}
+                  <div className="flex">
+                    {/* Card image (left side) */}
+                    <div
+                      className="relative w-28 aspect-[5/7] flex-shrink-0 overflow-hidden"
+                      style={{
+                        background: `linear-gradient(135deg, ${gekioshiCard.memberColor}40 0%, ${gekioshiCard.memberColor}90 100%)`,
+                      }}
+                    >
+                      {gekioshiCard.memberImage && (
+                        <Image
+                          src={gekioshiCard.memberImage}
+                          alt={gekioshiCard.memberName}
+                          fill
+                          className="object-cover object-top"
+                          sizes="112px"
+                        />
+                      )}
+                      <div className="card-holo-overlay" style={{ opacity: 0.3 }} />
+                    </div>
+
+                    {/* Card info (right side) */}
+                    <div className="flex-1 p-4 flex flex-col justify-center">
+                      {/* Rarity badge */}
+                      <span
+                        className="self-start rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
+                        style={{
+                          backgroundColor: `${RARITY_CONFIG[gekioshiCard.rarity].glowColor}22`,
+                          color: RARITY_CONFIG[gekioshiCard.rarity].glowColor,
+                        }}
+                      >
+                        {RARITY_CONFIG[gekioshiCard.rarity].label}
+                      </span>
+
+                      <p className="mt-1.5 text-[18px] font-bold text-gray-900 leading-tight">
+                        {gekioshiCard.memberName}
+                      </p>
+                      <p className="mt-0.5 text-[12px] text-gray-500">
+                        {gekioshiCard.title}
+                      </p>
+                      <p className="mt-1 text-[12px]" style={{ color: RARITY_CONFIG[gekioshiCard.rarity].color }}>
+                        {"★".repeat(RARITY_CONFIG[gekioshiCard.rarity].stars)}
+                      </p>
+
+                      {/* Obtained date */}
+                      <p className="mt-2 text-[10px] text-gray-400">
+                        {new Date(gekioshiCard.obtainedAt).toLocaleDateString("ja-JP")} に取得
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </motion.div>
           </div>
         )}

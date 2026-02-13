@@ -4,9 +4,9 @@ import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { ChevronLeft, Share2, Users, Hash, Layers, Calendar, User, BookOpen, Camera, X, Palette } from "lucide-react";
+import { ChevronLeft, Share2, Users, Hash, Layers, Calendar, User, BookOpen, Camera, X, Palette, Star } from "lucide-react";
 import { Card, OwnedCard, RARITY_CONFIG } from "@/types";
-import { getCardById as storeGetCardById, getUser, updateCardMemo, addCardImage, removeCardImage } from "@/lib/store";
+import { getCardById as storeGetCardById, getUser, updateCardMemo, addCardImage, removeCardImage, getGekioshiCardId, setGekioshiCardId } from "@/lib/store";
 import { getCardById as catalogGetCardById } from "@/lib/cards-data";
 import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
 import { CardDrawingCanvas } from "@/components/card/CardDrawingCanvas";
@@ -23,6 +23,7 @@ export default function CardDetailPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [showDrawing, setShowDrawing] = useState(false);
+  const [isGekioshi, setIsGekioshi] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const viewerCount = useMemo(() => Math.floor(Math.random() * 26) + 5, []);
@@ -50,6 +51,8 @@ export default function CardDetailPage() {
       setAttachedImages(ownedCard.attachedImages || []);
     }
     setMounted(true);
+    const gekioshiId = getGekioshiCardId();
+    setIsGekioshi(gekioshiId === id);
   }, [params.id, router]);
 
   const handleShare = async () => {
@@ -66,6 +69,17 @@ export default function CardDetailPage() {
       }
     }
   };
+
+  const handleToggleGekioshi = useCallback(() => {
+    if (!card) return;
+    if (isGekioshi) {
+      setGekioshiCardId(null);
+      setIsGekioshi(false);
+    } else {
+      setGekioshiCardId(card.id);
+      setIsGekioshi(true);
+    }
+  }, [card, isGekioshi]);
 
   const reloadCard = useCallback(() => {
     const id = params.id as string;
@@ -212,6 +226,28 @@ export default function CardDetailPage() {
             今{viewerCount}人が見ています
           </span>
         </motion.div>
+
+        {/* Gekioshi button */}
+        {isOwned && (
+          <motion.button
+            onClick={handleToggleGekioshi}
+            className={`mt-4 flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-bold transition-all active:scale-[0.97] ${
+              isGekioshi
+                ? "bg-amber-50 border-2 border-amber-300 text-amber-600 shadow-sm"
+                : "bg-white border border-gray-200 text-gray-500 shadow-sm"
+            }`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <Star
+              className={`h-4 w-4 ${isGekioshi ? "text-amber-500" : "text-gray-400"}`}
+              fill={isGekioshi ? "currentColor" : "none"}
+            />
+            {isGekioshi ? "激推し設定中" : "激推しに設定する"}
+          </motion.button>
+        )}
 
         {/* Glass info panel */}
         <motion.div
