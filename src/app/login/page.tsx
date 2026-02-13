@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { User as UserIcon, ArrowRight, ArrowLeft, Check } from "lucide-react";
-import { setUser, setCoins, getUser } from "@/lib/store";
+import { setUser, setCoins, getUser, addCard } from "@/lib/store";
 import { GROUPS, MEMBERS, getMembersByGroup } from "@/lib/groups-data";
+import { ALL_CARDS } from "@/lib/cards-data";
 import { INITIAL_COINS } from "@/types";
 import type { User } from "@/types";
 
@@ -53,6 +54,18 @@ export default function LoginPage() {
 
     setUser(user);
     setCoins(INITIAL_COINS);
+
+    // Give a card of the tanmou member as welcome gift
+    if (selectedMemberId) {
+      // Find a card for this member (prefer lower rarity as starter)
+      const memberCards = ALL_CARDS.filter(c => c.memberId === selectedMemberId);
+      // Sort by rarity: normal first, then rare, sr, ur, legend
+      const rarityOrder = ["normal", "rare", "sr", "ur", "legend"];
+      memberCards.sort((a, b) => rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity));
+      if (memberCards.length > 0) {
+        addCard(memberCards[0]);
+      }
+    }
 
     setTimeout(() => {
       router.push("/home");
