@@ -33,7 +33,7 @@ export function CardThumbnail({ card, index }: CardThumbnailProps) {
       <Link href={`/card/${card.id}`}>
         <div
           className={`card-thumbnail group relative aspect-[5/7] overflow-hidden rounded-xl border-2 transition-all duration-200 active:scale-[0.96] ${GLOW_CLASS[card.rarity]}`}
-          style={{ borderColor: config.glowColor }}
+          style={{ borderColor: config.glowColor, boxShadow: `0 4px 20px ${config.glowColor}30, 0 0 40px ${config.glowColor}15` }}
         >
           {/* Holographic shimmer overlay */}
           <div className="card-holo-overlay" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -16,10 +16,12 @@ import {
 } from "lucide-react";
 import { Card, CardTheme, RARITY_CONFIG, RARITY_PRICE } from "@/types";
 import { getCoins, deductCoins, addCard, getCards, getUser } from "@/lib/store";
-import { CARD_THEMES, getCardsByTheme } from "@/lib/cards-data";
+import { CARD_THEMES, getCardsByTheme, DEMO_CARDS } from "@/lib/cards-data";
 import { CardFlip } from "@/components/card/CardFlip";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
+import { FeaturedCard } from "@/components/shop/FeaturedCard";
+
 type ShopView = "themes" | "cards";
 type ShopState = "browsing" | "confirming" | "revealing" | "complete";
 
@@ -56,6 +58,16 @@ export default function ShopPage() {
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [refreshState]);
+
+  // Pick a featured card (first unowned legendary/epic, or fallback to first card)
+  const featuredCard = useMemo(() => {
+    const unowned = DEMO_CARDS.filter((c) => !ownedCardIds.has(c.id));
+    const legendary = unowned.find((c) => c.rarity === "legendary");
+    if (legendary) return legendary;
+    const epic = unowned.find((c) => c.rarity === "epic");
+    if (epic) return epic;
+    return unowned[0] ?? DEMO_CARDS[0];
+  }, [ownedCardIds]);
 
   const handleThemeTap = (theme: CardTheme) => {
     setSelectedTheme(theme);
@@ -114,7 +126,7 @@ export default function ShopPage() {
   };
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#F4F5F6]" />;
+    return <div className="min-h-screen bg-[#030712]" />;
   }
 
   return (
@@ -131,21 +143,31 @@ export default function ShopPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="flex items-center gap-3 rounded-2xl border border-gold-400/20 bg-gradient-to-r from-gold-400/10 to-gold-400/5 px-4 py-3">
+            <div className="flex items-center gap-3 rounded-2xl border border-gold-400/20 bg-gold-400/5 px-4 py-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold-400/15">
                 <Coins className="h-5 w-5 text-gold-400" />
               </div>
               <div>
-                <p className="text-[12px] text-gray-400">所持コイン</p>
-                <p className="text-[18px] font-bold text-gold-400">
+                <p className="text-[12px] text-white/40">所持コイン</p>
+                <p className="text-[18px] font-bold text-gold-300">
                   {coins.toLocaleString()}
                 </p>
               </div>
             </div>
           </motion.div>
 
+          {/* Featured Card */}
+          {featuredCard && (
+            <div className="px-4 pt-3">
+              <FeaturedCard
+                card={featuredCard}
+                onTap={() => handleCardTap(featuredCard)}
+              />
+            </div>
+          )}
+
           {/* Theme Cards */}
-          <div className="flex flex-col gap-4 px-4 pt-3 pb-6">
+          <div className="flex flex-col gap-4 px-4 pt-4 pb-6">
             {CARD_THEMES.map((theme, index) => {
               const { owned, total } = getThemeProgress(theme.id);
 
@@ -154,7 +176,7 @@ export default function ShopPage() {
                   key={theme.id}
                   type="button"
                   onClick={() => handleThemeTap(theme)}
-                  className="relative h-44 w-full overflow-hidden rounded-2xl border border-gray-200 text-left"
+                  className="relative h-44 w-full overflow-hidden rounded-2xl border border-white/8 text-left"
                   style={{
                     boxShadow: `0 0 24px ${theme.accentColor}15, 0 0 48px ${theme.accentColor}08`,
                   }}
@@ -191,14 +213,14 @@ export default function ShopPage() {
                       <h3 className="text-[20px] font-bold text-white">
                         {theme.name}
                       </h3>
-                      <p className="mt-0.5 text-[13px] text-gray-200">
+                      <p className="mt-0.5 text-[13px] text-white/60">
                         {theme.description}
                       </p>
                     </div>
 
                     {/* Bottom row */}
                     <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-black/10 px-3 py-1 text-[12px] text-white/80">
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-[12px] text-white/80">
                         {owned}/{total} 取得済み
                       </span>
                       <span className="flex items-center gap-1 text-[12px] text-white/60">
@@ -222,7 +244,7 @@ export default function ShopPage() {
           {/* Back button */}
           <button
             onClick={handleBackToThemes}
-            className="flex items-center gap-1 px-4 pt-3 text-[13px] text-gray-500"
+            className="flex items-center gap-1 px-4 pt-3 text-[13px] text-white/50"
           >
             <ChevronLeft className="h-4 w-4" />
             テーマ一覧に戻る
@@ -231,10 +253,10 @@ export default function ShopPage() {
           {/* Theme info banner */}
           <div className="px-4 pt-3">
             <div
-              className="rounded-xl border-l-4 bg-white px-4 py-3"
+              className="rounded-xl border-l-4 bg-white/5 px-4 py-3"
               style={{ borderLeftColor: selectedTheme.accentColor }}
             >
-              <p className="text-[13px] text-gray-600">
+              <p className="text-[13px] text-white/60">
                 {selectedTheme.description}
               </p>
               {(() => {
@@ -242,10 +264,10 @@ export default function ShopPage() {
                 const pct = total > 0 ? (owned / total) * 100 : 0;
                 return (
                   <div className="mt-2 flex items-center gap-3">
-                    <span className="text-[12px] text-gray-500">
+                    <span className="text-[12px] text-white/40">
                       {owned}/{total}
                     </span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                       <motion.div
                         className="h-full rounded-full"
                         style={{ backgroundColor: selectedTheme.accentColor }}
@@ -326,7 +348,7 @@ export default function ShopPage() {
 
                       {/* Owned overlay */}
                       {owned && (
-                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30">
+                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
                           <div className="flex flex-col items-center gap-1">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-matcha-400/20">
                               <Check className="h-5 w-5 text-matcha-300" />
@@ -342,18 +364,20 @@ export default function ShopPage() {
                     {/* Price display */}
                     {!owned && (
                       <div className="mt-2 flex items-center justify-center gap-1.5">
-                        <Coins
-                          className={`h-3.5 w-3.5 ${
-                            canAfford ? "text-gold-400" : "text-rose-400"
-                          }`}
-                        />
-                        <span
-                          className={`text-[13px] font-bold ${
-                            canAfford ? "text-gold-400" : "text-rose-400"
-                          }`}
-                        >
-                          {price.toLocaleString()} コイン
-                        </span>
+                        <div className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1">
+                          <Coins
+                            className={`h-3.5 w-3.5 ${
+                              canAfford ? "text-gold-300" : "text-rose-400"
+                            }`}
+                          />
+                          <span
+                            className={`text-[13px] font-bold ${
+                              canAfford ? "text-gold-300" : "text-rose-400"
+                            }`}
+                          >
+                            {price.toLocaleString()}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </button>
@@ -370,13 +394,13 @@ export default function ShopPage() {
         {shopState === "confirming" && selectedCard && (
           <motion.div
             key="confirming"
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
+              className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-[#0a0f1a] shadow-2xl"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -420,12 +444,12 @@ export default function ShopPage() {
 
                 {/* Confirmation text */}
                 <div className="mb-5 text-center">
-                  <h2 className="mb-2 text-[18px] font-bold text-gray-900">
+                  <h2 className="mb-2 text-[18px] font-bold text-white">
                     「{selectedCard.title}」を購入しますか？
                   </h2>
                   <div className="flex items-center justify-center gap-1.5">
-                    <Coins className="h-4 w-4 text-gold-400" />
-                    <span className="text-[16px] font-bold text-gold-400">
+                    <Coins className="h-4 w-4 text-gold-300" />
+                    <span className="text-[16px] font-bold text-gold-300">
                       {RARITY_PRICE[selectedCard.rarity].toLocaleString()}{" "}
                       コイン
                     </span>
@@ -433,10 +457,10 @@ export default function ShopPage() {
                 </div>
 
                 {/* Remaining balance */}
-                <div className="mb-5 rounded-xl bg-gray-100 px-4 py-3 text-center">
-                  <p className="text-[13px] text-gray-500">
+                <div className="mb-5 rounded-xl bg-white/5 px-4 py-3 text-center">
+                  <p className="text-[13px] text-white/50">
                     購入後の残高:{" "}
-                    <span className="font-bold text-gold-400">
+                    <span className="font-bold text-gold-300">
                       {(
                         coins - RARITY_PRICE[selectedCard.rarity]
                       ).toLocaleString()}
@@ -469,7 +493,7 @@ export default function ShopPage() {
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="rounded-2xl border border-gray-200 bg-gray-50 py-3.5 text-[14px] font-medium text-gray-600 transition-all active:scale-[0.98] active:bg-gray-100"
+                    className="rounded-2xl border border-white/10 bg-white/5 py-3.5 text-[14px] font-medium text-white/60 transition-all active:scale-[0.98] active:bg-white/10"
                   >
                     キャンセル
                   </button>
@@ -483,7 +507,7 @@ export default function ShopPage() {
         {shopState === "revealing" && selectedCard && (
           <motion.div
             key="revealing"
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -500,7 +524,7 @@ export default function ShopPage() {
         {shopState === "complete" && selectedCard && (
           <motion.div
             key="complete"
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -526,7 +550,7 @@ export default function ShopPage() {
               <p className="mb-2 text-[15px] font-semibold text-white">
                 「{selectedCard.title}」
               </p>
-              <p className="mb-8 text-[14px] text-gray-300">
+              <p className="mb-8 text-[14px] text-white/50">
                 コレクションに追加されました
               </p>
 
@@ -540,13 +564,13 @@ export default function ShopPage() {
                 </button>
                 <button
                   onClick={handleBackToShop}
-                  className="rounded-2xl border border-gray-200/40 bg-white/10 py-3.5 text-[14px] font-medium text-gray-200 transition-all active:scale-[0.98] active:bg-white/20"
+                  className="rounded-2xl border border-white/10 bg-white/5 py-3.5 text-[14px] font-medium text-white/60 transition-all active:scale-[0.98] active:bg-white/10"
                 >
                   ショップに戻る
                 </button>
                 <button
                   onClick={() => router.push("/collection")}
-                  className="py-2 text-[13px] text-gray-400 transition-colors active:text-gray-200"
+                  className="py-2 text-[13px] text-white/40 transition-colors active:text-white/60"
                 >
                   コレクションへ
                 </button>

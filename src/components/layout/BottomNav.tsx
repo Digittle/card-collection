@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, ShoppingBag, Settings } from "lucide-react";
+import { Home, ShoppingBag, Gift, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/collection", label: "コレクション", icon: LayoutGrid },
+  { href: "/collection", label: "ホーム", icon: Home },
   { href: "/shop", label: "ショップ", icon: ShoppingBag },
+  { href: "/claim", label: "受け取る", icon: Gift },
   { href: "/settings", label: "設定", icon: Settings },
 ];
 
@@ -14,7 +15,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="glass-strong fixed inset-x-0 bottom-0 z-50 pb-safe">
+    <nav className="glass-dark-strong fixed inset-x-0 bottom-0 z-50 pb-safe">
       <div className="mx-auto flex max-w-md items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname.startsWith(item.href);
@@ -26,11 +27,10 @@ export function BottomNav() {
               href={item.href}
               className={`relative flex flex-1 flex-col items-center gap-1 py-3.5 text-[11px] tracking-wide transition-all ${
                 isActive
-                  ? "font-bold text-primary-500"
-                  : "font-medium text-gray-500 active:text-gray-600"
+                  ? "font-bold text-primary-400"
+                  : "font-medium text-white/30 active:text-white/50"
               }`}
             >
-              {/* Top bar indicator */}
               {isActive && <span className="nav-indicator" />}
               <Icon
                 className={`h-[22px] w-[22px] ${

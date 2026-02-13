@@ -21,22 +21,22 @@ const VARIANT_STYLES = {
     confirmBg:
       "bg-gradient-to-r from-primary-600 to-primary-500 shadow-lg shadow-primary-500/20",
     confirmText: "text-white",
-    warningText: "text-primary-600",
-    warningBg: "bg-primary-50",
+    warningText: "text-primary-400",
+    warningBg: "bg-primary-500/10",
   },
   danger: {
     confirmBg:
       "bg-gradient-to-r from-red-600 to-red-500 shadow-lg shadow-red-500/20",
     confirmText: "text-white",
-    warningText: "text-red-600",
-    warningBg: "bg-red-50",
+    warningText: "text-red-400",
+    warningBg: "bg-red-500/10",
   },
   warning: {
     confirmBg:
       "bg-gradient-to-r from-amber-500 to-amber-400 shadow-lg shadow-amber-400/20",
     confirmText: "text-white",
-    warningText: "text-amber-600",
-    warningBg: "bg-amber-50",
+    warningText: "text-amber-400",
+    warningBg: "bg-amber-500/10",
   },
 };
 
@@ -57,7 +57,7 @@ export function ConfirmationModal({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm"
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -66,22 +66,18 @@ export function ConfirmationModal({
         }}
       >
         <motion.div
-          className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
+          className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a2e]/95 shadow-2xl backdrop-blur-xl"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
         >
           <div className="p-6">
-            {/* Title */}
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-
-            {/* Description */}
-            <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            <h3 className="text-lg font-bold text-white">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-white/50">
               {description}
             </p>
 
-            {/* Warning */}
             {warning && (
               <motion.div
                 className={`mt-4 flex items-center gap-2 rounded-xl px-4 py-3 ${styles.warningBg}`}
@@ -96,15 +92,13 @@ export function ConfirmationModal({
               </motion.div>
             )}
 
-            {/* Optional children slot */}
             {children && <div className="mt-4">{children}</div>}
 
-            {/* Actions */}
             <div className="mt-6 flex gap-3">
               <button
                 onClick={onCancel}
                 disabled={isProcessing}
-                className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600 transition-colors active:bg-gray-50 disabled:opacity-50"
+                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/60 transition-colors active:bg-white/10 disabled:opacity-50"
               >
                 {cancelLabel}
               </button>

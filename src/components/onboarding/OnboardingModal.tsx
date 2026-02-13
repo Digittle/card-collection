@@ -69,7 +69,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
+        className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a2e]/95 shadow-2xl backdrop-blur-xl"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1 }}
@@ -85,7 +85,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
           {/* Skip button */}
           <button
             onClick={handleSkip}
-            className="absolute right-3 top-4 flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition-colors active:bg-black/5 active:text-gray-900"
+            className="absolute right-3 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white/40 transition-colors active:bg-white/5 active:text-white"
             aria-label="スキップ"
           >
             <X className="h-5 w-5" />
@@ -105,10 +105,10 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
               >
                 <Icon className={`h-12 w-12 ${currentStep.color}`} />
               </div>
-              <h2 className="mb-3 text-[20px] font-bold text-gray-900">
+              <h2 className="mb-3 text-[20px] font-bold text-white">
                 {currentStep.title}
               </h2>
-              <p className="text-[14px] leading-[1.7] text-gray-500">
+              <p className="text-[14px] leading-[1.7] text-white/50">
                 {currentStep.description}
               </p>
             </motion.div>
@@ -116,7 +116,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
 
           {/* Step indicator */}
           <div className="mt-8 flex flex-col items-center gap-2.5">
-            <span className="text-[12px] font-medium text-gray-500">
+            <span className="text-[12px] font-medium text-white/40">
               {step + 1}/{STEPS.length}
             </span>
             <div className="flex justify-center gap-2">
@@ -127,7 +127,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
                   animate={{
                     width: i === step ? 24 : 8,
                     backgroundColor:
-                      i === step ? currentStep.accentColor : "#d1d5db",
+                      i === step ? currentStep.accentColor : "rgba(255,255,255,0.15)",
                   }}
                   transition={{ duration: 0.3 }}
                 />

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Gift,
   KeyRound,
   AlertCircle,
-  Check,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -15,11 +14,14 @@ import { getUser, addCard, hasClaimedToken, addClaimHistory } from "@/lib/store"
 import { validateToken } from "@/lib/cards-data";
 import { Card } from "@/types";
 import { CardFlip } from "@/components/card/CardFlip";
+import { CountdownOverlay } from "@/components/card/CountdownOverlay";
+import { CelebrationBurst } from "@/components/effects/CelebrationBurst";
+import { CelebrationOverlay } from "@/components/card/CelebrationOverlay";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 
 
-type ClaimState = "input" | "revealing" | "complete";
+type ClaimState = "input" | "countdown" | "revealing" | "celebration" | "complete";
 
 export default function ClaimPage() {
   const router = useRouter();
@@ -64,15 +66,23 @@ export default function ClaimPage() {
 
     addClaimHistory(code.trim().toUpperCase());
     setClaimedCard(result.card);
-    setClaimState("revealing");
+    setClaimState("countdown");
   };
+
+  const handleCountdownComplete = useCallback(() => {
+    setClaimState("revealing");
+  }, []);
 
   const handleRevealComplete = () => {
     if (claimedCard) {
       addCard(claimedCard);
-      setClaimState("complete");
+      setClaimState("celebration");
     }
   };
+
+  const handleCelebrationDismiss = useCallback(() => {
+    setClaimState("complete");
+  }, []);
 
   const handleReset = () => {
     setCode("");
@@ -82,7 +92,7 @@ export default function ClaimPage() {
   };
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#F4F5F6]" />;
+    return <div className="min-h-screen bg-[#030712]" />;
   }
 
   return (
@@ -102,17 +112,17 @@ export default function ClaimPage() {
             >
               <div className="mb-8 flex flex-col items-center text-center">
                 <motion.div
-                  className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-200/40 to-primary-100/20"
+                  className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", delay: 0.1 }}
                 >
-                  <Gift className="h-10 w-10 text-primary-500" />
+                  <Gift className="h-10 w-10 text-primary-400" />
                 </motion.div>
-                <h2 className="mb-2 text-[20px] font-bold text-gray-900">
+                <h2 className="mb-2 text-[20px] font-bold text-white">
                   コードで受け取る
                 </h2>
-                <p className="text-[14px] leading-relaxed text-gray-500">
+                <p className="text-[14px] leading-relaxed text-white/50">
                   カードのコードを入力して
                   <br />
                   新しいカードを受け取りましょう
@@ -121,7 +131,7 @@ export default function ClaimPage() {
 
               <div className="space-y-4">
                 <div className="relative">
-                  <KeyRound className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                  <KeyRound className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
                   <input
                     type="text"
                     value={code}
@@ -130,12 +140,12 @@ export default function ClaimPage() {
                       setError("");
                     }}
                     placeholder="例: PHOENIX-2024"
-                    className="w-full rounded-2xl border border-gray-300 bg-white py-4 pl-12 pr-4 font-mono text-[15px] text-gray-900 uppercase placeholder-gray-400 outline-none transition-all focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-400/20"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 font-mono text-[15px] text-white uppercase placeholder:text-white/30 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20"
                     onKeyDown={(e) => e.key === "Enter" && handleClaim()}
                   />
                 </div>
 
-                {/* Error - shown directly below input per guidelines */}
+                {/* Error - shown directly below input */}
                 {error && (
                   <motion.div
                     className="flex items-start gap-2.5 rounded-xl bg-red-500/8 p-3.5 text-[13px] leading-relaxed text-red-400"
@@ -158,21 +168,21 @@ export default function ClaimPage() {
               </div>
 
               {/* Demo codes */}
-              <div className="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <p className="mb-3 text-[12px] font-medium text-gray-400">
+              <div className="mt-8 rounded-2xl border border-white/8 bg-white/5 p-4">
+                <p className="mb-3 text-[12px] font-medium text-white/40">
                   お試し用のコードをタップして入力できます
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    "PHOENIX-2024",
-                    "DRAGON-2024",
-                    "SPIRIT-2024",
-                    "GOLEM-2024",
+                    "SNOWMAN-2024",
+                    "SIXTONES-2024",
+                    "KINGPRINCE-2024",
+                    "NANIWA-2024",
                   ].map((demoCode) => (
                     <button
                       key={demoCode}
                       onClick={() => setCode(demoCode)}
-                      className="rounded-xl bg-gray-100 px-3 py-1.5 font-mono text-[12px] text-gray-600 transition-all active:scale-[0.97] active:bg-gray-200"
+                      className="rounded-xl bg-white/5 px-3 py-1.5 font-mono text-[12px] text-white/50 transition-all active:scale-[0.97] active:bg-white/10"
                     >
                       {demoCode}
                     </button>
@@ -180,6 +190,14 @@ export default function ClaimPage() {
                 </div>
               </div>
             </motion.div>
+          )}
+
+          {/* Countdown State */}
+          {claimState === "countdown" && claimedCard && (
+            <CountdownOverlay
+              rarity={claimedCard.rarity}
+              onComplete={handleCountdownComplete}
+            />
           )}
 
           {/* Revealing State */}
@@ -195,6 +213,22 @@ export default function ClaimPage() {
                 card={claimedCard}
                 onComplete={handleRevealComplete}
                 isFirstTime={true}
+              />
+            </motion.div>
+          )}
+
+          {/* Celebration State */}
+          {claimState === "celebration" && claimedCard && (
+            <motion.div
+              key="celebration"
+              className="fixed inset-0 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <CelebrationBurst rarity={claimedCard.rarity} />
+              <CelebrationOverlay
+                cardTitle={claimedCard.title}
+                onDismiss={handleCelebrationDismiss}
               />
             </motion.div>
           )}
@@ -215,10 +249,10 @@ export default function ClaimPage() {
               >
                 <Sparkles className="h-10 w-10 text-matcha-500" />
               </motion.div>
-              <h2 className="mb-2 text-[22px] font-bold text-gray-900">
+              <h2 className="mb-2 text-[22px] font-bold text-white">
                 おめでとうございます！
               </h2>
-              <p className="mb-8 text-[14px] text-gray-500">
+              <p className="mb-8 text-[14px] text-white/50">
                 「{claimedCard.title}」がコレクションに追加されました
               </p>
 
@@ -232,13 +266,13 @@ export default function ClaimPage() {
                 </button>
                 <button
                   onClick={handleReset}
-                  className="rounded-2xl border border-gray-200 bg-gray-50 py-3.5 text-[14px] font-medium text-gray-600 transition-all active:scale-[0.98] active:bg-gray-100"
+                  className="rounded-2xl border border-white/10 bg-white/5 py-3.5 text-[14px] font-medium text-white/60 transition-all active:scale-[0.98] active:bg-white/10"
                 >
                   別のカードを受け取る
                 </button>
                 <button
                   onClick={() => router.push("/collection")}
-                  className="py-2 text-[13px] text-gray-400 transition-colors active:text-gray-600"
+                  className="py-2 text-[13px] text-white/40 transition-colors active:text-white/60"
                 >
                   コレクションへ戻る
                 </button>

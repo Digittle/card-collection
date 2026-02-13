@@ -219,3 +219,17 @@ export function getThemeById(themeId: string): CardTheme | undefined {
 export function getAllThemes(): CardTheme[] {
   return CARD_THEMES;
 }
+
+export function getFeaturedCards(): Card[] {
+  // Return legendary and epic cards first, then rare
+  return [...DEMO_CARDS].sort((a, b) => {
+    const order = { legendary: 0, epic: 1, rare: 2, common: 3 };
+    return order[a.rarity] - order[b.rarity];
+  });
+}
+
+export function getRelatedCards(cardId: string): Card[] {
+  const card = DEMO_CARDS.find(c => c.id === cardId);
+  if (!card) return [];
+  return DEMO_CARDS.filter(c => c.themeId === card.themeId && c.id !== cardId);
+}

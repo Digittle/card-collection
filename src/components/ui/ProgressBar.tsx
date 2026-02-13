@@ -16,21 +16,21 @@ export function ProgressBar({ current, total, label }: ProgressBarProps) {
     <div className="w-full">
       {label && (
         <div className="mb-2 flex items-center justify-between text-xs">
-          <span className="font-medium text-gray-400">{label}</span>
+          <span className="font-medium text-white/40">{label}</span>
           <span>
             {isComplete ? (
-              <span className="font-bold text-matcha-500">
+              <span className="font-bold text-matcha-400">
                 コンプリート！
               </span>
             ) : (
-              <span className="tabular-nums text-gray-500">
+              <span className="tabular-nums text-white/50">
                 {current}/{total}
               </span>
             )}
           </span>
         </div>
       )}
-      <div className="h-2.5 overflow-hidden rounded-full bg-gray-200">
+      <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
         <motion.div
           className={`h-full rounded-full ${
             isComplete

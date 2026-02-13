@@ -59,16 +59,16 @@ export default function GiftPage() {
   }, [selectedCard]);
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#F4F5F6]" />;
+    return <div className="min-h-screen bg-[#030712]" />;
   }
 
   return (
-    <div className="relative min-h-screen bg-[#F4F5F6]">
+    <div className="relative min-h-screen bg-[#030712]">
       {/* Ambient glow background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-primary-400/6 blur-3xl" />
-        <div className="absolute top-1/3 -right-20 h-60 w-60 rounded-full bg-gold-300/4 blur-3xl" />
-        <div className="absolute bottom-1/4 -left-20 h-60 w-60 rounded-full bg-matcha-300/4 blur-3xl" />
+        <div className="absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-primary-400/10 blur-3xl" />
+        <div className="absolute top-1/3 -right-20 h-60 w-60 rounded-full bg-gold-300/8 blur-3xl" />
+        <div className="absolute bottom-1/4 -left-20 h-60 w-60 rounded-full bg-matcha-300/8 blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-md">
@@ -96,7 +96,7 @@ export default function GiftPage() {
                   <Gift className="h-10 w-10 text-primary-500" />
                 </motion.div>
                 <motion.h1
-                  className="mb-2 text-[22px] font-bold text-gray-900"
+                  className="mb-2 text-[22px] font-bold text-white"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
@@ -104,7 +104,7 @@ export default function GiftPage() {
                   ウェルカムギフト
                 </motion.h1>
                 <motion.p
-                  className="text-[14px] leading-relaxed text-gray-500"
+                  className="text-[14px] leading-relaxed text-white/50"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
@@ -129,8 +129,8 @@ export default function GiftPage() {
                             style={{ backgroundColor: theme.accentColor }}
                           />
                           <div>
-                            <h3 className="text-[14px] font-bold text-gray-900">{theme.name}</h3>
-                            <p className="text-[11px] text-gray-400">{theme.description}</p>
+                            <h3 className="text-[14px] font-bold text-white">{theme.name}</h3>
+                            <p className="text-[11px] text-white/30">{theme.description}</p>
                           </div>
                         </div>
                         {/* Cards in this theme */}
@@ -147,7 +147,7 @@ export default function GiftPage() {
                                 onClick={() => handleCardSelect(card)}
                                 className={`relative overflow-hidden rounded-2xl border-2 text-left transition-all ${
                                   isSelected
-                                    ? "ring-2 ring-primary-400 ring-offset-2 ring-offset-[#F4F5F6]"
+                                    ? "ring-2 ring-primary-400 ring-offset-2 ring-offset-[#030712]"
                                     : "ring-0"
                                 }`}
                                 style={{
@@ -172,7 +172,7 @@ export default function GiftPage() {
                                 whileTap={{ scale: 0.97 }}
                               >
                                 {/* Card image */}
-                                <div className="relative aspect-[5/7] w-full overflow-hidden bg-gray-100">
+                                <div className="relative aspect-[5/7] w-full overflow-hidden bg-white/5">
                                   <Image
                                     src={card.imageUrl}
                                     alt={card.title}
@@ -202,15 +202,15 @@ export default function GiftPage() {
                                 </div>
 
                                 {/* Card info */}
-                                <div className="bg-white/90 px-3 py-2.5">
-                                  <p className="truncate text-[13px] font-bold text-gray-900">
+                                <div className="bg-white/5 px-3 py-2.5">
+                                  <p className="truncate text-[13px] font-bold text-white">
                                     {card.title}
                                   </p>
                                   <div className="mt-1 flex items-center gap-2">
                                     <span className="text-[13px] font-bold text-matcha-300">
                                       無料
                                     </span>
-                                    <span className="text-[11px] text-gray-400 line-through">
+                                    <span className="text-[11px] text-white/30 line-through">
                                       ¥{originalPrice.toLocaleString()}
                                     </span>
                                   </div>
@@ -228,7 +228,7 @@ export default function GiftPage() {
               {/* Fixed bottom CTA */}
               <div className="fixed bottom-0 left-0 right-0 z-20">
                 <div className="mx-auto max-w-md">
-                  <div className="bg-gradient-to-t from-[#F4F5F6] via-[#F4F5F6]/95 to-[#F4F5F6]/0 px-4 pt-6 pb-8">
+                  <div className="bg-gradient-to-t from-[#030712] via-[#030712]/95 to-[#030712]/0 px-4 pt-6 pb-8">
                     <motion.button
                       onClick={handleConfirm}
                       disabled={!selectedCard}
@@ -266,7 +266,7 @@ export default function GiftPage() {
             >
               {/* Backdrop */}
               <motion.div
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={() => setState("selection")}
@@ -274,7 +274,7 @@ export default function GiftPage() {
 
               {/* Dialog */}
               <motion.div
-                className="relative w-full max-w-xs overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
+                className="relative w-full max-w-xs overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a2e]/95 shadow-2xl backdrop-blur-xl"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -287,21 +287,21 @@ export default function GiftPage() {
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a2e] via-[#1a1a2e]/40 to-transparent" />
                   <div className="absolute bottom-3 left-4 right-4">
                     <span
                       className={`mb-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${RARITY_CONFIG[selectedCard.rarity].textColor} bg-gradient-to-r ${RARITY_CONFIG[selectedCard.rarity].bgGradient}`}
                     >
                       {RARITY_CONFIG[selectedCard.rarity].label}
                     </span>
-                    <p className="text-[16px] font-bold text-gray-900">
+                    <p className="text-[16px] font-bold text-white">
                       {selectedCard.title}
                     </p>
                   </div>
                 </div>
 
                 <div className="px-5 pt-4 pb-5">
-                  <p className="mb-5 text-center text-[14px] leading-relaxed text-gray-600">
+                  <p className="mb-5 text-center text-[14px] leading-relaxed text-white/60">
                     「{selectedCard.title}」を
                     <br />
                     受け取りますか？
@@ -325,7 +325,7 @@ export default function GiftPage() {
                     </motion.button>
                     <motion.button
                       onClick={() => setState("selection")}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 py-3.5 text-[14px] font-medium text-gray-600 transition-all active:bg-gray-100"
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 py-3.5 text-[14px] font-medium text-white/60 transition-all active:bg-white/10"
                       whileTap={{ scale: 0.98 }}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -387,7 +387,7 @@ export default function GiftPage() {
               </motion.div>
 
               <motion.h2
-                className="mb-2 text-[22px] font-bold text-gray-900"
+                className="mb-2 text-[22px] font-bold text-white"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -396,7 +396,7 @@ export default function GiftPage() {
               </motion.h2>
 
               <motion.p
-                className="mb-2 text-[14px] text-gray-500"
+                className="mb-2 text-[14px] text-white/50"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}

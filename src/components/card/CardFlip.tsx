@@ -115,12 +115,12 @@ export function CardFlip({
         >
           {/* Back of card (card back face) */}
           <div
-            className="absolute inset-0 rounded-2xl border-2 border-gray-300 bg-gradient-to-br from-gray-100 via-white to-gray-100 p-4"
+            className="absolute inset-0 rounded-2xl border-2 border-white/10 bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-white/[0.08] p-4"
             style={{ backfaceVisibility: "hidden" }}
           >
-            <div className="flex h-full flex-col items-center justify-center rounded-xl border border-gray-200 bg-gray-50">
-              <Sparkles className="mb-4 h-12 w-12 text-gray-400" />
-              <p className="text-lg font-medium text-gray-500">
+            <div className="flex h-full flex-col items-center justify-center rounded-xl border border-white/10 bg-white/5">
+              <Sparkles className="mb-4 h-12 w-12 text-white/40" />
+              <p className="text-lg font-medium text-white/40">
                 タップして開封
               </p>
             </div>
@@ -181,7 +181,7 @@ export function CardFlip({
             >
               <span
                 className={`mb-2 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase ${config.textColor} bg-gradient-to-r ${config.bgGradient} ${
-                  isHighRarity ? "ring-2 ring-offset-2 ring-offset-white" : ""
+                  isHighRarity ? "ring-2 ring-offset-2 ring-offset-[#030712]" : ""
                 }`}
                 style={
                   isHighRarity
@@ -198,7 +198,7 @@ export function CardFlip({
 
             {/* Title */}
             <motion.h2
-              className="text-2xl font-bold text-gray-900"
+              className="text-2xl font-bold text-white"
               initial={{ opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -211,7 +211,7 @@ export function CardFlip({
 
             {/* Series info */}
             <motion.p
-              className="mt-1 text-sm text-gray-500"
+              className="mt-1 text-sm text-white/50"
               initial={{ opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -233,13 +233,13 @@ export function CardFlip({
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
         >
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-white/40">
             カードをタップして開封しましょう
           </p>
           <button
             type="button"
             onClick={handleSkip}
-            className="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-xs text-gray-500 transition-colors hover:border-gray-400 hover:bg-gray-100 hover:text-gray-600 active:bg-gray-200"
+            className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-white/30 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white/50 active:bg-white/15"
           >
             スキップ
           </button>

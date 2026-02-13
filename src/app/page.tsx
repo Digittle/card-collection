@@ -17,29 +17,29 @@ export default function LandingPage() {
   }, [router]);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#F4F5F6] px-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#030712] px-6">
       {/* Animated ambient background */}
-      <div className="ambient-glow left-[20%] top-[20%] h-[350px] w-[350px] bg-primary-400/10" />
+      <div className="ambient-glow left-[20%] top-[20%] h-[350px] w-[350px] bg-primary-400/20" />
       <div
-        className="ambient-glow right-[15%] top-[50%] h-[300px] w-[300px] bg-gold-300/8"
+        className="ambient-glow right-[15%] top-[50%] h-[300px] w-[300px] bg-gold-300/15"
         style={{ animationDelay: "-7s" }}
       />
       <div
-        className="ambient-glow bottom-[10%] left-[30%] h-[250px] w-[250px] bg-rose-300/6"
+        className="ambient-glow bottom-[10%] left-[30%] h-[250px] w-[250px] bg-rose-300/10"
         style={{ animationDelay: "-14s" }}
       />
 
       {/* Floating card illustrations */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute left-[8%] top-[15%] h-20 w-14 rounded-lg border border-primary-300/30 bg-gradient-to-br from-primary-200/40 to-primary-100/30"
+          className="absolute left-[8%] top-[15%] h-20 w-14 rounded-lg border border-white/10 bg-gradient-to-br from-primary-200/40 to-primary-100/30"
           animate={{ y: [0, -12, 0], rotate: [-5, -3, -5] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
           <Star className="m-auto mt-5 h-5 w-5 text-primary-400/50" />
         </motion.div>
         <motion.div
-          className="absolute right-[10%] top-[22%] h-16 w-11 rounded-lg border border-gold-300/20 bg-gradient-to-br from-gold-300/30 to-gold-200/20"
+          className="absolute right-[10%] top-[22%] h-16 w-11 rounded-lg border border-white/10 bg-gradient-to-br from-gold-300/30 to-gold-200/20"
           animate={{ y: [0, -10, 0], rotate: [6, 8, 6] }}
           transition={{
             duration: 4.5,
@@ -51,7 +51,7 @@ export default function LandingPage() {
           <Sparkles className="m-auto mt-4 h-4 w-4 text-gold-300/50" />
         </motion.div>
         <motion.div
-          className="absolute bottom-[25%] left-[15%] h-14 w-10 rounded-lg border border-rose-300/15 bg-gradient-to-br from-rose-200/10 to-rose-100/5"
+          className="absolute bottom-[25%] left-[15%] h-14 w-10 rounded-lg border border-white/10 bg-gradient-to-br from-rose-200/10 to-rose-100/5"
           animate={{ y: [0, -8, 0], rotate: [-3, -6, -3] }}
           transition={{
             duration: 6,
@@ -61,7 +61,7 @@ export default function LandingPage() {
           }}
         />
         <motion.div
-          className="absolute bottom-[30%] right-[12%] h-18 w-12 rounded-lg border border-matcha-400/15 bg-gradient-to-br from-matcha-300/20 to-matcha-200/15"
+          className="absolute bottom-[30%] right-[12%] h-18 w-12 rounded-lg border border-white/10 bg-gradient-to-br from-matcha-300/20 to-matcha-200/15"
           animate={{ y: [0, -14, 0], rotate: [4, 2, 4] }}
           transition={{
             duration: 5.5,
@@ -89,7 +89,7 @@ export default function LandingPage() {
         </motion.div>
 
         <motion.h1
-          className="mb-3 text-[32px] font-bold leading-tight tracking-tight text-gray-900"
+          className="mb-3 text-[32px] font-bold leading-tight tracking-tight text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
@@ -102,7 +102,7 @@ export default function LandingPage() {
         </motion.h1>
 
         <motion.p
-          className="mb-12 max-w-[260px] text-[15px] leading-relaxed text-gray-500"
+          className="mb-12 max-w-[260px] text-[15px] leading-relaxed text-white/50"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
@@ -125,7 +125,7 @@ export default function LandingPage() {
         </motion.button>
 
         <motion.p
-          className="mt-8 text-[13px] text-gray-400"
+          className="mt-8 text-[13px] text-white/30"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}

@@ -9,6 +9,8 @@ const STORAGE_KEYS = {
   CLAIM_HISTORY: "dcc_claim_history",
   COINS: "dcc_coins",
   FREE_CARD: "dcc_free_card_received",
+  COMMUNITY_STATE: "dcc_community_state",
+  ACTIVITY_LOG: "dcc_activity_log",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {

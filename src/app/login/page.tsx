@@ -65,9 +65,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#F4F5F6] px-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#030712] px-6">
       {/* Ambient bg */}
-      <div className="ambient-glow left-[30%] top-[25%] h-[300px] w-[300px] bg-primary-400/8" />
+      <div className="ambient-glow left-[30%] top-[25%] h-[300px] w-[300px] bg-primary-400/15" />
 
       <motion.div
         className="relative z-10 w-full max-w-sm"
@@ -83,22 +83,22 @@ export default function LoginPage() {
           >
             <Sparkles className="h-10 w-10 text-primary-500" />
           </motion.div>
-          <h1 className="mb-2 text-[24px] font-bold text-gray-900">ようこそ</h1>
-          <p className="text-[14px] leading-relaxed text-gray-500">
+          <h1 className="mb-2 text-[24px] font-bold text-white">ようこそ</h1>
+          <p className="text-[14px] leading-relaxed text-white/50">
             名前を入力してカード収集を始めましょう
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
-            <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+            <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="あなたの名前"
               maxLength={20}
-              className="w-full rounded-2xl border border-gray-300 bg-white py-4 pl-12 pr-4 text-[15px] text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-400/20"
+              className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-[15px] text-white placeholder-white/30 outline-none transition-all focus:border-primary-400 focus:bg-white/10 focus:ring-2 focus:ring-primary-400/20"
             />
           </div>
 
@@ -119,15 +119,15 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-8 flex items-center gap-4">
-          <div className="h-px flex-1 bg-gray-200" />
-          <span className="text-[12px] text-gray-400">または</span>
-          <div className="h-px flex-1 bg-gray-200" />
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-[12px] text-white/30">または</span>
+          <div className="h-px flex-1 bg-white/10" />
         </div>
 
         <button
           onClick={handleGuestLogin}
           disabled={isLoading}
-          className="mt-4 w-full rounded-2xl border border-gray-200 bg-white py-4 text-[14px] font-medium text-gray-600 transition-all active:scale-[0.98] active:bg-gray-100 disabled:opacity-40"
+          className="mt-4 w-full rounded-2xl border border-white/10 bg-white/5 py-4 text-[14px] font-medium text-white/60 transition-all active:scale-[0.98] active:bg-white/10 disabled:opacity-40"
         >
           ゲストではじめる
         </button>

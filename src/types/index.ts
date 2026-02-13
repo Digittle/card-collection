@@ -54,6 +54,32 @@ export const RARITY_PRICE: Record<Rarity, number> = {
 
 export const INITIAL_COINS = 1000000;
 
+export interface CommunityState {
+  lastUpdated: string;
+  todayDate: string;
+  todayClaimCount: number;
+  trendingCardIndex: number;
+  seedOffset: number;
+  recentClaimers: SimulatedUser[];
+}
+
+export interface SimulatedUser {
+  name: string;
+  initial: string;
+  color: string;
+  claimedCardId: string;
+  claimedAt: string;
+}
+
+export interface ActivityEvent {
+  id: string;
+  type: "claim" | "view" | "collect_complete";
+  userName: string;
+  cardId: string;
+  cardTitle: string;
+  timestamp: string;
+}
+
 export const RARITY_CONFIG: Record<
   Rarity,
   {

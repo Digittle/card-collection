@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F4F5F6;
-  --foreground: #1a1a1a;
+  --background: #030712;
+  --foreground: #f0f0f0;
 }
 
 @theme inline {
@@ -245,6 +245,31 @@ a,
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Dark glass morphism */
+.glass-dark {
+  background: rgba(3, 7, 18, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-dark-strong {
+  background: rgba(3, 7, 18, 0.92);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Hide scrollbar for carousels */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* ========= Progress bar animation ========= */
