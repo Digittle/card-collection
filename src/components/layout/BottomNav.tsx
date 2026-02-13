@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Target, ShoppingBag, Settings } from "lucide-react";
+import { LayoutGrid, ShoppingBag, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/collection", label: "コレクション", icon: LayoutGrid },
-  { href: "/programs", label: "プログラム", icon: Target },
   { href: "/shop", label: "ショップ", icon: ShoppingBag },
   { href: "/settings", label: "設定", icon: Settings },
 ];

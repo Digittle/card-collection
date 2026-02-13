@@ -14,11 +14,8 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { getUser, getCards, clearUser } from "@/lib/store";
-import { getCollabBadges } from "@/lib/collab-store";
-import { CollabBadge } from "@/types";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
-import { CollabBadgeDisplay } from "@/components/collab/CollabBadgeDisplay";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -27,7 +24,6 @@ export default function SettingsPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [collabBadges, setCollabBadges] = useState<CollabBadge[]>([]);
 
   useEffect(() => {
     const user = getUser();
@@ -37,7 +33,6 @@ export default function SettingsPage() {
     }
     setUserName(user.displayName);
     setCardCount(getCards().length);
-    setCollabBadges(getCollabBadges());
     setMounted(true);
   }, [router]);
 
@@ -79,19 +74,6 @@ export default function SettingsPage() {
             </div>
           </div>
         </motion.div>
-
-        {/* Collab Badges */}
-        {collabBadges.length > 0 && (
-          <motion.div
-            className="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white p-5"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <h3 className="mb-3 text-sm font-bold text-gray-900">共闘バッジ</h3>
-            <CollabBadgeDisplay badges={collabBadges} />
-          </motion.div>
-        )}
 
         {/* Settings list */}
         <div className="space-y-1.5">
@@ -186,12 +168,6 @@ export default function SettingsPage() {
                 ・コレクション（カード {cardCount}枚）
               </p>
               <p className="text-[13px] text-gray-600">・受け取り履歴</p>
-              <p className="text-[13px] text-gray-600">
-                ・プログラムの進捗もすべて削除されます
-              </p>
-              <p className="text-[13px] text-gray-600">
-                ・共闘プログラムの記録とバッジ
-              </p>
             </div>
             <p className="mb-6 text-[12px] font-medium text-red-400/80">
               この操作は取り消せません

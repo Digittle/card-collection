@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, UserProfile, INITIAL_COINS, RightAllocation, UserProgramProgress } from "@/types";
+import { Card, UserProfile, INITIAL_COINS } from "@/types";
 
 const STORAGE_KEYS = {
   USER: "dcc_user",
@@ -9,12 +9,6 @@ const STORAGE_KEYS = {
   CLAIM_HISTORY: "dcc_claim_history",
   COINS: "dcc_coins",
   FREE_CARD: "dcc_free_card_received",
-  RIGHT_ALLOCATIONS: "dcc_right_allocations",
-  PROGRAM_PROGRESS: "dcc_program_progress",
-  COLLAB_PROGRESS: "dcc_collab_progress",
-  COLLAB_CONTRIBUTIONS: "dcc_collab_contributions",
-  COLLAB_FEED: "dcc_collab_feed",
-  COLLAB_BADGES: "dcc_collab_badges",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
@@ -123,38 +117,4 @@ export function getOwnedCardsByTheme(themeId: string): Card[] {
   return getCards().filter((c) => c.themeId === themeId);
 }
 
-// Right Allocations
-export function getAllocations(): RightAllocation[] {
-  return getItem<RightAllocation[]>(STORAGE_KEYS.RIGHT_ALLOCATIONS, []);
-}
-
-export function addAllocation(allocation: RightAllocation): void {
-  const allocations = getAllocations();
-  allocations.push(allocation);
-  setItem(STORAGE_KEYS.RIGHT_ALLOCATIONS, allocations);
-}
-
-export function getCardAllocations(cardId: string): RightAllocation[] {
-  return getAllocations().filter((a) => a.cardId === cardId);
-}
-
-// Program Progress
-export function getProgramProgresses(): UserProgramProgress[] {
-  return getItem<UserProgramProgress[]>(STORAGE_KEYS.PROGRAM_PROGRESS, []);
-}
-
-export function getProgramProgress(programId: string): UserProgramProgress | undefined {
-  return getProgramProgresses().find((p) => p.programId === programId);
-}
-
-export function setProgramProgress(progress: UserProgramProgress): void {
-  const progresses = getProgramProgresses();
-  const index = progresses.findIndex((p) => p.programId === progress.programId);
-  if (index >= 0) {
-    progresses[index] = progress;
-  } else {
-    progresses.push(progress);
-  }
-  setItem(STORAGE_KEYS.PROGRAM_PROGRESS, progresses);
-}
 
