@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Coins, Check, ShoppingBag } from "lucide-react";
+import { Coins, Check, ShoppingBag, Camera, X, BookOpen } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { ALL_CARDS } from "@/lib/cards-data";
@@ -16,6 +16,8 @@ import {
   addCard,
   ownsCard,
   getCards,
+  updateCardMemo,
+  addCardImage,
 } from "@/lib/store";
 import { Card, RARITY_CONFIG, Rarity, RARITY_ORDER } from "@/types";
 
@@ -78,14 +80,14 @@ function ShopInner() {
       setCoinsState(getCoins());
       setOwnedIds(new Set(getCards().map((c) => c.id)));
       setPurchaseSuccess(true);
-
-      setTimeout(() => {
-        setPurchaseSuccess(false);
-        setPurchaseCard(null);
-      }, 1500);
     },
     [coins]
   );
+
+  const handleHistoryComplete = useCallback(() => {
+    setPurchaseSuccess(false);
+    setPurchaseCard(null);
+  }, []);
 
   if (!mounted) {
     return <div className="min-h-screen bg-[#030712]" />;
@@ -263,6 +265,7 @@ function ShopInner() {
                 setPurchaseCard(null);
               }
             }}
+            onHistoryComplete={handleHistoryComplete}
           />
         )}
       </AnimatePresence>
@@ -276,16 +279,67 @@ function PurchaseModal({
   purchaseSuccess,
   onPurchase,
   onClose,
+  onHistoryComplete,
 }: {
   card: Card;
   coins: number;
   purchaseSuccess: boolean;
   onPurchase: (card: Card) => void;
   onClose: () => void;
+  onHistoryComplete: () => void;
 }) {
   const config = RARITY_CONFIG[card.rarity];
   const price = config.shopPrice;
   const canAfford = coins >= price;
+
+  const [step, setStep] = useState<"confirm" | "success" | "history">("confirm");
+  const [memo, setMemo] = useState("");
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Transition from success → history after brief animation
+  useEffect(() => {
+    if (purchaseSuccess && step === "confirm") {
+      setStep("success");
+      const timer = setTimeout(() => setStep("history"), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [purchaseSuccess, step]);
+
+  const handleImageSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = document.createElement("img");
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxW = 800;
+          const scale = Math.min(1, maxW / img.width);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const base64 = canvas.toDataURL("image/jpeg", 0.8);
+          addCardImage(card.id, base64);
+          setAttachedImages((prev) => [...prev, base64]);
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    },
+    [card.id]
+  );
+
+  const handleSave = useCallback(() => {
+    if (memo.trim()) {
+      updateCardMemo(card.id, memo.trim());
+    }
+    onHistoryComplete();
+  }, [card.id, memo, onHistoryComplete]);
 
   return (
     <motion.div
@@ -296,18 +350,21 @@ function PurchaseModal({
       transition={{ duration: 0.2 }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+        onClick={step === "confirm" ? onClose : undefined}
+      />
 
       {/* Modal content */}
       <motion.div
-        className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-[#0a0f1a]/95 backdrop-blur-xl"
+        className="relative z-10 max-h-[85vh] w-full max-w-sm overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-[#0a0f1a]/95 backdrop-blur-xl"
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
         <AnimatePresence mode="wait">
-          {purchaseSuccess ? (
+          {step === "success" && (
             <motion.div
               key="success"
               className="flex flex-col items-center px-6 py-10"
@@ -333,7 +390,131 @@ function PurchaseModal({
                 {card.memberName}のカードを獲得しました
               </p>
             </motion.div>
-          ) : (
+          )}
+
+          {step === "history" && (
+            <motion.div
+              key="history"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              className="px-5 pb-5 pt-6"
+            >
+              {/* Header */}
+              <div className="mb-4 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary-400" />
+                <h3 className="text-[16px] font-bold text-white">
+                  思い出を記録
+                </h3>
+              </div>
+
+              {/* Card mini preview */}
+              <div className="mb-4 flex items-center gap-3 rounded-xl bg-white/5 p-3">
+                <div
+                  className="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg border"
+                  style={{
+                    background: `linear-gradient(135deg, ${card.memberColor}40 0%, ${card.memberColor}90 100%)`,
+                    borderColor: `${card.memberColor}44`,
+                  }}
+                >
+                  {card.memberImage && (
+                    <Image
+                      src={card.memberImage}
+                      alt={card.memberName}
+                      fill
+                      className="object-cover object-top"
+                      sizes="48px"
+                    />
+                  )}
+                </div>
+                <div>
+                  <p className="text-[13px] font-bold text-white">
+                    {card.memberName}
+                  </p>
+                  <p className="text-[11px] text-white/50">{card.title}</p>
+                  <p className="text-[11px]" style={{ color: config.color }}>
+                    {"★".repeat(config.stars)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Date */}
+              <p className="mb-3 text-[12px] text-white/40">
+                取得日: {new Date().toLocaleDateString("ja-JP")}
+              </p>
+
+              {/* Memo */}
+              <textarea
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                placeholder="この日の思い出を書き留めよう..."
+                rows={4}
+                className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none transition-all focus:border-primary-400 focus:ring-1 focus:ring-primary-400/30"
+              />
+
+              {/* Image attachment */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.03] py-3 text-[13px] text-white/50 transition-colors active:bg-white/[0.06]"
+              >
+                <Camera className="h-4 w-4" />
+                写真を追加
+              </button>
+
+              {/* Attached images preview */}
+              {attachedImages.length > 0 && (
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {attachedImages.map((img, i) => (
+                    <div
+                      key={i}
+                      className="relative aspect-square overflow-hidden rounded-lg"
+                    >
+                      <img
+                        src={img}
+                        alt={`添付${i + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        onClick={() =>
+                          setAttachedImages((prev) =>
+                            prev.filter((_, idx) => idx !== i)
+                          )
+                        }
+                        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white/80"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Save button */}
+              <button
+                onClick={handleSave}
+                className="mt-4 w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 py-3 text-[14px] font-bold text-white shadow-lg shadow-primary-500/20 transition-all active:scale-[0.97]"
+              >
+                保存する
+              </button>
+
+              {/* Skip */}
+              <button
+                onClick={onHistoryComplete}
+                className="mt-2 w-full py-2 text-[12px] text-white/30 transition-colors active:text-white/50"
+              >
+                スキップ
+              </button>
+            </motion.div>
+          )}
+
+          {step === "confirm" && (
             <motion.div
               key="confirm"
               initial={{ opacity: 0 }}
