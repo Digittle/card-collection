@@ -95,15 +95,15 @@ function StatPill({
   highlight?: boolean;
 }) {
   return (
-    <div className="min-w-[100px] shrink-0 rounded-2xl border border-white/[0.08] bg-white/[0.06] px-4 py-3">
+    <div className="min-w-[100px] shrink-0 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
       <div className="flex items-center gap-1.5">
         <span className="text-[16px]">{emoji}</span>
         <AnimatedNumber
           value={value}
-          className={`text-[20px] font-bold ${highlight ? "text-amber-400" : "text-white"}`}
+          className={`text-[20px] font-bold ${highlight ? "text-amber-400" : "text-gray-900"}`}
         />
       </div>
-      <p className="mt-0.5 text-[11px] text-white/40">{label}</p>
+      <p className="mt-0.5 text-[11px] text-gray-400">{label}</p>
     </div>
   );
 }
@@ -112,17 +112,17 @@ function DateSeparator({ date, index }: { date: string; index: number }) {
   return (
     <div className="my-6 flex items-center gap-3 px-2">
       <motion.div
-        className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: 0.5, delay: index * 0.08 }}
         style={{ originX: 1 }}
       />
-      <span className="whitespace-nowrap text-[12px] font-bold text-white/30">
+      <span className="whitespace-nowrap text-[12px] font-bold text-gray-400">
         {formatDateJP(date)}
       </span>
       <motion.div
-        className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: 0.5, delay: index * 0.08 }}
@@ -151,7 +151,7 @@ function MemoryCard({
     >
       <Link href={`/card/${card.id}`}>
         <div
-          className={`card-glow-${card.rarity} overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04]`}
+          className={`card-glow-${card.rarity} overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm`}
         >
           {/* Hero photo area */}
           <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -213,17 +213,17 @@ function MemoryCard({
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[14px] font-bold text-white">
+              <p className="truncate text-[14px] font-bold text-gray-900">
                 {card.title}
               </p>
-              <p className="mt-0.5 text-[12px] text-white/50">
+              <p className="mt-0.5 text-[12px] text-gray-500">
                 {card.memberName}
               </p>
               <div className="mt-0.5 flex items-center gap-2">
                 <span className="text-[12px]" style={{ color: config.color }}>
                   {"★".repeat(config.stars)}
                 </span>
-                <span className="text-[11px] text-white/30">
+                <span className="text-[11px] text-gray-400">
                   {formatDateJP(card.obtainedAt)}
                 </span>
               </div>
@@ -232,8 +232,8 @@ function MemoryCard({
 
           {/* Memo preview */}
           {card.memo && (
-            <div className="border-t border-white/[0.06] px-4 py-3">
-              <p className="line-clamp-3 text-[14px] leading-relaxed text-white/60">
+            <div className="border-t border-gray-100 px-4 py-3">
+              <p className="line-clamp-3 text-[14px] leading-relaxed text-gray-600">
                 {card.memo}
               </p>
             </div>
@@ -264,7 +264,7 @@ function QuickCardGrid({
           >
             <Link href={`/card/${card.id}`}>
               <div
-                className={`card-glow-${card.rarity} overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04]`}
+                className={`card-glow-${card.rarity} overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm`}
               >
                 <div className="relative aspect-[5/7] w-full overflow-hidden">
                   {card.memberImage ? (
@@ -313,16 +313,16 @@ function EmptyState() {
       <motion.div
         animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0.5, 0.3] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="mb-6 h-[120px] w-[86px] rounded-2xl border border-white/10 bg-white/[0.04]"
+        className="mb-6 h-[120px] w-[86px] rounded-2xl border border-gray-200 bg-white"
       >
         <div className="flex h-full w-full items-center justify-center">
-          <div className="h-10 w-10 rounded-full bg-white/[0.06]" />
+          <div className="h-10 w-10 rounded-full bg-gray-100" />
         </div>
       </motion.div>
-      <p className="mb-1 text-[15px] font-bold text-white/60">
+      <p className="mb-1 text-[15px] font-bold text-gray-600">
         まだカードを取得していません
       </p>
-      <p className="mb-5 text-center text-[13px] text-white/30">
+      <p className="mb-5 text-center text-[13px] text-gray-400">
         ガチャやショップでカードを集めて思い出を記録しよう
       </p>
       <Link
@@ -386,7 +386,7 @@ export default function HistoryPage() {
   const dateGroups = useMemo(() => groupByDate(filteredCards), [filteredCards]);
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#030712]" />;
+    return <div className="min-h-screen bg-[#F4F5F6]" />;
   }
 
   const filterTabs: { key: FilterTab; label: string }[] = [
@@ -437,8 +437,8 @@ export default function HistoryPage() {
                   onClick={() => setActiveFilter(tab.key)}
                   className={`rounded-full px-4 py-2 text-[13px] transition-colors ${
                     activeFilter === tab.key
-                      ? "bg-white/10 font-bold text-white"
-                      : "text-white/40"
+                      ? "bg-gray-900 font-bold text-white"
+                      : "text-gray-400"
                   }`}
                 >
                   {tab.label}
@@ -449,7 +449,7 @@ export default function HistoryPage() {
             {/* Timeline Content */}
             {filteredCards.length === 0 ? (
               <div className="mt-16 text-center">
-                <p className="text-[14px] text-white/40">
+                <p className="text-[14px] text-gray-400">
                   {activeFilter === "photo"
                     ? "写真付きのカードはまだありません"
                     : "メモ付きのカードはまだありません"}

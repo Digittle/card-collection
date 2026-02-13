@@ -16,10 +16,10 @@ export function CardTile({ card, owned, size = "md" }: CardTileProps) {
 
   if (!owned) {
     return (
-      <div className="relative aspect-[5/7] w-full overflow-hidden rounded-xl border border-white/8 bg-white/[0.04]">
+      <div className="relative aspect-[5/7] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
         <div className="flex h-full flex-col items-center justify-center gap-1">
-          <span className="text-2xl text-white/15">?</span>
-          <Lock className="h-4 w-4 text-white/10" />
+          <span className="text-2xl text-gray-300">?</span>
+          <Lock className="h-4 w-4 text-gray-300" />
         </div>
       </div>
     );

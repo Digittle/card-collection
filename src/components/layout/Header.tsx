@@ -32,18 +32,18 @@ export function Header({
           {showBack && (
             <button
               onClick={() => router.back()}
-              className="flex h-12 w-12 items-center justify-center rounded-full text-white/70 transition-colors active:bg-white/10"
+              className="flex h-12 w-12 items-center justify-center rounded-full text-gray-600 transition-colors active:bg-black/5"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
           )}
         </div>
-        <h1 className="text-[18px] font-bold text-white">{title}</h1>
+        <h1 className="text-[18px] font-bold text-gray-900">{title}</h1>
         <div className="flex items-center justify-end gap-2">
           {coins !== undefined && (
             <div className="flex items-center gap-1 rounded-full bg-gold-300/10 px-2.5 py-1">
               <Coins className="h-3.5 w-3.5 text-gold-300" />
-              <span className="text-[12px] font-bold tabular-nums text-gold-300">
+              <span className="text-[12px] font-bold tabular-nums text-gold-400">
                 {coins.toLocaleString()}
               </span>
             </div>

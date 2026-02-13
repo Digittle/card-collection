@@ -124,19 +124,19 @@ export default function CardDetailPage() {
   );
 
   if (!mounted || !card) {
-    return <div className="min-h-screen bg-[#030712]" />;
+    return <div className="min-h-screen bg-[#F4F5F6]" />;
   }
 
   const config = RARITY_CONFIG[card.rarity];
   const isOwned = "obtainedAt" in card;
 
   return (
-    <div className="mx-auto min-h-screen max-w-md bg-[#030712]">
+    <div className="mx-auto min-h-screen max-w-md bg-[#F4F5F6]">
       {/* Ambient glow */}
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
-          background: `radial-gradient(ellipse at 50% 30%, ${card.memberColor}18 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse at 50% 30%, ${card.memberColor}10 0%, transparent 70%)`,
         }}
       />
 
@@ -145,13 +145,13 @@ export default function CardDetailPage() {
         <div className="flex h-14 items-center justify-between px-3 pt-safe">
           <button
             onClick={() => router.back()}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-md transition-colors active:bg-white/20"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-gray-600 backdrop-blur-md transition-colors active:bg-black/10"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={handleShare}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-md transition-colors active:bg-white/20"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-gray-600 backdrop-blur-md transition-colors active:bg-black/10"
           >
             <Share2 className="h-4 w-4" />
           </button>
@@ -195,7 +195,7 @@ export default function CardDetailPage() {
 
         {/* Viewer count */}
         <motion.div
-          className="mt-4 flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1.5"
+          className="mt-4 flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -204,14 +204,14 @@ export default function CardDetailPage() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
           </span>
-          <span className="text-[12px] text-white/50">
+          <span className="text-[12px] text-gray-500">
             今{viewerCount}人が見ています
           </span>
         </motion.div>
 
         {/* Glass info panel */}
         <motion.div
-          className="mt-6 w-full rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl"
+          className="mt-6 w-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
@@ -227,51 +227,51 @@ export default function CardDetailPage() {
             >
               {config.label}
             </span>
-            <h2 className="mt-2 text-[26px] font-bold text-white">
+            <h2 className="mt-2 text-[26px] font-bold text-gray-900">
               {card.title}
             </h2>
           </div>
 
           {/* Description */}
-          <p className="mt-3 text-center text-[14px] leading-relaxed text-white/50">
+          <p className="mt-3 text-center text-[14px] leading-relaxed text-gray-500">
             {card.description}
           </p>
 
           {/* Meta grid */}
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-white/5 p-3">
-              <Users className="mb-1 h-4 w-4 text-white/30" />
-              <p className="text-[11px] text-white/30">グループ</p>
-              <p className="text-[13px] font-semibold text-white">
+            <div className="rounded-xl bg-gray-50 p-3">
+              <Users className="mb-1 h-4 w-4 text-gray-400" />
+              <p className="text-[11px] text-gray-400">グループ</p>
+              <p className="text-[13px] font-semibold text-gray-900">
                 {card.groupName}
               </p>
             </div>
-            <div className="rounded-xl bg-white/5 p-3">
-              <User className="mb-1 h-4 w-4 text-white/30" />
-              <p className="text-[11px] text-white/30">メンバー</p>
-              <p className="text-[13px] font-semibold text-white">
+            <div className="rounded-xl bg-gray-50 p-3">
+              <User className="mb-1 h-4 w-4 text-gray-400" />
+              <p className="text-[11px] text-gray-400">メンバー</p>
+              <p className="text-[13px] font-semibold text-gray-900">
                 {card.memberName}
               </p>
             </div>
-            <div className="rounded-xl bg-white/5 p-3">
-              <Layers className="mb-1 h-4 w-4 text-white/30" />
-              <p className="text-[11px] text-white/30">シリーズ</p>
-              <p className="text-[13px] font-semibold text-white">
+            <div className="rounded-xl bg-gray-50 p-3">
+              <Layers className="mb-1 h-4 w-4 text-gray-400" />
+              <p className="text-[11px] text-gray-400">シリーズ</p>
+              <p className="text-[13px] font-semibold text-gray-900">
                 {card.series}
               </p>
             </div>
-            <div className="rounded-xl bg-white/5 p-3">
-              <Hash className="mb-1 h-4 w-4 text-white/30" />
-              <p className="text-[11px] text-white/30">カード番号</p>
-              <p className="text-[13px] font-semibold text-white">
+            <div className="rounded-xl bg-gray-50 p-3">
+              <Hash className="mb-1 h-4 w-4 text-gray-400" />
+              <p className="text-[11px] text-gray-400">カード番号</p>
+              <p className="text-[13px] font-semibold text-gray-900">
                 #{card.cardNumber}/{card.totalInSeries}
               </p>
             </div>
             {isOwned && (
-              <div className="col-span-2 rounded-xl bg-white/5 p-3">
-                <Calendar className="mb-1 h-4 w-4 text-white/30" />
-                <p className="text-[11px] text-white/30">取得日</p>
-                <p className="text-[13px] font-semibold text-white">
+              <div className="col-span-2 rounded-xl bg-gray-50 p-3">
+                <Calendar className="mb-1 h-4 w-4 text-gray-400" />
+                <p className="text-[11px] text-gray-400">取得日</p>
+                <p className="text-[13px] font-semibold text-gray-900">
                   {new Date((card as OwnedCard).obtainedAt).toLocaleDateString("ja-JP")}
                 </p>
               </div>
@@ -282,19 +282,19 @@ export default function CardDetailPage() {
         {/* Memories section - owned cards only */}
         {isOwned && (
           <motion.div
-            className="mt-6 w-full rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl"
+            className="mt-6 w-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
           >
             {/* Section header */}
             <div className="mb-4 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-white/50" />
-              <h3 className="text-[16px] font-bold text-white">思い出</h3>
+              <BookOpen className="h-5 w-5 text-gray-500" />
+              <h3 className="text-[16px] font-bold text-gray-900">思い出</h3>
               <AnimatePresence>
                 {savedIndicator && (
                   <motion.span
-                    className="ml-auto text-[12px] text-green-400/70"
+                    className="ml-auto text-[12px] text-green-600"
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }}
@@ -308,7 +308,7 @@ export default function CardDetailPage() {
 
             {/* Memo textarea */}
             <textarea
-              className="w-full resize-none rounded-xl border border-white/10 bg-white/5 p-3 text-[14px] text-white placeholder-white/30 outline-none transition-colors focus:border-white/20 focus:bg-white/[0.07]"
+              className="w-full resize-none rounded-xl border border-gray-200 bg-white p-3 text-[14px] text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-400 focus:bg-white"
               rows={4}
               placeholder="この日の思い出を書き留めよう..."
               value={memo}
@@ -327,7 +327,7 @@ export default function CardDetailPage() {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-[13px] text-white/70 transition-colors active:bg-white/10"
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-[13px] text-gray-600 transition-colors active:bg-gray-100"
               >
                 <Camera className="h-4 w-4" />
                 写真を追加
@@ -339,7 +339,7 @@ export default function CardDetailPage() {
                   {attachedImages.map((img, index) => (
                     <div
                       key={index}
-                      className="group relative aspect-square overflow-hidden rounded-xl border border-white/10"
+                      className="group relative aspect-square overflow-hidden rounded-xl border border-gray-200"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -373,24 +373,24 @@ export default function CardDetailPage() {
               onClick={() => setDeleteConfirm(null)}
             >
               <motion.div
-                className="mx-6 w-full max-w-xs rounded-2xl border border-white/10 bg-[#0a0f1a] p-5"
+                className="mx-6 w-full max-w-xs rounded-2xl border border-gray-200 bg-white p-5"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <p className="text-center text-[15px] font-semibold text-white">
+                <p className="text-center text-[15px] font-semibold text-gray-900">
                   この写真を削除しますか？
                 </p>
                 <div className="mt-4 flex gap-3">
                   <button
-                    className="flex-1 rounded-xl border border-white/10 bg-white/[0.06] py-2.5 text-[13px] text-white/70 transition-colors active:bg-white/10"
+                    className="flex-1 rounded-xl border border-gray-200 bg-gray-50 py-2.5 text-[13px] text-gray-600 transition-colors active:bg-gray-100"
                     onClick={() => setDeleteConfirm(null)}
                   >
                     キャンセル
                   </button>
                   <button
-                    className="flex-1 rounded-xl bg-red-500/20 py-2.5 text-[13px] font-semibold text-red-400 transition-colors active:bg-red-500/30"
+                    className="flex-1 rounded-xl bg-red-50 py-2.5 text-[13px] font-semibold text-red-500 transition-colors active:bg-red-100"
                     onClick={() => handleDeleteImage(deleteConfirm)}
                   >
                     削除

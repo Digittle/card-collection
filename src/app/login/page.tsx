@@ -60,9 +60,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#030712] px-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#F4F5F6] px-6">
       {/* Ambient background */}
-      <div className="ambient-glow left-[30%] top-[25%] h-[300px] w-[300px] bg-primary-400/15" />
+      <div className="ambient-glow left-[30%] top-[25%] h-[300px] w-[300px] bg-primary-400/10" />
       <div
         className="ambient-glow right-[20%] top-[60%] h-[250px] w-[250px] bg-amber-400/10"
         style={{ animationDelay: "-8s" }}
@@ -88,17 +88,17 @@ export default function LoginPage() {
                 >
                   <UserIcon className="h-10 w-10 text-primary-500" />
                 </motion.div>
-                <h1 className="mb-2 text-[24px] font-bold text-white">
+                <h1 className="mb-2 text-[24px] font-bold text-gray-900">
                   ようこそ
                 </h1>
-                <p className="text-[14px] leading-relaxed text-white/50">
+                <p className="text-[14px] leading-relaxed text-gray-500">
                   まずはニックネームを教えてください
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div className="relative">
-                  <UserIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
+                  <UserIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     value={name}
@@ -108,7 +108,7 @@ export default function LoginPage() {
                     }}
                     placeholder="ニックネームを入力"
                     maxLength={20}
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-[15px] text-white placeholder-white/30 outline-none transition-all focus:border-primary-400 focus:bg-white/10 focus:ring-2 focus:ring-primary-400/20"
+                    className="w-full rounded-2xl border border-gray-200 bg-white py-4 pl-12 pr-4 text-[15px] text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-400/20"
                   />
                 </div>
 
@@ -136,17 +136,17 @@ export default function LoginPage() {
               {/* Back button */}
               <button
                 onClick={() => setStep(1)}
-                className="mb-6 flex items-center gap-1 text-[14px] text-white/50 transition-colors hover:text-white/80 self-start"
+                className="mb-6 flex items-center gap-1 text-[14px] text-gray-500 transition-colors hover:text-gray-700 self-start"
               >
                 <ArrowLeft className="h-4 w-4" />
                 戻る
               </button>
 
               {/* Step 2: 担当選択 */}
-              <h1 className="mb-2 text-center text-[22px] font-bold text-white">
+              <h1 className="mb-2 text-center text-[22px] font-bold text-gray-900">
                 担当を選んでください
               </h1>
-              <p className="mb-6 text-center text-[13px] text-white/40">
+              <p className="mb-6 text-center text-[13px] text-gray-400">
                 あとから変更できます
               </p>
 
@@ -162,8 +162,8 @@ export default function LoginPage() {
                       style={{
                         backgroundColor: isActive
                           ? group.accentColor
-                          : "rgba(255,255,255,0.05)",
-                        color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
+                          : "rgba(0,0,0,0.04)",
+                        color: isActive ? "#fff" : "rgba(0,0,0,0.4)",
                       }}
                     >
                       {group.name}
@@ -196,10 +196,10 @@ export default function LoginPage() {
                         style={{
                           borderColor: isSelected
                             ? member.color
-                            : "rgba(255,255,255,0.06)",
+                            : "rgba(0,0,0,0.08)",
                           backgroundColor: isSelected
                             ? `${member.color}15`
-                            : "rgba(255,255,255,0.03)",
+                            : "rgba(255,255,255,0.8)",
                           boxShadow: isSelected
                             ? `0 0 20px ${member.color}30, 0 0 40px ${member.color}15`
                             : "none",
@@ -211,7 +211,7 @@ export default function LoginPage() {
                           style={{
                             borderColor: isSelected
                               ? member.color
-                              : "rgba(255,255,255,0.1)",
+                              : "rgba(0,0,0,0.1)",
                             boxShadow: isSelected
                               ? `0 0 12px ${member.color}60`
                               : "none",
@@ -251,8 +251,8 @@ export default function LoginPage() {
                           className="text-[12px] font-medium leading-tight text-center"
                           style={{
                             color: isSelected
-                              ? "#fff"
-                              : "rgba(255,255,255,0.6)",
+                              ? "#333"
+                              : "rgba(0,0,0,0.5)",
                           }}
                         >
                           {member.name}
@@ -266,10 +266,10 @@ export default function LoginPage() {
               {/* Skip option */}
               <button
                 onClick={() => setSelectedMemberId(null)}
-                className="mb-5 text-[13px] text-white/40 transition-colors hover:text-white/60"
+                className="mb-5 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
               >
                 {selectedMemberId === null ? (
-                  <span className="text-primary-400">✓ </span>
+                  <span className="text-primary-500">✓ </span>
                 ) : null}
                 担当なし（スキップ）
               </button>

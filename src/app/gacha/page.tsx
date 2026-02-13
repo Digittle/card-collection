@@ -110,7 +110,7 @@ export default function GachaPage() {
   }, [drawnCards]);
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#030712]" />;
+    return <div className="min-h-screen bg-[#F4F5F6]" />;
   }
 
   return (
@@ -151,20 +151,20 @@ export default function GachaPage() {
                       delay: i * 0.4,
                     }}
                   >
-                    <Sparkles className="h-4 w-4 text-white/20" />
+                    <Sparkles className="h-4 w-4 text-gray-300" />
                   </motion.div>
                 ))}
               </div>
 
               <Sparkles className="mb-3 h-8 w-8 text-gold-300" />
-              <h2 className="text-[20px] font-black text-white">
+              <h2 className="text-[20px] font-black text-gray-900">
                 STARTO ガチャ
               </h2>
-              <p className="mt-1 text-[13px] text-white/50">
+              <p className="mt-1 text-[13px] text-gray-500">
                 推しのカードを引こう
               </p>
             </div>
-            <div className="absolute inset-0 rounded-2xl border border-white/[0.06]" />
+            <div className="absolute inset-0 rounded-2xl border border-gray-200" />
           </motion.div>
 
           {/* Rate Info */}
@@ -176,13 +176,13 @@ export default function GachaPage() {
           >
             <button
               onClick={() => setShowRates(!showRates)}
-              className="flex w-full items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3"
+              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3"
             >
-              <span className="text-[13px] font-medium text-white/60">
+              <span className="text-[13px] font-medium text-gray-500">
                 排出確率
               </span>
               <ChevronDown
-                className={`h-4 w-4 text-white/40 transition-transform ${showRates ? "rotate-180" : ""}`}
+                className={`h-4 w-4 text-gray-400 transition-transform ${showRates ? "rotate-180" : ""}`}
               />
             </button>
             <AnimatePresence>
@@ -206,11 +206,11 @@ export default function GachaPage() {
                               className="inline-block h-2.5 w-2.5 rounded-full"
                               style={{ backgroundColor: cfg.color }}
                             />
-                            <span className="text-[12px] text-white/60">
+                            <span className="text-[12px] text-gray-500">
                               {cfg.labelEn} {cfg.label}
                             </span>
                           </div>
-                          <span className="text-[12px] font-bold tabular-nums text-white/80">
+                          <span className="text-[12px] font-bold tabular-nums text-gray-700">
                             {(cfg.probability * 100).toFixed(0)}%
                           </span>
                         </div>
@@ -249,14 +249,14 @@ export default function GachaPage() {
             <motion.button
               onClick={() => handleDraw(1, false)}
               disabled={coins < GACHA_COST_SINGLE}
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.05] py-3.5 text-center font-bold text-white transition-colors disabled:opacity-40"
+              className="w-full rounded-xl border border-gray-200 bg-white py-3.5 text-center font-bold text-gray-900 transition-colors disabled:opacity-40"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
               whileTap={{ scale: 0.97 }}
             >
               <span className="text-[15px]">1回ガチャ</span>
-              <span className="ml-2 text-[13px] text-white/50">
+              <span className="ml-2 text-[13px] text-gray-500">
                 {GACHA_COST_SINGLE.toLocaleString()}コイン
               </span>
             </motion.button>
@@ -291,7 +291,7 @@ export default function GachaPage() {
             {/* Insufficient coins warning */}
             {coins < GACHA_COST_SINGLE && !freeAvailable && (
               <motion.p
-                className="text-center text-[12px] text-red-400/80"
+                className="text-center text-[12px] text-red-500"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
@@ -408,7 +408,7 @@ export default function GachaPage() {
             </div>
 
             {/* Summary */}
-            <div className="border-t border-white/[0.06] bg-[#030712] px-4 pb-6 pt-4">
+            <div className="border-t border-white/[0.06] bg-gray-900 px-4 pb-6 pt-4">
               <p className="mb-4 text-center text-[13px] text-white/60">
                 NEW: {summary.newCount}枚 / 重複: {summary.dupeCount}枚
                 {summary.dupeCount > 0 && (

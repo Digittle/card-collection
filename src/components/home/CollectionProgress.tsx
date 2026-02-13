@@ -28,7 +28,7 @@ function ProgressRing({
         cy={radius + strokeWidth}
         r={radius}
         fill="none"
-        stroke="rgba(255,255,255,0.08)"
+        stroke="rgba(0,0,0,0.08)"
         strokeWidth={strokeWidth}
       />
       {/* Progress arc */}
@@ -51,7 +51,7 @@ function ProgressRing({
         y={radius + strokeWidth}
         textAnchor="middle"
         dominantBaseline="central"
-        fill="white"
+        fill="#1a1a2e"
         fontSize="13"
         fontWeight="bold"
       >
@@ -66,7 +66,7 @@ export function CollectionProgress() {
 
   return (
     <section className="mt-6 px-4">
-      <h2 className="mb-3 text-[15px] font-bold text-white">
+      <h2 className="mb-3 text-[15px] font-bold text-gray-900">
         コレクション進捗
       </h2>
       <div className="grid grid-cols-2 gap-3">
@@ -83,11 +83,11 @@ export function CollectionProgress() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 + i * 0.08 }}
-              className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] p-3"
+              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3"
             >
               <ProgressRing progress={progress} color={group.accentColor} />
               <div className="min-w-0">
-                <p className="truncate text-[13px] font-bold text-white">
+                <p className="truncate text-[13px] font-bold text-gray-900">
                   {group.name}
                 </p>
                 <p

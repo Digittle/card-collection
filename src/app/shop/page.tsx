@@ -25,7 +25,7 @@ type RarityFilter = "all" | Rarity;
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#030712]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F4F5F6]" />}>
       <ShopInner />
     </Suspense>
   );
@@ -90,7 +90,7 @@ function ShopInner() {
   }, []);
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#030712]" />;
+    return <div className="min-h-screen bg-[#F4F5F6]" />;
   }
 
   const rarityTabs: { key: RarityFilter; label: string }[] = [
@@ -115,8 +115,8 @@ function ShopInner() {
               selectedGroup === "all"
                 ? { backgroundColor: "#ec6d81", color: "#fff" }
                 : {
-                    backgroundColor: "rgba(255,255,255,0.05)",
-                    color: "rgba(255,255,255,0.4)",
+                    backgroundColor: "rgba(0,0,0,0.04)",
+                    color: "rgba(0,0,0,0.4)",
                   }
             }
           >
@@ -131,8 +131,8 @@ function ShopInner() {
                 selectedGroup === group.id
                   ? { backgroundColor: group.accentColor, color: "#fff" }
                   : {
-                      backgroundColor: "rgba(255,255,255,0.05)",
-                      color: "rgba(255,255,255,0.4)",
+                      backgroundColor: "rgba(0,0,0,0.04)",
+                      color: "rgba(0,0,0,0.4)",
                     }
               }
             >
@@ -149,8 +149,8 @@ function ShopInner() {
               onClick={() => setSelectedRarity(tab.key)}
               className={`shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors ${
                 selectedRarity === tab.key
-                  ? "bg-white/15 text-white"
-                  : "bg-white/[0.04] text-white/40"
+                  ? "bg-gray-200 text-gray-900"
+                  : "bg-gray-100 text-gray-400"
               }`}
             >
               {tab.label}
@@ -239,13 +239,13 @@ function ShopInner() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-12 flex flex-col items-center"
           >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-              <ShoppingBag className="h-7 w-7 text-white/30" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <ShoppingBag className="h-7 w-7 text-gray-400" />
             </div>
-            <p className="mb-1 text-[15px] font-bold text-white/60">
+            <p className="mb-1 text-[15px] font-bold text-gray-500">
               カードが見つかりません
             </p>
-            <p className="text-center text-[13px] text-white/30">
+            <p className="text-center text-[13px] text-gray-400">
               フィルターを変更してお試しください
             </p>
           </motion.div>
@@ -363,7 +363,7 @@ function PurchaseModal({
 
       {/* Modal content */}
       <motion.div
-        className="relative z-10 max-h-[85vh] w-full max-w-sm overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-[#0a0f1a]/95 backdrop-blur-xl"
+        className="relative z-10 max-h-[85vh] w-full max-w-sm overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl backdrop-blur-xl"
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -391,8 +391,8 @@ function PurchaseModal({
               >
                 <Check className="h-8 w-8 text-emerald-400" />
               </motion.div>
-              <p className="text-[18px] font-bold text-white">購入完了!</p>
-              <p className="mt-1 text-[13px] text-white/50">
+              <p className="text-[18px] font-bold text-gray-900">購入完了!</p>
+              <p className="mt-1 text-[13px] text-gray-500">
                 {card.memberName}のカードを獲得しました
               </p>
             </motion.div>
@@ -409,13 +409,13 @@ function PurchaseModal({
               {/* Header */}
               <div className="mb-4 flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary-400" />
-                <h3 className="text-[16px] font-bold text-white">
+                <h3 className="text-[16px] font-bold text-gray-900">
                   思い出を記録
                 </h3>
               </div>
 
               {/* Card mini preview */}
-              <div className="mb-4 flex items-center gap-3 rounded-xl bg-white/5 p-3">
+              <div className="mb-4 flex items-center gap-3 rounded-xl bg-gray-50 p-3">
                 <div
                   className="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg border"
                   style={{
@@ -434,10 +434,10 @@ function PurchaseModal({
                   )}
                 </div>
                 <div>
-                  <p className="text-[13px] font-bold text-white">
+                  <p className="text-[13px] font-bold text-gray-900">
                     {card.memberName}
                   </p>
-                  <p className="text-[11px] text-white/50">{card.title}</p>
+                  <p className="text-[11px] text-gray-500">{card.title}</p>
                   <p className="text-[11px]" style={{ color: config.color }}>
                     {"★".repeat(config.stars)}
                   </p>
@@ -445,7 +445,7 @@ function PurchaseModal({
               </div>
 
               {/* Date */}
-              <p className="mb-3 text-[12px] text-white/40">
+              <p className="mb-3 text-[12px] text-gray-400">
                 取得日: {new Date().toLocaleDateString("ja-JP")}
               </p>
 
@@ -455,7 +455,7 @@ function PurchaseModal({
                 onChange={(e) => setMemo(e.target.value)}
                 placeholder="この日の思い出を書き留めよう..."
                 rows={4}
-                className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none transition-all focus:border-primary-400 focus:ring-1 focus:ring-primary-400/30"
+                className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-[14px] text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-primary-400 focus:ring-1 focus:ring-primary-400/30"
               />
 
               {/* Image attachment */}
@@ -468,7 +468,7 @@ function PurchaseModal({
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.03] py-3 text-[13px] text-white/50 transition-colors active:bg-white/[0.06]"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 py-3 text-[13px] text-gray-500 transition-colors active:bg-gray-100"
               >
                 <Camera className="h-4 w-4" />
                 写真を追加
@@ -513,7 +513,7 @@ function PurchaseModal({
               {/* Skip */}
               <button
                 onClick={onHistoryComplete}
-                className="mt-2 w-full py-2 text-[12px] text-white/30 transition-colors active:text-white/50"
+                className="mt-2 w-full py-2 text-[12px] text-gray-400 transition-colors active:text-gray-500"
               >
                 スキップ
               </button>
@@ -566,7 +566,7 @@ function PurchaseModal({
                   </span>
                 </div>
                 {!canAfford && (
-                  <p className="text-[12px] text-red-400">コインが不足しています</p>
+                  <p className="text-[12px] text-red-500">コインが不足しています</p>
                 )}
               </div>
 
@@ -581,7 +581,7 @@ function PurchaseModal({
                 </button>
                 <button
                   onClick={onClose}
-                  className="w-full rounded-xl bg-white/[0.06] py-3 text-[14px] font-bold text-white/60 transition-all active:scale-[0.97]"
+                  className="w-full rounded-xl bg-gray-100 py-3 text-[14px] font-bold text-gray-500 transition-all active:scale-[0.97]"
                 >
                   キャンセル
                 </button>

@@ -7,7 +7,7 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="mx-auto min-h-screen max-w-md bg-[#030712]">
+    <div className="mx-auto min-h-screen max-w-md bg-[#F4F5F6]">
       <div className="pb-20">{children}</div>
       <BottomNav />
     </div>

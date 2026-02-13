@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030712;
-  --foreground: #f0f0f0;
+  --background: #F4F5F6;
+  --foreground: #1a1a2e;
   --penlight-color: #ec6d81;
 }
 
@@ -81,17 +81,19 @@ a,
 /* ========= Glass morphism ========= */
 
 .glass-dark {
-  background: rgba(3, 7, 18, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .glass-dark-strong {
-  background: rgba(3, 7, 18, 0.92);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Hide scrollbar for carousels */
@@ -258,7 +260,7 @@ a,
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.04) 50%,
+    rgba(0, 0, 0, 0.03) 50%,
     transparent 100%
   );
   background-size: 200% 100%;

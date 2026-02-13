@@ -45,15 +45,15 @@ export default function HomePage() {
         {/* History link */}
         <div className="px-4 mt-2 mb-4">
           <Link href="/history">
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 transition-colors active:bg-white/[0.08]">
+            <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 transition-colors active:bg-gray-100">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-400/10">
                 <Clock className="h-4 w-4 text-primary-400" />
               </div>
               <div className="flex-1">
-                <p className="text-[14px] font-bold text-white">ヒストリー</p>
-                <p className="text-[11px] text-white/40">カード取得履歴を見る</p>
+                <p className="text-[14px] font-bold text-gray-900">ヒストリー</p>
+                <p className="text-[11px] text-gray-400">カード取得履歴を見る</p>
               </div>
-              <span className="text-[12px] text-white/30">→</span>
+              <span className="text-[12px] text-gray-300">→</span>
             </div>
           </Link>
         </div>

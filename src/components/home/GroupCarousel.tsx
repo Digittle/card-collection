@@ -12,7 +12,7 @@ export function GroupCarousel() {
 
   return (
     <section className="mt-6">
-      <h2 className="mb-3 px-4 text-[15px] font-bold text-white">グループ</h2>
+      <h2 className="mb-3 px-4 text-[15px] font-bold text-gray-900">グループ</h2>
       <div className="scrollbar-hide flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
         {GROUPS.map((group, i) => {
           const totalGroupCards = getCardsByGroup(group.id).length;

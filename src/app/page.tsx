@@ -35,7 +35,7 @@ function FloatingOrb({
         height: size,
         left: `${x}%`,
         top: `${y}%`,
-        background: `radial-gradient(circle, ${color}40 0%, ${color}00 70%)`,
+        background: `radial-gradient(circle, ${color}20 0%, ${color}00 70%)`,
         filter: "blur(40px)",
       }}
       animate={{
@@ -77,7 +77,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#030712] px-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#F4F5F6] px-6">
       {/* Floating penlight-style colored orbs */}
       <div className="absolute inset-0 overflow-hidden">
         {orbs.map((orb, i) => (
@@ -86,7 +86,7 @@ export default function LandingPage() {
       </div>
 
       {/* Subtle vignette overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/60 via-transparent to-[#030712]/80 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#F4F5F6]/60 via-transparent to-[#F4F5F6]/80 pointer-events-none" />
 
       <motion.div
         className="relative z-10 flex flex-col items-center text-center"
@@ -101,17 +101,17 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
         >
-          <span className="bg-gradient-to-r from-amber-200 to-amber-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary-500 to-primary-400 bg-clip-text text-transparent">
             STARTO
           </span>
           <br />
-          <span className="bg-gradient-to-r from-amber-200 to-amber-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary-500 to-primary-400 bg-clip-text text-transparent">
             Card Collection
           </span>
         </motion.h1>
 
         <motion.p
-          className="mb-12 text-[15px] text-white/50"
+          className="mb-12 text-[15px] text-gray-500"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.6 }}
@@ -132,7 +132,7 @@ export default function LandingPage() {
         </motion.button>
 
         <motion.p
-          className="mt-8 text-[13px] text-white/30"
+          className="mt-8 text-[13px] text-gray-400"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}

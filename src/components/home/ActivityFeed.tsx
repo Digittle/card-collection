@@ -58,10 +58,10 @@ export function ActivityFeed() {
 
   return (
     <section className="mt-6 px-4 pb-4">
-      <h2 className="mb-3 text-[15px] font-bold text-white">
+      <h2 className="mb-3 text-[15px] font-bold text-gray-900">
         みんなの活動
       </h2>
-      <div className="rounded-xl border border-white/[0.08] bg-white/[0.04] p-3">
+      <div className="rounded-xl border border-gray-200 bg-white p-3">
         <div className="flex flex-col gap-3">
           {activities.map((act, i) => (
             <motion.div
@@ -75,7 +75,7 @@ export function ActivityFeed() {
                 className="h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: act.groupColor }}
               />
-              <p className="text-[13px] text-white/70">{act.text}</p>
+              <p className="text-[13px] text-gray-600">{act.text}</p>
             </motion.div>
           ))}
         </div>

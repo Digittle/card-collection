@@ -29,8 +29,8 @@ export function BottomNav() {
               href={item.href}
               className={`relative flex flex-1 flex-col items-center gap-0.5 py-3 text-[10px] tracking-wide transition-all ${
                 isActive
-                  ? "font-bold text-primary-400"
-                  : "font-medium text-white/30 active:text-white/50"
+                  ? "font-bold text-primary-500"
+                  : "font-medium text-gray-400 active:text-gray-600"
               }`}
             >
               {isActive && <span className="nav-indicator" />}

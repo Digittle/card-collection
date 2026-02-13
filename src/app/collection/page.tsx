@@ -16,7 +16,7 @@ type ViewMode = "owned" | "zukan";
 
 export default function CollectionPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#030712]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F4F5F6]" />}>
       <CollectionInner />
     </Suspense>
   );
@@ -65,7 +65,7 @@ function CollectionInner() {
   }, [selectedGroup, viewMode, ownedIds]);
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#030712]" />;
+    return <div className="min-h-screen bg-[#F4F5F6]" />;
   }
 
   const ownedCount = ownedCards.length;
@@ -77,8 +77,8 @@ function CollectionInner() {
       <div className="px-4 pb-8">
         {/* Stats */}
         <div className="mt-4 text-center">
-          <span className="text-[13px] text-white/50">
-            所持: <span className="font-bold text-white">{ownedCount}</span> / {ALL_CARDS.length}枚
+          <span className="text-[13px] text-gray-500">
+            所持: <span className="font-bold text-gray-900">{ownedCount}</span> / {ALL_CARDS.length}枚
           </span>
         </div>
 
@@ -90,7 +90,7 @@ function CollectionInner() {
             style={
               selectedGroup === "all"
                 ? { backgroundColor: "#ec6d81", color: "#fff" }
-                : { backgroundColor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }
+                : { backgroundColor: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)" }
             }
           >
             すべて
@@ -103,7 +103,7 @@ function CollectionInner() {
               style={
                 selectedGroup === group.id
                   ? { backgroundColor: group.accentColor, color: "#fff" }
-                  : { backgroundColor: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }
+                  : { backgroundColor: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)" }
               }
             >
               {group.name}
@@ -112,13 +112,13 @@ function CollectionInner() {
         </div>
 
         {/* View mode toggle */}
-        <div className="mt-4 flex rounded-xl bg-white/[0.04] p-1">
+        <div className="mt-4 flex rounded-xl bg-gray-100 p-1">
           <button
             onClick={() => setViewMode("owned")}
             className={`flex-1 rounded-lg py-2 text-[12px] font-bold transition-colors ${
               viewMode === "owned"
-                ? "bg-white/10 text-white"
-                : "text-white/40"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-400"
             }`}
           >
             所持のみ
@@ -127,8 +127,8 @@ function CollectionInner() {
             onClick={() => setViewMode("zukan")}
             className={`flex-1 rounded-lg py-2 text-[12px] font-bold transition-colors ${
               viewMode === "zukan"
-                ? "bg-white/10 text-white"
-                : "text-white/40"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-400"
             }`}
           >
             図鑑
@@ -160,13 +160,13 @@ function CollectionInner() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-12 flex flex-col items-center"
           >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-              <Gift className="h-7 w-7 text-white/30" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <Gift className="h-7 w-7 text-gray-400" />
             </div>
-            <p className="mb-1 text-[15px] font-bold text-white/60">
+            <p className="mb-1 text-[15px] font-bold text-gray-500">
               カードがありません
             </p>
-            <p className="mb-5 text-center text-[13px] text-white/30">
+            <p className="mb-5 text-center text-[13px] text-gray-400">
               ガチャでカードを集めよう
             </p>
             <Link
