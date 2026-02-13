@@ -4,8 +4,9 @@ import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Coins, Check, ShoppingBag, Camera, X, BookOpen } from "lucide-react";
+import { Coins, Check, ShoppingBag, Camera, X, BookOpen, Palette } from "lucide-react";
 import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
+import { CardDrawingCanvas } from "@/components/card/CardDrawingCanvas";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { ALL_CARDS } from "@/lib/cards-data";
@@ -297,6 +298,7 @@ function PurchaseModal({
   const [memo, setMemo] = useState("");
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [showCamera, setShowCamera] = useState(false);
+  const [showDrawing, setShowDrawing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // When purchase succeeds, move to success step
@@ -476,6 +478,13 @@ function PurchaseModal({
                 写真を追加
               </button>
               <button
+                onClick={() => setShowDrawing(true)}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-primary-200 bg-primary-50 py-3 text-[13px] font-bold text-primary-600 transition-colors active:bg-primary-100"
+              >
+                <Palette className="h-4 w-4" />
+                カードにお絵描きする
+              </button>
+              <button
                 onClick={() => setShowCamera(true)}
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-400 py-3 text-[13px] font-bold text-white shadow-sm transition-colors active:opacity-90"
               >
@@ -609,6 +618,20 @@ function PurchaseModal({
               addCardImage(card.id, base64);
               setAttachedImages((prev) => [...prev, base64]);
               setShowCamera(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDrawing && (
+          <CardDrawingCanvas
+            card={card}
+            onClose={() => setShowDrawing(false)}
+            onSave={(base64) => {
+              addCardImage(card.id, base64);
+              setAttachedImages((prev) => [...prev, base64]);
+              setShowDrawing(false);
             }}
           />
         )}

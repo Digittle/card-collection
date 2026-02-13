@@ -4,11 +4,12 @@ import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { ChevronLeft, Share2, Users, Hash, Layers, Calendar, User, BookOpen, Camera, X } from "lucide-react";
+import { ChevronLeft, Share2, Users, Hash, Layers, Calendar, User, BookOpen, Camera, X, Palette } from "lucide-react";
 import { Card, OwnedCard, RARITY_CONFIG } from "@/types";
 import { getCardById as storeGetCardById, getUser, updateCardMemo, addCardImage, removeCardImage } from "@/lib/store";
 import { getCardById as catalogGetCardById } from "@/lib/cards-data";
 import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
+import { CardDrawingCanvas } from "@/components/card/CardDrawingCanvas";
 
 export default function CardDetailPage() {
   const params = useParams();
@@ -21,6 +22,7 @@ export default function CardDetailPage() {
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [showDrawing, setShowDrawing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const viewerCount = useMemo(() => Math.floor(Math.random() * 26) + 5, []);
@@ -336,6 +338,13 @@ export default function CardDetailPage() {
                   写真を追加
                 </button>
                 <button
+                  onClick={() => setShowDrawing(true)}
+                  className="flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-4 py-2.5 text-[13px] font-bold text-primary-600 transition-colors active:bg-primary-100"
+                >
+                  <Palette className="h-4 w-4" />
+                  カードにお絵描きする
+                </button>
+                <button
                   onClick={() => setShowCamera(true)}
                   className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-400 px-4 py-2.5 text-[13px] font-bold text-white shadow-sm transition-colors active:opacity-90"
                 >
@@ -454,6 +463,20 @@ export default function CardDetailPage() {
                 addCardImage(card.id, base64);
                 reloadCard();
                 setShowCamera(false);
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showDrawing && card && (
+            <CardDrawingCanvas
+              card={card}
+              onClose={() => setShowDrawing(false)}
+              onSave={(base64) => {
+                addCardImage(card.id, base64);
+                reloadCard();
+                setShowDrawing(false);
               }}
             />
           )}
