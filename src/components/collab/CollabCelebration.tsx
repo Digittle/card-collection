@@ -32,7 +32,7 @@ function ConfettiParticle({ index, color }: { index: number; color: string }) {
       }}
       initial={{ y: -20, rotate: 0, opacity: 1 }}
       animate={{
-        y: window.innerHeight + 20,
+        y: typeof window !== "undefined" ? window.innerHeight + 20 : 800,
         rotate: rotation + 720,
         opacity: [1, 1, 0],
         x: [0, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 200],

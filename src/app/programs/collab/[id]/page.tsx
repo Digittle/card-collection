@@ -70,7 +70,7 @@ export default function CollabProgramDetailPage() {
 
   // Simulator
   const simulator = useCollabSimulator({
-    program: program!,
+    program,
     enabled: mounted && program != null && localProgress?.status !== "completed",
   });
 

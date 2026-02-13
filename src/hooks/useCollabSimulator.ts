@@ -6,11 +6,11 @@ import {
   CollabFeedItem,
   CollaborativeProgram,
 } from "@/types";
-import { simulateTick, catchUpSimulation, SimulationResult } from "@/lib/collab-simulator";
+import { simulateTick, catchUpSimulation } from "@/lib/collab-simulator";
 import { getCollabProgress } from "@/lib/collab-store";
 
 interface UseCollabSimulatorOptions {
-  program: CollaborativeProgram;
+  program: CollaborativeProgram | null;
   enabled?: boolean;
 }
 
@@ -34,25 +34,27 @@ export function useCollabSimulator({
   const isVisibleRef = useRef(true);
 
   const refresh = useCallback(() => {
+    if (!program) return;
     const p = getCollabProgress(program.id);
     setProgress(p || null);
-  }, [program.id]);
+  }, [program]);
 
   // Initial load + catch-up
   useEffect(() => {
+    if (!program) return;
     catchUpSimulation(program);
     refresh();
   }, [program, refresh]);
 
   // Simulation interval
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !program) return;
 
     const currentProgress = getCollabProgress(program.id);
     if (currentProgress?.status === "completed") return;
 
     function tick() {
-      if (!isVisibleRef.current) return;
+      if (!isVisibleRef.current || !program) return;
 
       const result = simulateTick(program);
       if (result) {
@@ -69,7 +71,6 @@ export function useCollabSimulator({
 
         if (result.milestoneReached) {
           setMilestoneReached(result.milestoneReached);
-          // Clear milestone after a delay
           setTimeout(() => setMilestoneReached(null), 3000);
         }
       }
@@ -89,8 +90,7 @@ export function useCollabSimulator({
     // Visibility change handler
     const handleVisibility = () => {
       isVisibleRef.current = !document.hidden;
-      if (!document.hidden) {
-        // Catch up when coming back
+      if (!document.hidden && program) {
         catchUpSimulation(program);
         refresh();
       }
