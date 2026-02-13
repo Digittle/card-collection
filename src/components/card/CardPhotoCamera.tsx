@@ -3,8 +3,18 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { X, RotateCcw, Download } from "lucide-react";
+import { X, RotateCcw, Download, RotateCw, Droplets, Sparkles, Maximize } from "lucide-react";
 import { Card, RARITY_CONFIG } from "@/types";
+
+const CARD_EFFECTS = [
+  { id: "none", label: "なし", filter: "" },
+  { id: "sparkle", label: "キラキラ", filter: "brightness(1.2) contrast(1.1) saturate(1.3)" },
+  { id: "vintage", label: "ヴィンテージ", filter: "sepia(0.4) saturate(0.8) brightness(0.95)" },
+  { id: "mono", label: "モノクロ", filter: "grayscale(1)" },
+  { id: "neon", label: "ネオン", filter: "saturate(2) brightness(1.15) contrast(1.1)" },
+  { id: "dream", label: "ドリーム", filter: "brightness(1.1) blur(0.5px) saturate(1.2)" },
+  { id: "cool", label: "クール", filter: "hue-rotate(20deg) saturate(0.9) brightness(1.05)" },
+] as const;
 
 interface CardPhotoCameraProps {
   card: Card;
@@ -26,6 +36,10 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
   const [cameraState, setCameraState] = useState<CameraState>("loading");
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cardScale, setCardScale] = useState(1);
+  const [cardRotation, setCardRotation] = useState(0); // degrees 0-360
+  const [cardOpacity, setCardOpacity] = useState(1); // 0.1 to 1.0
+  const [selectedEffect, setSelectedEffect] = useState<string>("none");
+  const [activeControl, setActiveControl] = useState<string>("size"); // which control panel is shown
 
   // Drag state stored in refs for performance
   const cardPosRef = useRef({ x: 0, y: 0 });
@@ -134,10 +148,10 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
       const newY = dragStartRef.current.posY + dy;
       cardPosRef.current = { x: newX, y: newY };
       if (cardOverlayRef.current) {
-        cardOverlayRef.current.style.transform = `translate(${newX}px, ${newY}px) scale(${cardScale})`;
+        cardOverlayRef.current.style.transform = `translate(${newX}px, ${newY}px) scale(${cardScale}) rotate(${cardRotation}deg)`;
       }
     },
-    [cardScale]
+    [cardScale, cardRotation]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -164,23 +178,23 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
       const newY = dragStartRef.current.posY + dy;
       cardPosRef.current = { x: newX, y: newY };
       if (cardOverlayRef.current) {
-        cardOverlayRef.current.style.transform = `translate(${newX}px, ${newY}px) scale(${cardScale})`;
+        cardOverlayRef.current.style.transform = `translate(${newX}px, ${newY}px) scale(${cardScale}) rotate(${cardRotation}deg)`;
       }
     },
-    [cardScale]
+    [cardScale, cardRotation]
   );
 
   const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false;
   }, []);
 
-  // Update transform when scale changes via slider
+  // Update transform when scale or rotation changes via slider
   useEffect(() => {
     if (cardOverlayRef.current) {
       const { x, y } = cardPosRef.current;
-      cardOverlayRef.current.style.transform = `translate(${x}px, ${y}px) scale(${cardScale})`;
+      cardOverlayRef.current.style.transform = `translate(${x}px, ${y}px) scale(${cardScale}) rotate(${cardRotation}deg)`;
     }
-  }, [cardScale]);
+  }, [cardScale, cardRotation]);
 
   // Draw rounded rect helper
   function drawRoundedRect(
@@ -257,8 +271,30 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
     const videoH = cardH * scaleToVideo;
     const videoR = 12 * cardScale * scaleToVideo;
 
-    // Save context and clip to rounded rect
+    // Save context for rotation
     ctx.save();
+
+    // Translate to card center, rotate, translate back
+    const videoCX = videoX + videoW / 2;
+    const videoCY = videoY + videoH / 2;
+    ctx.translate(videoCX, videoCY);
+    ctx.rotate((cardRotation * Math.PI) / 180);
+    ctx.translate(-videoCX, -videoCY);
+
+    // Apply opacity
+    ctx.globalAlpha = cardOpacity;
+
+    // Apply effect filter (canvas filter support)
+    const effectFilter = CARD_EFFECTS.find(e => e.id === selectedEffect)?.filter || "";
+    if (effectFilter && "filter" in ctx) {
+      // Remove blur from canvas filter (canvas blur is different from CSS blur)
+      const canvasFilter = effectFilter.replace(/blur\([^)]*\)/, "").trim();
+      if (canvasFilter) {
+        ctx.filter = canvasFilter;
+      }
+    }
+
+    // Clip to rounded rect
     drawRoundedRect(ctx, videoX, videoY, videoW, videoH, videoR);
     ctx.clip();
 
@@ -321,16 +357,22 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
 
     ctx.restore();
 
-    // Draw card border
+    // Draw card border with rotation
+    ctx.save();
+    ctx.translate(videoCX, videoCY);
+    ctx.rotate((cardRotation * Math.PI) / 180);
+    ctx.translate(-videoCX, -videoCY);
+    ctx.globalAlpha = cardOpacity;
     ctx.strokeStyle = config.glowColor + "99";
     ctx.lineWidth = 2 * cardScale * scaleToVideo;
     drawRoundedRect(ctx, videoX, videoY, videoW, videoH, videoR);
     ctx.stroke();
+    ctx.restore();
 
     const base64 = canvas.toDataURL("image/jpeg", 0.85);
     setCapturedImage(base64);
     setCameraState("preview");
-  }, [card, cardScale, config]);
+  }, [card, cardScale, cardRotation, cardOpacity, selectedEffect, config]);
 
   // Retake - resume the video stream
   const handleRetake = useCallback(() => {
@@ -439,7 +481,7 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
                 width: 140,
                 height: 196,
                 touchAction: "none",
-                transform: `translate(${cardPosRef.current.x}px, ${cardPosRef.current.y}px) scale(${cardScale})`,
+                transform: `translate(${cardPosRef.current.x}px, ${cardPosRef.current.y}px) scale(${cardScale}) rotate(${cardRotation}deg)`,
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -451,6 +493,8 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
                 style={{
                   background: `linear-gradient(135deg, ${card.memberColor}66 0%, ${card.memberColor}EE 100%)`,
                   borderColor: `${config.glowColor}99`,
+                  opacity: cardOpacity,
+                  filter: CARD_EFFECTS.find(e => e.id === selectedEffect)?.filter || "",
                 }}
               >
                 {card.memberImage && (
@@ -505,32 +549,97 @@ export function CardPhotoCamera({ card, onClose, onSave }: CardPhotoCameraProps)
       <div className="absolute inset-x-0 bottom-0 z-40">
         <div className="bg-black/40 px-6 pb-10 pt-5 backdrop-blur-xl">
           {cameraState === "ready" && (
-            <div className="flex items-center justify-between gap-4">
-              {/* Size slider */}
-              <div className="flex flex-1 flex-col items-start gap-1">
-                <span className="text-[10px] text-white/50">カードサイズ</span>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="1.5"
-                  step="0.05"
-                  value={cardScale}
-                  onChange={(e) => setCardScale(parseFloat(e.target.value))}
-                  className="w-full accent-purple-500"
-                  style={{ height: 20 }}
-                />
+            <div className="space-y-3">
+              {/* Control tabs */}
+              <div className="flex justify-center gap-1.5">
+                {[
+                  { id: "size", icon: Maximize, label: "サイズ" },
+                  { id: "rotation", icon: RotateCw, label: "角度" },
+                  { id: "opacity", icon: Droplets, label: "透過" },
+                  { id: "effect", icon: Sparkles, label: "エフェクト" },
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveControl(tab.id)}
+                      className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all ${
+                        activeControl === tab.id
+                          ? "bg-white text-gray-900 shadow"
+                          : "bg-white/10 text-white/60"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Shutter button */}
-              <button
-                onClick={handleCapture}
-                className="flex h-[68px] w-[68px] flex-shrink-0 items-center justify-center rounded-full border-4 border-white/50 bg-white shadow-lg transition-transform active:scale-95"
-              >
-                <span className="block h-[58px] w-[58px] rounded-full bg-white transition-colors active:bg-gray-200" />
-              </button>
+              {/* Active control panel */}
+              {activeControl === "size" && (
+                <div className="flex flex-col gap-1 px-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-white/50">カードサイズ</span>
+                    <span className="text-[10px] font-bold text-white/70">{Math.round(cardScale * 100)}%</span>
+                  </div>
+                  <input type="range" min="0.3" max="2.0" step="0.05" value={cardScale}
+                    onChange={(e) => setCardScale(parseFloat(e.target.value))}
+                    className="w-full accent-purple-500" style={{ height: 20 }} />
+                </div>
+              )}
 
-              {/* Spacer for centering */}
-              <div className="flex-1" />
+              {activeControl === "rotation" && (
+                <div className="flex flex-col gap-1 px-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-white/50">角度</span>
+                    <span className="text-[10px] font-bold text-white/70">{cardRotation}°</span>
+                  </div>
+                  <input type="range" min="-180" max="180" step="1" value={cardRotation}
+                    onChange={(e) => setCardRotation(parseInt(e.target.value))}
+                    className="w-full accent-blue-500" style={{ height: 20 }} />
+                </div>
+              )}
+
+              {activeControl === "opacity" && (
+                <div className="flex flex-col gap-1 px-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-white/50">透過度</span>
+                    <span className="text-[10px] font-bold text-white/70">{Math.round(cardOpacity * 100)}%</span>
+                  </div>
+                  <input type="range" min="0.1" max="1.0" step="0.05" value={cardOpacity}
+                    onChange={(e) => setCardOpacity(parseFloat(e.target.value))}
+                    className="w-full accent-cyan-500" style={{ height: 20 }} />
+                </div>
+              )}
+
+              {activeControl === "effect" && (
+                <div className="scrollbar-hide flex gap-2 overflow-x-auto px-2">
+                  {CARD_EFFECTS.map((effect) => (
+                    <button
+                      key={effect.id}
+                      onClick={() => setSelectedEffect(effect.id)}
+                      className={`flex-shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all ${
+                        selectedEffect === effect.id
+                          ? "bg-white text-gray-900 shadow"
+                          : "bg-white/10 text-white/60"
+                      }`}
+                    >
+                      {effect.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Shutter button row */}
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={handleCapture}
+                  className="flex h-[68px] w-[68px] items-center justify-center rounded-full border-4 border-white/50 bg-white shadow-lg transition-transform active:scale-95"
+                >
+                  <span className="block h-[58px] w-[58px] rounded-full bg-white transition-colors active:bg-gray-200" />
+                </button>
+              </div>
             </div>
           )}
 
