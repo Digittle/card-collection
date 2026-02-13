@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,7 +10,6 @@ import {
   TrendingDown,
   Minus,
   Swords,
-  Map,
   BarChart3,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -21,9 +20,7 @@ import {
   getGroupActivities,
   GroupActivityData,
   calculateTerritoryPercentages,
-  generateTerritoryGrid,
   generateTerritoryShifts,
-  isAdjacentToDifferentGroup,
   TerritoryData,
   TerritoryShift,
 } from "@/lib/activity-simulator";
@@ -70,11 +67,8 @@ export default function ActivityPage() {
   const [period, setPeriod] = useState<Period>("today");
   const [activities, setActivities] = useState<GroupActivityData[]>([]);
   const [territories, setTerritories] = useState<TerritoryData[]>([]);
-  const [gridCells, setGridCells] = useState<string[]>([]);
   const [battleLog, setBattleLog] = useState<TerritoryShift[]>([]);
   const [tick, setTick] = useState(0);
-  const prevGridRef = useRef<string[]>([]);
-  const [changedCells, setChangedCells] = useState<Set<number>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<keyof GroupActivityData>("gachaDraws");
 
   // Auth check
@@ -95,24 +89,6 @@ export default function ActivityPage() {
 
     const terr = calculateTerritoryPercentages(acts);
     setTerritories(terr);
-
-    const seed = period.length * 1000 + tick * 7 + 42;
-    const newGrid = generateTerritoryGrid(terr, seed);
-
-    if (prevGridRef.current.length === 100) {
-      const changed = new Set<number>();
-      for (let i = 0; i < 100; i++) {
-        if (prevGridRef.current[i] !== newGrid[i]) {
-          changed.add(i);
-        }
-      }
-      setChangedCells(changed);
-      if (changed.size > 0) {
-        setTimeout(() => setChangedCells(new Set()), 600);
-      }
-    }
-    prevGridRef.current = newGrid;
-    setGridCells(newGrid);
 
     const shiftSeed = Math.floor(Date.now() / (1000 * 60 * 5)) + tick;
     setBattleLog(generateTerritoryShifts(shiftSeed));
@@ -374,66 +350,7 @@ export default function ActivityPage() {
           </div>
         </section>
 
-        {/* Section 3: Territory Map */}
-        <section className="px-4 mb-5">
-          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
-            <div className="flex items-center gap-1.5 mb-3">
-              <Map className="h-4 w-4 text-gray-900" />
-              <span className="text-[14px] font-bold text-gray-900">陣地マップ</span>
-            </div>
-
-            <div className="grid grid-cols-10 gap-[2px] rounded-xl bg-gray-100 p-1.5">
-              {gridCells.map((groupId, i) => {
-                const color = getGroupColor(groupId);
-                const isBorder = isAdjacentToDifferentGroup(i, gridCells);
-                const wasChanged = changedCells.has(i);
-
-                return (
-                  <motion.div
-                    key={i}
-                    className="aspect-square rounded-[3px]"
-                    animate={
-                      wasChanged
-                        ? {
-                            scale: [1, 0.5, 1],
-                            backgroundColor: color,
-                          }
-                        : {
-                            backgroundColor: color,
-                            scale: 1,
-                          }
-                    }
-                    transition={
-                      wasChanged
-                        ? { duration: 0.3, ease: "easeInOut" }
-                        : { duration: 0.5 }
-                    }
-                    style={{
-                      opacity: isBorder ? 0.9 : 0.55,
-                    }}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Legend below grid */}
-            <div className="mt-2.5 flex justify-center gap-4">
-              {GROUPS.map((g) => (
-                <div key={g.id} className="flex items-center gap-1">
-                  <div
-                    className="h-2.5 w-2.5 rounded-sm"
-                    style={{ backgroundColor: g.accentColor }}
-                  />
-                  <span className="text-[10px] text-gray-400">
-                    {SHORT_NAMES[g.id] ?? g.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Section 4: Battle Log */}
+        {/* Section 3: Battle Log */}
         <section className="px-4 mb-5">
           <div className="flex items-center gap-1.5 mb-3">
             <Swords className="h-4 w-4 text-gray-900" />
