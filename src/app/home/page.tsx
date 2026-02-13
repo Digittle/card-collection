@@ -54,6 +54,110 @@ export default function HomePage() {
         transition={{ duration: 0.3 }}
         className="mt-4"
       >
+        {/* Gekioshi Card Showcase - Hero Display */}
+        {gekioshiCard && (
+          <div className="px-4 mb-5">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+            >
+              {/* Section label */}
+              <div className="flex items-center gap-1.5 mb-2.5">
+                <Star className="h-4 w-4 text-amber-500" fill="currentColor" />
+                <span className="text-[14px] font-bold text-gray-900">激推しカード</span>
+              </div>
+
+              <Link href={`/card/${gekioshiCard.id}`}>
+                <div className="relative rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
+
+                  {/* Luxurious frame - ornamental border pattern */}
+                  <div className="p-3 bg-gradient-to-br from-amber-50 via-yellow-50/50 to-amber-50">
+
+                    {/* Inner golden frame border */}
+                    <div
+                      className="rounded-xl overflow-hidden"
+                      style={{
+                        boxShadow: `
+                          inset 0 0 0 2px #D4A849,
+                          inset 0 0 0 4px #F5E6B8,
+                          inset 0 0 0 5px #D4A849,
+                          0 4px 16px rgba(212, 168, 73, 0.15)
+                        `,
+                      }}
+                    >
+                      {/* Card image - large, hero-sized */}
+                      <div
+                        className="relative aspect-[5/7] w-full overflow-hidden"
+                        style={{
+                          background: `linear-gradient(135deg, ${gekioshiCard.memberColor}40 0%, ${gekioshiCard.memberColor}90 100%)`,
+                        }}
+                      >
+                        {gekioshiCard.memberImage && (
+                          <Image
+                            src={gekioshiCard.memberImage}
+                            alt={gekioshiCard.memberName}
+                            fill
+                            className="object-cover object-top"
+                            sizes="400px"
+                            priority
+                          />
+                        )}
+                        {/* Holo overlay */}
+                        <div className="card-holo-overlay" style={{ opacity: 0.35 }} />
+
+                        {/* Rarity glow effect */}
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            boxShadow: `inset 0 0 30px ${RARITY_CONFIG[gekioshiCard.rarity].glowColor}30`,
+                          }}
+                        />
+
+                        {/* Bottom gradient with card info */}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-16">
+                          {/* Gekioshi badge */}
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Star className="h-3.5 w-3.5 text-amber-400" fill="currentColor" />
+                            <span className="text-[11px] font-bold text-amber-400 tracking-wide">激推し</span>
+                          </div>
+
+                          <p className="text-[24px] font-bold leading-tight text-white drop-shadow-lg">
+                            {gekioshiCard.memberName}
+                          </p>
+                          <p className="mt-1 text-[13px] text-white/70 drop-shadow">
+                            {gekioshiCard.title}
+                          </p>
+                          <div className="mt-1.5 flex items-center gap-3">
+                            <p className="text-[13px]" style={{ color: RARITY_CONFIG[gekioshiCard.rarity].color }}>
+                              {"★".repeat(RARITY_CONFIG[gekioshiCard.rarity].stars)}
+                            </p>
+                            <span
+                              className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
+                              style={{
+                                backgroundColor: `${RARITY_CONFIG[gekioshiCard.rarity].glowColor}33`,
+                                color: RARITY_CONFIG[gekioshiCard.rarity].color,
+                              }}
+                            >
+                              {RARITY_CONFIG[gekioshiCard.rarity].label}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Frame corner decorations */}
+                    <div className="absolute top-1.5 left-1.5 h-4 w-4 border-t-2 border-l-2 border-amber-400/60 rounded-tl-lg" />
+                    <div className="absolute top-1.5 right-1.5 h-4 w-4 border-t-2 border-r-2 border-amber-400/60 rounded-tr-lg" />
+                    <div className="absolute bottom-1.5 left-1.5 h-4 w-4 border-b-2 border-l-2 border-amber-400/60 rounded-bl-lg" />
+                    <div className="absolute bottom-1.5 right-1.5 h-4 w-4 border-b-2 border-r-2 border-amber-400/60 rounded-br-lg" />
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          </div>
+        )}
+
         {/* Tanmou / User Status Section */}
         {user && (
           <div className="px-4 mb-5">
@@ -193,79 +297,6 @@ export default function HomePage() {
                   </>
                 );
               })()}
-            </motion.div>
-          </div>
-        )}
-
-        {/* Gekioshi Card Display */}
-        {gekioshiCard && (
-          <div className="px-4 mb-5">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-            >
-              {/* Section label */}
-              <div className="flex items-center gap-1.5 mb-2.5">
-                <Star className="h-4 w-4 text-amber-500" fill="currentColor" />
-                <span className="text-[14px] font-bold text-gray-900">激推しカード</span>
-              </div>
-
-              {/* Card showcase */}
-              <Link href={`/card/${gekioshiCard.id}`}>
-                <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                  {/* Card visual - horizontal layout */}
-                  <div className="flex">
-                    {/* Card image (left side) */}
-                    <div
-                      className="relative w-28 aspect-[5/7] flex-shrink-0 overflow-hidden"
-                      style={{
-                        background: `linear-gradient(135deg, ${gekioshiCard.memberColor}40 0%, ${gekioshiCard.memberColor}90 100%)`,
-                      }}
-                    >
-                      {gekioshiCard.memberImage && (
-                        <Image
-                          src={gekioshiCard.memberImage}
-                          alt={gekioshiCard.memberName}
-                          fill
-                          className="object-cover object-top"
-                          sizes="112px"
-                        />
-                      )}
-                      <div className="card-holo-overlay" style={{ opacity: 0.3 }} />
-                    </div>
-
-                    {/* Card info (right side) */}
-                    <div className="flex-1 p-4 flex flex-col justify-center">
-                      {/* Rarity badge */}
-                      <span
-                        className="self-start rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
-                        style={{
-                          backgroundColor: `${RARITY_CONFIG[gekioshiCard.rarity].glowColor}22`,
-                          color: RARITY_CONFIG[gekioshiCard.rarity].glowColor,
-                        }}
-                      >
-                        {RARITY_CONFIG[gekioshiCard.rarity].label}
-                      </span>
-
-                      <p className="mt-1.5 text-[18px] font-bold text-gray-900 leading-tight">
-                        {gekioshiCard.memberName}
-                      </p>
-                      <p className="mt-0.5 text-[12px] text-gray-500">
-                        {gekioshiCard.title}
-                      </p>
-                      <p className="mt-1 text-[12px]" style={{ color: RARITY_CONFIG[gekioshiCard.rarity].color }}>
-                        {"★".repeat(RARITY_CONFIG[gekioshiCard.rarity].stars)}
-                      </p>
-
-                      {/* Obtained date */}
-                      <p className="mt-2 text-[10px] text-gray-400">
-                        {new Date(gekioshiCard.obtainedAt).toLocaleDateString("ja-JP")} に取得
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
             </motion.div>
           </div>
         )}
