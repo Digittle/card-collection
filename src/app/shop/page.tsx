@@ -297,14 +297,20 @@ function PurchaseModal({
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Transition from success → history after brief animation
+  // When purchase succeeds, move to success step
   useEffect(() => {
     if (purchaseSuccess && step === "confirm") {
       setStep("success");
+    }
+  }, [purchaseSuccess, step]);
+
+  // Auto-transition from success → history after animation
+  useEffect(() => {
+    if (step === "success") {
       const timer = setTimeout(() => setStep("history"), 1200);
       return () => clearTimeout(timer);
     }
-  }, [purchaseSuccess, step]);
+  }, [step]);
 
   const handleImageSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
