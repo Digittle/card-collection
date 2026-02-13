@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Sparkles, ShoppingBag, LayoutGrid, Settings } from "lucide-react";
+import { Home, Sparkles, ShoppingBag, LayoutGrid, Clock, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/home", label: "ホーム", icon: Home },
   { href: "/gacha", label: "ガチャ", icon: Sparkles },
   { href: "/shop", label: "ショップ", icon: ShoppingBag },
   { href: "/collection", label: "コレクション", icon: LayoutGrid },
+  { href: "/history", label: "ヒストリー", icon: Clock },
   { href: "/settings", label: "設定", icon: Settings },
 ];
 
@@ -26,7 +27,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex flex-1 flex-col items-center gap-1 py-3.5 text-[11px] tracking-wide transition-all ${
+              className={`relative flex flex-1 flex-col items-center gap-0.5 py-3 text-[10px] tracking-wide transition-all ${
                 isActive
                   ? "font-bold text-primary-400"
                   : "font-medium text-white/30 active:text-white/50"
@@ -34,7 +35,7 @@ export function BottomNav() {
             >
               {isActive && <span className="nav-indicator" />}
               <Icon
-                className={`h-[22px] w-[22px] ${
+                className={`h-[20px] w-[20px] ${
                   isActive ? "stroke-[2.5]" : "stroke-[1.5]"
                 }`}
               />
