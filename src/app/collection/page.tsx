@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Gift, BookOpen, Trophy } from "lucide-react";
+import { Gift, BookOpen, Trophy, ChevronDown } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
 import { SeriesBinder } from "@/components/collection-book/SeriesBinder";
@@ -22,9 +22,17 @@ export default function CollectionPage() {
 
 function CollectionBookInner() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<string>("all");
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(groupId)) next.delete(groupId);
+      else next.add(groupId);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const user = getUser();
@@ -32,12 +40,15 @@ function CollectionBookInner() {
       router.replace("/");
       return;
     }
-    const groupParam = searchParams.get("group");
-    if (groupParam && GROUPS.some((g) => g.id === groupParam)) {
-      setSelectedGroup(groupParam);
-    }
     setMounted(true);
-  }, [router, searchParams]);
+  }, [router]);
+
+  const user = useMemo(() => {
+    if (!mounted) return null;
+    return getUser();
+  }, [mounted]);
+
+  const tanmouGroupId = user?.tanmouGroupId || null;
 
   const ownedCards = useMemo(() => {
     if (!mounted) return [];
@@ -54,25 +65,52 @@ function CollectionBookInner() {
     return getCoins();
   }, [mounted]);
 
-  // Calculate overall progress
+  // Overall progress
   const overallOwned = ownedCards.length;
   const overallTotal = ALL_CARDS.length;
   const overallPercent = overallTotal > 0 ? Math.round((overallOwned / overallTotal) * 100) : 0;
 
-  // Get series to display based on selected group
-  const seriesToShow = useMemo(() => {
-    return selectedGroup === "all"
-      ? getAllSeries()
-      : getSeriesByGroup(selectedGroup);
-  }, [selectedGroup]);
-
-  // Calculate completed series count
+  // All series for completed series count
+  const allSeries = useMemo(() => getAllSeries(), []);
   const completedSeries = useMemo(() => {
-    return seriesToShow.filter(series => {
+    return allSeries.filter(series => {
       const seriesCards = getCardsBySeries(series);
       return seriesCards.every(c => ownedIds.has(c.id));
     }).length;
-  }, [seriesToShow, ownedIds]);
+  }, [allSeries, ownedIds]);
+
+  // Tanmou group and other groups
+  const tanmouGroup = useMemo(() => {
+    if (!tanmouGroupId) return null;
+    return GROUPS.find(g => g.id === tanmouGroupId) || null;
+  }, [tanmouGroupId]);
+
+  const otherGroups = useMemo(() => {
+    if (!tanmouGroupId) return GROUPS;
+    return GROUPS.filter(g => g.id !== tanmouGroupId);
+  }, [tanmouGroupId]);
+
+  // If no tanmou group, expand the first group by default
+  useEffect(() => {
+    if (mounted && !tanmouGroupId && GROUPS.length > 0) {
+      setExpandedGroups(new Set([GROUPS[0].id]));
+    }
+  }, [mounted, tanmouGroupId]);
+
+  // Tanmou group data
+  const tanmouSeries = useMemo(() => {
+    if (!tanmouGroupId) return [];
+    return getSeriesByGroup(tanmouGroupId);
+  }, [tanmouGroupId]);
+
+  const tanmouCards = useMemo(() => {
+    if (!tanmouGroupId) return [];
+    return getCardsByGroup(tanmouGroupId);
+  }, [tanmouGroupId]);
+
+  const tanmouOwnedCount = useMemo(() => {
+    return tanmouCards.filter(c => ownedIds.has(c.id)).length;
+  }, [tanmouCards, ownedIds]);
 
   // Get accent color for a series
   const getAccentColor = (series: string) => {
@@ -90,97 +128,149 @@ function CollectionBookInner() {
     <AppShell>
       <Header title="コレクションブック" coins={coins} />
 
-      <div className="px-4 pb-8">
+      <div className="pb-8">
         {/* Overall Progress Card */}
-        <motion.div
-          className="mt-4 rounded-2xl bg-white border border-gray-200 p-5 shadow-sm"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary-500" />
-              <span className="text-[15px] font-bold text-gray-900">コレクション進捗</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Trophy className="h-4 w-4 text-gold-400" />
-              <span className="text-[12px] font-bold text-gray-500">
-                {completedSeries}/{seriesToShow.length} シリーズ完成
-              </span>
-            </div>
-          </div>
-
-          {/* Large circular progress */}
-          <div className="flex items-center gap-5">
-            <div className="relative h-20 w-20 flex-shrink-0">
-              <svg className="h-full w-full -rotate-90" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="34" fill="none" stroke="#f3f4f6" strokeWidth="8" />
-                <circle
-                  cx="40" cy="40" r="34" fill="none"
-                  stroke="#ec6d81" strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 34}`}
-                  strokeDashoffset={`${2 * Math.PI * 34 * (1 - overallPercent / 100)}`}
-                  className="transition-all duration-700"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[18px] font-bold text-gray-900">{overallPercent}%</span>
+        <div className="px-4">
+          <motion.div
+            className="mt-4 rounded-2xl bg-white border border-gray-200 p-5 shadow-sm"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary-500" />
+                <span className="text-[15px] font-bold text-gray-900">コレクション進捗</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Trophy className="h-4 w-4 text-gold-400" />
+                <span className="text-[12px] font-bold text-gray-500">
+                  {completedSeries}/{allSeries.length} シリーズ完成
+                </span>
               </div>
             </div>
-            <div>
-              <p className="text-[24px] font-bold text-gray-900">
-                {overallOwned}<span className="text-[14px] font-normal text-gray-400"> / {overallTotal}枚</span>
-              </p>
-              <p className="mt-1 text-[12px] text-gray-400">
-                {overallOwned === overallTotal ? "全カードコンプリート！" : "ガチャやショップでカードを集めよう"}
-              </p>
+
+            {/* Large circular progress */}
+            <div className="flex items-center gap-5">
+              <div className="relative h-20 w-20 flex-shrink-0">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="#f3f4f6" strokeWidth="8" />
+                  <circle
+                    cx="40" cy="40" r="34" fill="none"
+                    stroke="#ec6d81" strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 34}`}
+                    strokeDashoffset={`${2 * Math.PI * 34 * (1 - overallPercent / 100)}`}
+                    className="transition-all duration-700"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[18px] font-bold text-gray-900">{overallPercent}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[24px] font-bold text-gray-900">
+                  {overallOwned}<span className="text-[14px] font-normal text-gray-400"> / {overallTotal}枚</span>
+                </p>
+                <p className="mt-1 text-[12px] text-gray-400">
+                  {overallOwned === overallTotal ? "全カードコンプリート！" : "ガチャやショップでカードを集めよう"}
+                </p>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
-        {/* Group filter pills */}
-        <div className="scrollbar-hide mt-5 flex gap-2 overflow-x-auto pb-1">
-          <button
-            onClick={() => setSelectedGroup("all")}
-            className="shrink-0 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors"
-            style={
-              selectedGroup === "all"
-                ? { backgroundColor: "#ec6d81", color: "#fff" }
-                : { backgroundColor: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)" }
-            }
-          >
-            すべて
-          </button>
-          {GROUPS.map((group) => (
-            <button
-              key={group.id}
-              onClick={() => setSelectedGroup(group.id)}
-              className="shrink-0 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors"
-              style={
-                selectedGroup === group.id
-                  ? { backgroundColor: group.accentColor, color: "#fff" }
-                  : { backgroundColor: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)" }
-              }
+        {/* Tanmou Group Section (always expanded) */}
+        {tanmouGroup && (
+          <section className="px-4 mt-5">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden"
             >
-              {group.name}
-            </button>
-          ))}
-        </div>
+              {/* Accent bar */}
+              <div className="h-1.5 w-full" style={{ backgroundColor: tanmouGroup.accentColor }} />
 
-        {/* Series Binders */}
-        <div className="mt-5 space-y-4">
-          {seriesToShow.map((series, index) => (
-            <SeriesBinder
-              key={series}
-              seriesName={series}
-              cards={getCardsBySeries(series)}
-              ownedIds={ownedIds}
-              accentColor={getAccentColor(series)}
-              index={index}
-            />
-          ))}
-        </div>
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: tanmouGroup.accentColor }} />
+                  <span className="text-[15px] font-bold text-gray-900">{tanmouGroup.name}</span>
+                  <span className="text-[11px] text-gray-400">あなたの担当</span>
+                </div>
+                <span className="text-[12px] font-bold text-gray-500">
+                  {tanmouOwnedCount}/{tanmouCards.length}枚
+                </span>
+              </div>
+
+              {/* Series binders */}
+              <div className="px-4 pb-4 space-y-3">
+                {tanmouSeries.map((series, index) => (
+                  <SeriesBinder
+                    key={series}
+                    seriesName={series}
+                    cards={getCardsBySeries(series)}
+                    ownedIds={ownedIds}
+                    accentColor={tanmouGroup.accentColor}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </section>
+        )}
+
+        {/* Other Groups (collapsible) */}
+        <section className="px-4 mt-5 space-y-3">
+          {otherGroups.map(group => {
+            const isExpanded = expandedGroups.has(group.id);
+            const groupSeries = getSeriesByGroup(group.id);
+            const groupCards = getCardsByGroup(group.id);
+            const ownedGroupCount = groupCards.filter(c => ownedIds.has(c.id)).length;
+
+            return (
+              <div key={group.id} className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                {/* Clickable header */}
+                <button
+                  onClick={() => toggleGroup(group.id)}
+                  className="flex items-center w-full px-4 py-3.5 gap-3"
+                >
+                  <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: group.accentColor }} />
+                  <span className="text-[14px] font-bold text-gray-900 flex-1 text-left">{group.name}</span>
+                  <span className="text-[12px] text-gray-400 mr-2">
+                    {ownedGroupCount}/{groupCards.length}枚
+                  </span>
+                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
+                </button>
+
+                {/* Expandable content */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
+                        {groupSeries.map((series, index) => (
+                          <SeriesBinder
+                            key={series}
+                            seriesName={series}
+                            cards={getCardsBySeries(series)}
+                            ownedIds={ownedIds}
+                            accentColor={group.accentColor}
+                            index={index}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </section>
 
         {/* Empty state when no cards at all */}
         {overallOwned === 0 && (
