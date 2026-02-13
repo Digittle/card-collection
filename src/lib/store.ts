@@ -104,6 +104,35 @@ export function markCardSeen(cardId: string): void {
   }
 }
 
+// Card memo & images
+export function updateCardMemo(cardId: string, memo: string): void {
+  const cards = getCards();
+  const card = cards.find((c) => c.id === cardId);
+  if (card) {
+    card.memo = memo;
+    setItem(STORAGE_KEYS.CARDS, cards);
+  }
+}
+
+export function addCardImage(cardId: string, base64: string): void {
+  const cards = getCards();
+  const card = cards.find((c) => c.id === cardId);
+  if (card) {
+    if (!card.attachedImages) card.attachedImages = [];
+    card.attachedImages.push(base64);
+    setItem(STORAGE_KEYS.CARDS, cards);
+  }
+}
+
+export function removeCardImage(cardId: string, index: number): void {
+  const cards = getCards();
+  const card = cards.find((c) => c.id === cardId);
+  if (card && card.attachedImages) {
+    card.attachedImages.splice(index, 1);
+    setItem(STORAGE_KEYS.CARDS, cards);
+  }
+}
+
 // Coins
 export function getCoins(): number {
   return getItem<number>(STORAGE_KEYS.COINS, INITIAL_COINS);

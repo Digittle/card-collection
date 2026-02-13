@@ -112,6 +112,8 @@ export interface Card {
 export interface OwnedCard extends Card {
   obtainedAt: string;
   isNew: boolean;
+  memo?: string;
+  attachedImages?: string[]; // base64 data URLs
 }
 
 // ===== User =====
