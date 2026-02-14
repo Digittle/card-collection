@@ -11,9 +11,9 @@ import {
   Minus,
   Swords,
   BarChart3,
-  Coins,
 } from "lucide-react";
-import { BottomNav } from "@/components/layout/BottomNav";
+import { AppShell } from "@/components/layout/AppShell";
+import { Header } from "@/components/layout/Header";
 import { getUser, getCoins } from "@/lib/store";
 import { GROUPS } from "@/lib/groups-data";
 import {
@@ -78,17 +78,17 @@ function PodiumSlot({ rank, territory, delay }: { rank: 1|2|3; territory: Territ
         <motion.div className="mb-1"
           animate={{ y: [0, -4, 0], rotate: [-2, 2, -2] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
-          <Crown className="h-6 w-6 text-amber-400 drop-shadow-lg" fill="currentColor" />
+          <Crown className="h-6 w-6 text-amber-500 drop-shadow-lg" fill="currentColor" />
         </motion.div>
       )}
       <div className={`${iconSize} rounded-full flex items-center justify-center mb-2 border-2`}
-        style={{ borderColor: color, background: `${color}30`,
-          boxShadow: rank === 1 ? `0 0 20px ${color}40` : `0 0 10px ${color}20` }}>
-        <span className="text-[11px] font-black text-white">
+        style={{ borderColor: color, background: `${color}20`,
+          boxShadow: rank === 1 ? `0 0 16px ${color}30` : `0 0 8px ${color}15` }}>
+        <span className="text-[11px] font-black" style={{ color }}>
           {getGroupShortName(territory.groupId).charAt(0)}
         </span>
       </div>
-      <span className={`${nameSize} font-bold text-white mb-1`}>
+      <span className={`${nameSize} font-bold text-gray-900 mb-1`}>
         {getGroupShortName(territory.groupId)}
       </span>
       <motion.span className={`${fontSize} font-black tabular-nums`} style={{ color }}
@@ -96,12 +96,12 @@ function PodiumSlot({ rank, territory, delay }: { rank: 1|2|3; territory: Territ
         transition={{ delay: delay + 0.3, type: "spring" }}>
         {territory.percentage}%
       </motion.span>
-      <span className="text-[10px] text-white/30 tabular-nums">
+      <span className="text-[10px] text-gray-400 tabular-nums">
         {territory.score.toLocaleString()} pts
       </span>
       <motion.div className="w-full mt-2 rounded-t-lg relative overflow-hidden"
-        style={{ background: `linear-gradient(180deg, ${color}40 0%, ${color}15 100%)`,
-          borderTop: `2px solid ${color}60`, borderLeft: `1px solid ${color}20`, borderRight: `1px solid ${color}20` }}
+        style={{ background: `linear-gradient(180deg, ${color}25 0%, ${color}10 100%)`,
+          borderTop: `2px solid ${color}50`, borderLeft: `1px solid ${color}15`, borderRight: `1px solid ${color}15` }}
         initial={{ height: 0 }} animate={{ height: podiumHeight }}
         transition={{ delay: delay + 0.1, duration: 0.6, ease: "easeOut" }}>
         <div className="flex justify-center pt-3">
@@ -178,47 +178,31 @@ export default function ActivityPage() {
   );
 
   return (
-    <div className="mx-auto min-h-screen max-w-md relative overflow-hidden"
-         style={{ background: "linear-gradient(180deg, #0a0e27 0%, #0d1333 40%, #030712 100%)" }}>
-
-      {/* Ambient orbs */}
-      <div className="ambient-glow" style={{ width: 200, height: 200, top: "10%", left: "-20%",
-        background: "radial-gradient(circle, rgba(236,109,129,0.15), transparent)" }} />
-      <div className="ambient-glow" style={{ width: 160, height: 160, top: "30%", right: "-15%",
-        background: "radial-gradient(circle, rgba(91,140,184,0.12), transparent)", animationDelay: "5s" }} />
-      <div className="ambient-glow" style={{ width: 180, height: 180, bottom: "20%", left: "-10%",
-        background: "radial-gradient(circle, rgba(139,113,176,0.1), transparent)", animationDelay: "10s" }} />
-
-      <div className="relative z-10 pb-24">
-        {/* Custom Header */}
-        <header className="sticky top-0 z-40 backdrop-blur-md bg-black/20 border-b border-white/5">
-          <div className="flex h-14 items-center justify-between px-4">
-            <div className="w-12" />
-            <h1 className="text-[18px] font-bold text-white">ランキング</h1>
-            <div className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 border border-white/10">
-              <Coins className="h-3.5 w-3.5 text-gold-300" />
-              <span className="text-[12px] font-bold tabular-nums text-gold-300">{coins.toLocaleString()}</span>
-            </div>
-          </div>
-        </header>
-
+    <AppShell>
+      <Header title="ランキング" coins={coins} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="mt-4"
+      >
         {/* Live Indicator */}
-        <div className="flex items-center justify-center gap-2 pt-4 pb-3">
+        <div className="flex items-center justify-center gap-2 pb-4">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
           </span>
-          <span className="text-[11px] font-medium text-emerald-400/80">LIVE</span>
+          <span className="text-[11px] font-medium text-green-600">LIVE</span>
         </div>
 
         {/* Period Tabs */}
-        <div className="flex justify-center gap-2 px-4 mb-6">
+        <div className="flex justify-center gap-2 px-4 mb-5">
           {PERIOD_LABELS.map((p) => (
             <button key={p.key} onClick={() => setPeriod(p.key)}
               className={`rounded-full px-5 py-1.5 text-[12px] font-bold transition-all ${
                 period === p.key
-                  ? "bg-white text-gray-900 shadow-lg shadow-white/10"
-                  : "bg-white/8 text-white/40 border border-white/5"
+                  ? "bg-gray-900 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-400"
               }`}>
               {p.label}
             </button>
@@ -226,10 +210,10 @@ export default function ActivityPage() {
         </div>
 
         {/* Hero Podium Section */}
-        <section className="px-4 mb-6">
-          <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/8 to-white/3 backdrop-blur-sm p-5 pt-8">
+        <section className="px-4 mb-5">
+          <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm p-5 pt-8">
             {/* Decorative ring */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
               <svg className="h-64 w-64 animate-[ringRotate_30s_linear_infinite]" viewBox="0 0 200 200">
                 <circle cx="100" cy="100" r="90" fill="none" stroke="url(#rankRing)" strokeWidth="0.5" strokeDasharray="4 8" />
                 <defs>
@@ -251,10 +235,10 @@ export default function ActivityPage() {
 
             {/* 4th place */}
             {sortedTerritories[3] && (
-              <div className="flex items-center justify-center gap-2 mt-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[12px] font-bold text-white/30">4</span>
-                <span className="text-[13px] font-medium text-white/50">{getGroupShortName(sortedTerritories[3].groupId)}</span>
-                <span className="ml-auto text-[14px] font-bold" style={{ color: `${getGroupColor(sortedTerritories[3].groupId)}80` }}>
+              <div className="flex items-center justify-center gap-2 mt-2 px-4 py-2 rounded-xl bg-gray-50 border border-gray-100">
+                <span className="text-[12px] font-bold text-gray-300">4</span>
+                <span className="text-[13px] font-medium text-gray-500">{getGroupShortName(sortedTerritories[3].groupId)}</span>
+                <span className="ml-auto text-[14px] font-bold" style={{ color: getGroupColor(sortedTerritories[3].groupId) }}>
                   {sortedTerritories[3].percentage}%
                 </span>
               </div>
@@ -263,10 +247,10 @@ export default function ActivityPage() {
         </section>
 
         {/* Ranking Cards */}
-        <section className="px-4 mb-6">
+        <section className="px-4 mb-5">
           <div className="flex items-center gap-2 mb-3">
-            <Trophy className="h-4 w-4 text-amber-400" />
-            <span className="text-[14px] font-bold text-white">グループランキング</span>
+            <Trophy className="h-4 w-4 text-amber-500" />
+            <span className="text-[14px] font-bold text-gray-900">グループランキング</span>
           </div>
           <div className="space-y-2.5">
             {sortedTerritories.map((t, index) => {
@@ -276,44 +260,45 @@ export default function ActivityPage() {
               const trendDir = activity?.trendDirection ?? "stable";
               return (
                 <motion.div key={t.groupId}
-                  className="relative rounded-xl overflow-hidden border border-white/10 backdrop-blur-sm"
+                  className="relative rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
                   style={{
-                    background: isFirst ? `linear-gradient(135deg, ${color}15 0%, rgba(255,255,255,0.05) 100%)` : "rgba(255,255,255,0.05)",
-                    ...(isFirst && { boxShadow: `0 0 20px ${color}20, inset 0 0 30px ${color}05` }),
+                    ...(isFirst && { borderColor: `${color}40`, boxShadow: `0 0 12px ${color}10` }),
                   }}
                   initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.08 }}>
-                  <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: color }} />
+                  {/* Accent bar for #1 */}
+                  {isFirst && <div className="h-1 w-full" style={{ backgroundColor: color }} />}
+                  <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: `${color}60` }} />
                   <div className="flex items-center p-3.5 pl-4">
                     <div className={`flex h-9 w-9 items-center justify-center rounded-full shrink-0 ${
                       t.rank === 1 ? "bg-gradient-to-br from-amber-400 to-yellow-300 shadow-lg shadow-amber-400/20"
                       : t.rank === 2 ? "bg-gradient-to-br from-gray-300 to-gray-400"
                       : t.rank === 3 ? "bg-gradient-to-br from-amber-700 to-amber-600"
-                      : "bg-white/10 border border-white/10"
+                      : "bg-gray-100 border border-gray-200"
                     }`}>
-                      <span className={`text-[15px] font-black ${t.rank <= 3 ? "text-white drop-shadow" : "text-white/40"}`}>{t.rank}</span>
+                      <span className={`text-[15px] font-black ${t.rank <= 3 ? "text-white drop-shadow" : "text-gray-400"}`}>{t.rank}</span>
                     </div>
                     <div className="flex-1 ml-3 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[14px] font-bold text-white">{getGroupShortName(t.groupId)}</span>
-                        {isFirst && <Crown className="h-3.5 w-3.5 text-amber-400" fill="currentColor" />}
+                        <span className="text-[14px] font-bold text-gray-900">{getGroupShortName(t.groupId)}</span>
+                        {isFirst && <Crown className="h-3.5 w-3.5 text-amber-500" fill="currentColor" />}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <div className="h-1.5 flex-1 rounded-full bg-white/10 overflow-hidden">
+                        <div className="h-1.5 flex-1 rounded-full bg-gray-100 overflow-hidden">
                           <motion.div className="h-full rounded-full"
                             style={{ background: `linear-gradient(90deg, ${color}, ${color}CC)` }}
                             initial={{ width: 0 }} animate={{ width: `${t.percentage}%` }}
                             transition={{ duration: 0.8, ease: "easeOut", delay: index * 0.1 }} />
                         </div>
-                        <span className="text-[10px] tabular-nums text-white/30 shrink-0">{t.score.toLocaleString()} pts</span>
+                        <span className="text-[10px] tabular-nums text-gray-400 shrink-0">{t.score.toLocaleString()} pts</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end ml-3">
                       <span className="text-[20px] font-black tabular-nums" style={{ color }}>{t.percentage}%</span>
                       <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide ${
-                        trendDir === "up" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
-                        : trendDir === "down" ? "bg-red-500/20 text-red-400 border border-red-500/20"
-                        : "bg-white/10 text-white/30 border border-white/5"
+                        trendDir === "up" ? "bg-emerald-50 text-emerald-500 border border-emerald-100"
+                        : trendDir === "down" ? "bg-red-50 text-red-500 border border-red-100"
+                        : "bg-gray-50 text-gray-400 border border-gray-100"
                       }`}>
                         {trendDir === "up" ? <span className="inline-flex items-center gap-0.5"><TrendingUp className="h-2.5 w-2.5" /> UP</span>
                         : trendDir === "down" ? <span className="inline-flex items-center gap-0.5"><TrendingDown className="h-2.5 w-2.5" /> DOWN</span>
@@ -328,10 +313,10 @@ export default function ActivityPage() {
         </section>
 
         {/* Battle Log */}
-        <section className="px-4 mb-6">
+        <section className="px-4 mb-5">
           <div className="flex items-center gap-2 mb-3">
-            <Swords className="h-4 w-4 text-red-400" />
-            <span className="text-[14px] font-bold text-white">バトルログ</span>
+            <Swords className="h-4 w-4 text-gray-900" />
+            <span className="text-[14px] font-bold text-gray-900">バトルログ</span>
           </div>
           <div className="space-y-2">
             <AnimatePresence mode="popLayout">
@@ -341,16 +326,16 @@ export default function ActivityPage() {
                 const timeLabel = minutesAgo < 1 ? "たった今" : minutesAgo < 60 ? `${minutesAgo}分前` : `${Math.floor(minutesAgo / 60)}時間前`;
                 return (
                   <motion.div key={shift.id}
-                    className="relative flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 backdrop-blur-sm px-3.5 py-2.5 overflow-hidden"
+                    className="relative flex items-center gap-3 rounded-xl border border-gray-200 bg-white shadow-sm px-3.5 py-2.5 overflow-hidden"
                     initial={{ opacity: 0, x: -30, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }}
                     exit={{ opacity: 0, x: 30, scale: 0.95 }}
                     transition={{ delay: i * 0.05, type: "spring", stiffness: 300 }}>
                     <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ backgroundColor: color }} />
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${color}20` }}>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${color}15` }}>
                       <Swords className="h-3 w-3" style={{ color }} />
                     </div>
-                    <p className="flex-1 min-w-0 text-[12px] text-white/60 truncate">{shift.message}</p>
-                    <span className="text-[10px] text-white/20 shrink-0 tabular-nums">{timeLabel}</span>
+                    <p className="flex-1 min-w-0 text-[12px] text-gray-600 truncate">{shift.message}</p>
+                    <span className="text-[10px] text-gray-300 shrink-0 tabular-nums">{timeLabel}</span>
                   </motion.div>
                 );
               })}
@@ -361,22 +346,22 @@ export default function ActivityPage() {
         {/* Category Breakdown */}
         <section className="px-4 pb-8">
           <div className="flex items-center gap-2 mb-3">
-            <BarChart3 className="h-4 w-4 text-blue-400" />
-            <span className="text-[14px] font-bold text-white">カテゴリ別</span>
+            <BarChart3 className="h-4 w-4 text-gray-900" />
+            <span className="text-[14px] font-bold text-gray-900">カテゴリ別</span>
           </div>
           <div className="scrollbar-hide flex gap-1.5 overflow-x-auto mb-3 pb-0.5">
             {CATEGORY_KEYS.map((cat) => (
               <button key={cat.key} onClick={() => setSelectedCategory(cat.key)}
                 className={`whitespace-nowrap rounded-full px-4 py-1.5 text-[11px] font-bold transition-all ${
                   selectedCategory === cat.key
-                    ? "bg-white text-gray-900 shadow-lg shadow-white/10"
-                    : "bg-white/8 text-white/30 border border-white/5"
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-400"
                 }`}>
                 {cat.label}
               </button>
             ))}
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 space-y-3">
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 space-y-3">
             {activities.map((data) => {
               const color = getGroupColor(data.groupId);
               const val = data[selectedCategory] as number;
@@ -385,14 +370,14 @@ export default function ActivityPage() {
               return (
                 <div key={data.groupId} className="flex items-center gap-2.5">
                   <div className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-                  <span className="w-14 shrink-0 truncate text-[11px] font-medium text-white/40">{getGroupShortName(data.groupId)}</span>
-                  <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <span className="w-14 shrink-0 truncate text-[11px] font-medium text-gray-500">{getGroupShortName(data.groupId)}</span>
+                  <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100">
                     <motion.div className="absolute inset-y-0 left-0 rounded-full"
-                      style={{ background: `linear-gradient(90deg, ${color}CC, ${color})`, boxShadow: `0 0 8px ${color}40` }}
+                      style={{ background: `linear-gradient(90deg, ${color}CC, ${color})` }}
                       initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                       transition={{ duration: 0.6, ease: "easeOut" }} />
                   </div>
-                  <span className="w-12 shrink-0 text-right text-[11px] font-bold tabular-nums text-white/50">
+                  <span className="w-12 shrink-0 text-right text-[11px] font-bold tabular-nums text-gray-500">
                     {selectedCategory === "collectionRate" ? `${val}%` : val.toLocaleString()}
                   </span>
                 </div>
@@ -400,9 +385,7 @@ export default function ActivityPage() {
             })}
           </div>
         </section>
-      </div>
-
-      <BottomNav />
-    </div>
+      </motion.div>
+    </AppShell>
   );
 }
