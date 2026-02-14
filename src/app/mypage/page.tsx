@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
-import { getUser, getCards, getCoins, getGachaCount, getPurchaseCount } from "@/lib/store";
+import { getUser, getCards, getGachaCount, getPurchaseCount } from "@/lib/store";
 import { getMemberById } from "@/lib/groups-data";
 import { getTierInfo, TierInfo } from "@/lib/tier";
 import { RARITY_CONFIG, RARITY_ORDER, OwnedCard, TierLevel } from "@/types";
@@ -30,21 +30,17 @@ export default function MyPage() {
   const [mounted, setMounted] = useState(false);
   const [tierInfo, setTierInfo] = useState<TierInfo | null>(null);
   const [userName, setUserName] = useState("");
-  const [coins, setCoinsState] = useState(0);
   const [ownedCards, setOwnedCards] = useState<OwnedCard[]>([]);
   const [tanmouName, setTanmouName] = useState<string | null>(null);
   const [daysSinceReg, setDaysSinceReg] = useState(0);
   const [gachaCount, setGachaCountState] = useState(0);
   const [purchaseCount, setPurchaseCountState] = useState(0);
-  const [shareStatus, setShareStatus] = useState<"idle" | "generating" | "done">("idle");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const user = getUser();
     if (!user) { router.replace("/"); return; }
 
     setUserName(user.displayName);
-    setCoinsState(getCoins());
     const cards = getCards();
     setOwnedCards(cards);
 
@@ -84,124 +80,22 @@ export default function MyPage() {
     legend: ownedCards.filter(c => c.rarity === "legend").length,
   };
 
-  // Share handler
-  const handleShare = useCallback(async () => {
-    if (!tierInfo || shareStatus === "generating") return;
-    setShareStatus("generating");
+  // Share handler - open X (Twitter) compose
+  const handleShare = useCallback(() => {
+    if (!tierInfo) return;
 
-    try {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    const lines = [
+      `【STARTO Card Collection】`,
+      `${tierInfo.labelEn} Tier`,
+      `推し活${daysSinceReg}日目 | カード${ownedCards.length}枚`,
+      `ガチャ${gachaCount}回 | 購入${purchaseCount}回`,
+      tanmouName ? `担当: ${tanmouName}` : "",
+      `#STARTOカコレ`,
+    ].filter(Boolean).join("\n");
 
-      const ctx = canvas.getContext("2d")!;
-      canvas.width = 600;
-      canvas.height = 400;
-
-      // Background gradient
-      const gradient = ctx.createLinearGradient(0, 0, 600, 400);
-      gradient.addColorStop(0, tierInfo.gradientFrom);
-      gradient.addColorStop(1, tierInfo.gradientTo);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 600, 400);
-
-      // Dark overlay for readability
-      ctx.fillStyle = "rgba(0,0,0,0.4)";
-      ctx.fillRect(0, 0, 600, 400);
-
-      // Title
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 28px sans-serif";
-      ctx.textAlign = "left";
-      ctx.fillText(userName, 40, 60);
-
-      // Tier badge
-      ctx.font = "bold 16px sans-serif";
-      ctx.fillStyle = tierInfo.color;
-      ctx.fillText(`${tierInfo.labelEn} Tier`, 40, 90);
-
-      // Divider
-      ctx.strokeStyle = "rgba(255,255,255,0.2)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(40, 110);
-      ctx.lineTo(560, 110);
-      ctx.stroke();
-
-      // Stats
-      ctx.fillStyle = "rgba(255,255,255,0.6)";
-      ctx.font = "14px sans-serif";
-      ctx.fillText("推し活日数", 40, 145);
-      ctx.fillText("ガチャ回数", 220, 145);
-      ctx.fillText("購入回数", 400, 145);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 32px sans-serif";
-      ctx.fillText(`${daysSinceReg}`, 40, 185);
-      ctx.fillText(`${gachaCount}`, 220, 185);
-      ctx.fillText(`${purchaseCount}`, 400, 185);
-
-      // Card counts
-      ctx.fillStyle = "rgba(255,255,255,0.6)";
-      ctx.font = "14px sans-serif";
-      ctx.fillText("所持カード", 40, 230);
-      ctx.fillText("レアカード", 220, 230);
-      ctx.fillText("コイン", 400, 230);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 32px sans-serif";
-      ctx.fillText(`${ownedCards.length}`, 40, 270);
-      ctx.fillText(`${tierInfo.rareCardCount}`, 220, 270);
-      ctx.fillText(`${coins.toLocaleString()}`, 400, 270);
-
-      // Tanmou
-      if (tanmouName) {
-        ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.font = "14px sans-serif";
-        ctx.fillText("担当", 40, 315);
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 20px sans-serif";
-        ctx.fillText(tanmouName, 40, 345);
-      }
-
-      // Watermark
-      ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.font = "12px sans-serif";
-      ctx.textAlign = "right";
-      ctx.fillText("STARTO Card Collection", 560, 380);
-
-      // Convert to blob for sharing
-      canvas.toBlob(async (blob) => {
-        if (!blob) { setShareStatus("idle"); return; }
-
-        const shareText = `【STARTO Card Collection】\n${tierInfo.labelEn} Tier | ${userName}\n推し活${daysSinceReg}日目 | カード${ownedCards.length}枚\nガチャ${gachaCount}回 | 購入${purchaseCount}回${tanmouName ? `\n担当: ${tanmouName}` : ""}`;
-
-        if (navigator.share && navigator.canShare) {
-          const file = new File([blob], "starto-status.png", { type: "image/png" });
-          const shareData = { text: shareText, files: [file] };
-          if (navigator.canShare(shareData)) {
-            try {
-              await navigator.share(shareData);
-            } catch { /* user cancelled */ }
-          } else {
-            // fallback: share text only
-            try { await navigator.share({ text: shareText }); } catch { /* cancelled */ }
-          }
-        } else {
-          // Clipboard fallback
-          try {
-            await navigator.clipboard.writeText(shareText);
-            alert("ステータスをクリップボードにコピーしました");
-          } catch {
-            // last resort
-          }
-        }
-        setShareStatus("done");
-        setTimeout(() => setShareStatus("idle"), 2000);
-      }, "image/png");
-    } catch {
-      setShareStatus("idle");
-    }
-  }, [tierInfo, shareStatus, userName, daysSinceReg, gachaCount, purchaseCount, ownedCards.length, coins, tanmouName]);
+    const url = `https://x.com/intent/post?text=${encodeURIComponent(lines)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, [tierInfo, daysSinceReg, gachaCount, purchaseCount, ownedCards.length, tanmouName]);
 
   if (!mounted || !tierInfo) {
     return <div className="min-h-screen bg-[#F4F5F6]" />;
@@ -212,7 +106,6 @@ export default function MyPage() {
   return (
     <AppShell>
       <Header title="マイページ" />
-      <canvas ref={canvasRef} className="hidden" />
 
       <div className="px-4 py-5 space-y-5">
         {/* Tier Hero Card */}
@@ -394,14 +287,13 @@ export default function MyPage() {
         {/* Share Button */}
         <motion.button
           onClick={handleShare}
-          disabled={shareStatus === "generating"}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-400 py-3.5 text-[14px] font-bold text-white shadow-lg shadow-primary-500/20 transition-all active:scale-[0.97] disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gray-900 to-gray-800 py-3.5 text-[14px] font-bold text-white shadow-lg shadow-gray-900/20 transition-all active:scale-[0.97]"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
           <Share2 className="h-4 w-4" />
-          {shareStatus === "done" ? "シェアしました！" : shareStatus === "generating" ? "画像生成中..." : "ステータスをシェア"}
+          Xでステータスをシェア
         </motion.button>
 
         {/* Settings Link */}
