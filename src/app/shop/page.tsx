@@ -30,6 +30,8 @@ import {
   getGachaPityCount,
   incrementGachaPity,
   resetGachaPity,
+  incrementGachaCount,
+  incrementPurchaseCount,
 } from "@/lib/store";
 import { Card, RARITY_CONFIG, Rarity, RARITY_ORDER, GACHA_COST_SINGLE, GACHA_COST_TEN } from "@/types";
 
@@ -115,6 +117,7 @@ function ShopInner() {
       if (!success) return;
 
       addCard(card);
+      incrementPurchaseCount();
       setCoinsState(getCoins());
       setOwnedIds(new Set(getCards().map((c) => c.id)));
       setPurchaseSuccess(true);
@@ -137,6 +140,7 @@ function ShopInner() {
     }
 
     const cards = drawGacha(count);
+    incrementGachaCount(cards.length);
     const results: DrawnResult[] = cards.map((c) => ({
       card: c,
       isNew: !ownsCard(c.id),

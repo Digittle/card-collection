@@ -10,6 +10,8 @@ const STORAGE_KEYS = {
   ACTIVITY_LOG: "starto_activity_log",
   GEKIOSHI_CARD: "starto_gekioshi_card",
   GACHA_PITY: "starto_gacha_pity",
+  GACHA_COUNT: "starto_gacha_count",
+  PURCHASE_COUNT: "starto_purchase_count",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
@@ -188,6 +190,24 @@ export function incrementGachaPity(count: number): void {
 
 export function resetGachaPity(): void {
   setItem(STORAGE_KEYS.GACHA_PITY, 0);
+}
+
+// Gacha count
+export function getGachaCount(): number {
+  return getItem<number>(STORAGE_KEYS.GACHA_COUNT, 0);
+}
+export function incrementGachaCount(count: number): void {
+  const current = getGachaCount();
+  setItem(STORAGE_KEYS.GACHA_COUNT, current + count);
+}
+
+// Purchase count
+export function getPurchaseCount(): number {
+  return getItem<number>(STORAGE_KEYS.PURCHASE_COUNT, 0);
+}
+export function incrementPurchaseCount(): void {
+  const current = getPurchaseCount();
+  setItem(STORAGE_KEYS.PURCHASE_COUNT, current + 1);
 }
 
 // Clear all data

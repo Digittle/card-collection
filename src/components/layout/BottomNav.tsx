@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShoppingBag, LayoutGrid, Flame, Settings } from "lucide-react";
+import { Home, ShoppingBag, LayoutGrid, Flame, User } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/home", label: "ホーム", icon: Home },
   { href: "/shop", label: "ショップ", icon: ShoppingBag },
   { href: "/collection", label: "コレクション", icon: LayoutGrid },
   { href: "/activity", label: "ランキング", icon: Flame },
-  { href: "/settings", label: "設定", icon: Settings },
+  { href: "/mypage", label: "マイページ", icon: User },
 ];
 
 export function BottomNav() {
