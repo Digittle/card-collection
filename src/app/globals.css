@@ -322,3 +322,10 @@ a,
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+
+/* ========= Ranking Page Effects ========= */
+
+@keyframes livePulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
