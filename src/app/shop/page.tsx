@@ -4,12 +4,14 @@ import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Coins, Check, ShoppingBag, Camera, X, BookOpen, Palette } from "lucide-react";
+import { Coins, Check, ShoppingBag, Camera, X, BookOpen, Palette, ChevronDown, Sparkles } from "lucide-react";
 import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
 import { CardDrawingCanvas } from "@/components/card/CardDrawingCanvas";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
-import { ALL_CARDS } from "@/lib/cards-data";
+import { DrawAnimation } from "@/components/gacha/DrawAnimation";
+import { GachaCardReveal } from "@/components/gacha/GachaCardReveal";
+import { ALL_CARDS, drawGacha } from "@/lib/cards-data";
 import { GROUPS } from "@/lib/groups-data";
 import {
   getUser,
@@ -20,10 +22,20 @@ import {
   getCards,
   updateCardMemo,
   addCardImage,
+  addCards,
+  canDoFreeGacha,
+  markFreeGachaUsed,
+  addCoins,
 } from "@/lib/store";
-import { Card, RARITY_CONFIG, Rarity, RARITY_ORDER } from "@/types";
+import { Card, RARITY_CONFIG, Rarity, RARITY_ORDER, GACHA_COST_SINGLE, GACHA_COST_TEN } from "@/types";
 
 type RarityFilter = "all" | Rarity;
+type GachaState = "select" | "drawing" | "reveal";
+
+interface DrawnResult {
+  card: Card;
+  isNew: boolean;
+}
 
 export default function ShopPage() {
   return (
@@ -37,12 +49,21 @@ function ShopInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<"gacha" | "shop">("gacha");
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
   const [selectedRarity, setSelectedRarity] = useState<RarityFilter>("all");
   const [coins, setCoinsState] = useState(0);
   const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
   const [purchaseCard, setPurchaseCard] = useState<Card | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+
+  // Gacha state
+  const [gachaState, setGachaState] = useState<GachaState>("select");
+  const [freeAvailable, setFreeAvailable] = useState(false);
+  const [drawnCards, setDrawnCards] = useState<DrawnResult[]>([]);
+  const [revealIndex, setRevealIndex] = useState(0);
+  const [showRates, setShowRates] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
 
   useEffect(() => {
     const user = getUser();
@@ -56,8 +77,15 @@ function ShopInner() {
     }
     setCoinsState(getCoins());
     setOwnedIds(new Set(getCards().map((c) => c.id)));
+    setFreeAvailable(canDoFreeGacha());
     setMounted(true);
   }, [router, searchParams]);
+
+  const refreshCoins = useCallback(() => {
+    setCoinsState(getCoins());
+    setFreeAvailable(canDoFreeGacha());
+    setOwnedIds(new Set(getCards().map((c) => c.id)));
+  }, []);
 
   const filteredCards = useMemo(() => {
     let cards = ALL_CARDS;
@@ -91,6 +119,68 @@ function ShopInner() {
     setPurchaseCard(null);
   }, []);
 
+  // Gacha handlers
+  const handleDraw = useCallback((count: number, isFree: boolean) => {
+    if (!isFree) {
+      const cost = count === 1 ? GACHA_COST_SINGLE : GACHA_COST_TEN;
+      if (!deductCoins(cost)) return;
+    } else {
+      markFreeGachaUsed();
+    }
+
+    const cards = drawGacha(count);
+    const results: DrawnResult[] = cards.map((c) => ({
+      card: c,
+      isNew: !ownsCard(c.id),
+    }));
+
+    const { dupeCount } = addCards(cards);
+    if (dupeCount > 0) {
+      addCoins(dupeCount * 50);
+    }
+
+    setDrawnCards(results);
+    setRevealIndex(0);
+    setShowGrid(false);
+    setGachaState("drawing");
+    setCoinsState(getCoins());
+    setFreeAvailable(canDoFreeGacha());
+  }, []);
+
+  const handleAnimationComplete = useCallback(() => {
+    if (drawnCards.length === 1) {
+      setGachaState("reveal");
+    } else {
+      setGachaState("reveal");
+      setShowGrid(true);
+    }
+  }, [drawnCards.length]);
+
+  const handleSingleRevealNext = useCallback(() => {
+    setGachaState("select");
+    refreshCoins();
+  }, [refreshCoins]);
+
+  const handleGridCardTap = useCallback((index: number) => {
+    setShowGrid(false);
+    setRevealIndex(index);
+  }, []);
+
+  const handleGridRevealNext = useCallback(() => {
+    setShowGrid(true);
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    setGachaState("select");
+    refreshCoins();
+  }, [refreshCoins]);
+
+  const summary = useMemo(() => {
+    const newCount = drawnCards.filter((r) => r.isNew).length;
+    const dupeCount = drawnCards.length - newCount;
+    return { newCount, dupeCount };
+  }, [drawnCards]);
+
   if (!mounted) {
     return <div className="min-h-screen bg-[#F4F5F6]" />;
   }
@@ -107,152 +197,370 @@ function ShopInner() {
     <AppShell>
       <Header title="ショップ" coins={coins} />
 
-      <div className="px-4 pb-8">
-        {/* Group filter pills */}
-        <div className="scrollbar-hide mt-4 flex gap-2 overflow-x-auto pb-1">
+      {/* Tab Switcher */}
+      <div className="px-4 mt-4 mb-2">
+        <div className="flex rounded-full bg-gray-100 p-1">
           <button
-            onClick={() => setSelectedGroup("all")}
-            className="shrink-0 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors"
-            style={
-              selectedGroup === "all"
-                ? { backgroundColor: "#ec6d81", color: "#fff" }
-                : {
-                    backgroundColor: "rgba(0,0,0,0.04)",
-                    color: "rgba(0,0,0,0.4)",
-                  }
-            }
+            onClick={() => setActiveTab("gacha")}
+            className={`flex-1 text-center py-2 text-[13px] font-bold rounded-full transition-all ${
+              activeTab === "gacha"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-400"
+            }`}
           >
-            すべて
+            ガチャ
           </button>
-          {GROUPS.map((group) => (
+          <button
+            onClick={() => setActiveTab("shop")}
+            className={`flex-1 text-center py-2 text-[13px] font-bold rounded-full transition-all ${
+              activeTab === "shop"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-400"
+            }`}
+          >
+            ショップ
+          </button>
+        </div>
+      </div>
+
+      {/* Gacha Tab Content */}
+      {activeTab === "gacha" && gachaState === "select" && (
+        <div className="px-4 pt-4">
+          {/* Gacha Banner */}
+          <motion.div
+            className="relative overflow-hidden rounded-2xl"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div
+              className="relative flex flex-col items-center justify-center py-12"
+              style={{
+                background: "linear-gradient(135deg, #60A5FA20 0%, #EC489920 25%, #F59E0B20 50%, #22C55E20 75%, #8B5CF620 100%)",
+              }}
+            >
+              {/* Decorative sparkles */}
+              <div className="absolute inset-0 overflow-hidden">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute"
+                    style={{
+                      left: `${15 + i * 18}%`,
+                      top: `${20 + (i % 3) * 25}%`,
+                    }}
+                    animate={{
+                      opacity: [0.2, 0.8, 0.2],
+                      scale: [0.8, 1.2, 0.8],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: i * 0.4,
+                    }}
+                  >
+                    <Sparkles className="h-4 w-4 text-gray-300" />
+                  </motion.div>
+                ))}
+              </div>
+
+              <Sparkles className="mb-3 h-8 w-8 text-gold-300" />
+              <h2 className="text-[20px] font-black text-gray-900">
+                STARTO ガチャ
+              </h2>
+              <p className="mt-1 text-[13px] text-gray-500">
+                推しのカードを引こう
+              </p>
+            </div>
+            <div className="absolute inset-0 rounded-2xl border border-gray-200" />
+          </motion.div>
+
+          {/* Rate Info */}
+          <motion.div
+            className="mt-4"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
             <button
-              key={group.id}
-              onClick={() => setSelectedGroup(group.id)}
+              onClick={() => setShowRates(!showRates)}
+              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3"
+            >
+              <span className="text-[13px] font-medium text-gray-500">
+                排出確率
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 text-gray-400 transition-transform ${showRates ? "rotate-180" : ""}`}
+              />
+            </button>
+            <AnimatePresence>
+              {showRates && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-1.5 px-4 pb-3 pt-2">
+                    {RARITY_ORDER.map((rarity) => {
+                      const cfg = RARITY_CONFIG[rarity];
+                      return (
+                        <div
+                          key={rarity}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="inline-block h-2.5 w-2.5 rounded-full"
+                              style={{ backgroundColor: cfg.color }}
+                            />
+                            <span className="text-[12px] text-gray-500">
+                              {cfg.labelEn} {cfg.label}
+                            </span>
+                          </div>
+                          <span className="text-[12px] font-bold tabular-nums text-gray-700">
+                            {(cfg.probability * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Draw Buttons */}
+          <div className="mt-6 space-y-3">
+            {/* Free gacha */}
+            {freeAvailable && (
+              <motion.button
+                onClick={() => handleDraw(1, true)}
+                className="w-full rounded-xl py-3.5 text-center font-bold text-white shadow-lg"
+                style={{
+                  background: "linear-gradient(135deg, #22C55E, #16A34A)",
+                  boxShadow: "0 4px 20px rgba(34,197,94,0.3)",
+                }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <span className="text-[15px]">無料1回ガチャ</span>
+                <span className="ml-2 text-[12px] text-white/70">
+                  1日1回
+                </span>
+              </motion.button>
+            )}
+
+            {/* Single draw */}
+            <motion.button
+              onClick={() => handleDraw(1, false)}
+              disabled={coins < GACHA_COST_SINGLE}
+              className="w-full rounded-xl border border-gray-200 bg-white py-3.5 text-center font-bold text-gray-900 transition-colors disabled:opacity-40"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <span className="text-[15px]">1回ガチャ</span>
+              <span className="ml-2 text-[13px] text-gray-500">
+                {GACHA_COST_SINGLE.toLocaleString()}コイン
+              </span>
+            </motion.button>
+
+            {/* Ten pull */}
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <button
+                onClick={() => handleDraw(10, false)}
+                disabled={coins < GACHA_COST_TEN}
+                className="w-full rounded-xl py-4 text-center font-bold text-white shadow-lg disabled:opacity-40"
+                style={{
+                  background: "linear-gradient(135deg, #F59E0B, #D97706)",
+                  boxShadow: "0 4px 20px rgba(245,158,11,0.3)",
+                }}
+              >
+                <span className="text-[16px]">10連ガチャ</span>
+                <span className="ml-2 text-[13px] text-white/80">
+                  {GACHA_COST_TEN.toLocaleString()}コイン
+                </span>
+              </button>
+              {/* SR guaranteed badge */}
+              <div className="absolute -right-1 -top-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-lg">
+                SR以上1枚確定!
+              </div>
+            </motion.div>
+
+            {/* Insufficient coins warning */}
+            {coins < GACHA_COST_SINGLE && !freeAvailable && (
+              <motion.p
+                className="text-center text-[12px] text-red-500"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                コイン不足 - プログラムで獲得しよう
+              </motion.p>
+            )}
+          </div>
+
+          {/* Bottom padding */}
+          <div className="h-8" />
+        </div>
+      )}
+
+      {/* Shop Tab Content */}
+      {activeTab === "shop" && (
+        <div className="px-4 pb-8">
+          {/* Group filter pills */}
+          <div className="scrollbar-hide mt-4 flex gap-2 overflow-x-auto pb-1">
+            <button
+              onClick={() => setSelectedGroup("all")}
               className="shrink-0 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors"
               style={
-                selectedGroup === group.id
-                  ? { backgroundColor: group.accentColor, color: "#fff" }
+                selectedGroup === "all"
+                  ? { backgroundColor: "#ec6d81", color: "#fff" }
                   : {
                       backgroundColor: "rgba(0,0,0,0.04)",
                       color: "rgba(0,0,0,0.4)",
                     }
               }
             >
-              {group.name}
+              すべて
             </button>
-          ))}
-        </div>
+            {GROUPS.map((group) => (
+              <button
+                key={group.id}
+                onClick={() => setSelectedGroup(group.id)}
+                className="shrink-0 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors"
+                style={
+                  selectedGroup === group.id
+                    ? { backgroundColor: group.accentColor, color: "#fff" }
+                    : {
+                        backgroundColor: "rgba(0,0,0,0.04)",
+                        color: "rgba(0,0,0,0.4)",
+                      }
+                }
+              >
+                {group.name}
+              </button>
+            ))}
+          </div>
 
-        {/* Rarity filter tabs */}
-        <div className="scrollbar-hide mt-3 flex gap-1.5 overflow-x-auto pb-1">
-          {rarityTabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setSelectedRarity(tab.key)}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors ${
-                selectedRarity === tab.key
-                  ? "bg-gray-200 text-gray-900"
-                  : "bg-gray-100 text-gray-400"
-              }`}
+          {/* Rarity filter tabs */}
+          <div className="scrollbar-hide mt-3 flex gap-1.5 overflow-x-auto pb-1">
+            {rarityTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setSelectedRarity(tab.key)}
+                className={`shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors ${
+                  selectedRarity === tab.key
+                    ? "bg-gray-200 text-gray-900"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Card grid */}
+          {filteredCards.length > 0 ? (
+            <motion.div
+              className="mt-4 grid grid-cols-2 gap-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
             >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+              {filteredCards.map((card, i) => {
+                const config = RARITY_CONFIG[card.rarity];
+                const owned = ownedIds.has(card.id);
 
-        {/* Card grid */}
-        {filteredCards.length > 0 ? (
-          <motion.div
-            className="mt-4 grid grid-cols-2 gap-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {filteredCards.map((card, i) => {
-              const config = RARITY_CONFIG[card.rarity];
-              const owned = ownedIds.has(card.id);
-
-              return (
-                <motion.div
-                  key={card.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(i * 0.03, 0.5) }}
-                >
-                  <button
-                    onClick={() => !owned && setPurchaseCard(card)}
-                    disabled={owned}
-                    className={`card-glow-${card.rarity} relative aspect-[5/7] w-full overflow-hidden rounded-xl border-2 text-left`}
-                    style={{
-                      background: `linear-gradient(135deg, ${card.memberColor}40 0%, ${card.memberColor}90 100%)`,
-                      borderColor: `${card.memberColor}66`,
-                    }}
+                return (
+                  <motion.div
+                    key={card.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(i * 0.03, 0.5) }}
                   >
-                    {card.memberImage && (
-                      <Image
-                        src={card.memberImage}
-                        alt={card.memberName}
-                        fill
-                        className="object-cover object-top"
-                        sizes="(max-width: 448px) 50vw, 200px"
-                      />
-                    )}
-                    <div className="card-holo-overlay" style={{ opacity: 0.3 }} />
+                    <button
+                      onClick={() => !owned && setPurchaseCard(card)}
+                      disabled={owned}
+                      className={`card-glow-${card.rarity} relative aspect-[5/7] w-full overflow-hidden rounded-xl border-2 text-left`}
+                      style={{
+                        background: `linear-gradient(135deg, ${card.memberColor}40 0%, ${card.memberColor}90 100%)`,
+                        borderColor: `${card.memberColor}66`,
+                      }}
+                    >
+                      {card.memberImage && (
+                        <Image
+                          src={card.memberImage}
+                          alt={card.memberName}
+                          fill
+                          className="object-cover object-top"
+                          sizes="(max-width: 448px) 50vw, 200px"
+                        />
+                      )}
+                      <div className="card-holo-overlay" style={{ opacity: 0.3 }} />
 
-                    {/* Owned overlay */}
-                    {owned && (
-                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60">
-                        <div className="rounded-full bg-white/20 px-3 py-1">
-                          <span className="text-[12px] font-bold text-white">
-                            取得済み
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Bottom info */}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2.5 pt-10">
-                      <p className="text-[13px] font-bold text-white drop-shadow-md">
-                        {card.memberName}
-                      </p>
-                      <p
-                        className="text-[10px] leading-none"
-                        style={{ color: config.color }}
-                      >
-                        {"★".repeat(config.stars)}
-                      </p>
-                      {!owned && (
-                        <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gold-300/10 px-2 py-0.5">
-                          <Coins className="h-3 w-3 text-gold-300" />
-                          <span className="text-[11px] font-bold tabular-nums text-gold-300">
-                            {config.shopPrice.toLocaleString()}
-                          </span>
+                      {/* Owned overlay */}
+                      {owned && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60">
+                          <div className="rounded-full bg-white/20 px-3 py-1">
+                            <span className="text-[12px] font-bold text-white">
+                              取得済み
+                            </span>
+                          </div>
                         </div>
                       )}
-                    </div>
-                  </button>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-12 flex flex-col items-center"
-          >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-              <ShoppingBag className="h-7 w-7 text-gray-400" />
-            </div>
-            <p className="mb-1 text-[15px] font-bold text-gray-500">
-              カードが見つかりません
-            </p>
-            <p className="text-center text-[13px] text-gray-400">
-              フィルターを変更してお試しください
-            </p>
-          </motion.div>
-        )}
-      </div>
+
+                      {/* Bottom info */}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2.5 pt-10">
+                        <p className="text-[13px] font-bold text-white drop-shadow-md">
+                          {card.memberName}
+                        </p>
+                        <p
+                          className="text-[10px] leading-none"
+                          style={{ color: config.color }}
+                        >
+                          {"★".repeat(config.stars)}
+                        </p>
+                        {!owned && (
+                          <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gold-300/10 px-2 py-0.5">
+                            <Coins className="h-3 w-3 text-gold-300" />
+                            <span className="text-[11px] font-bold tabular-nums text-gold-300">
+                              {config.shopPrice.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-12 flex flex-col items-center"
+            >
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                <ShoppingBag className="h-7 w-7 text-gray-400" />
+              </div>
+              <p className="mb-1 text-[15px] font-bold text-gray-500">
+                カードが見つかりません
+              </p>
+              <p className="text-center text-[13px] text-gray-400">
+                フィルターを変更してお試しください
+              </p>
+            </motion.div>
+          )}
+        </div>
+      )}
 
       {/* Purchase Modal */}
       <AnimatePresence>
@@ -268,6 +576,151 @@ function ShopInner() {
               }
             }}
             onHistoryComplete={handleHistoryComplete}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Drawing Animation */}
+      <AnimatePresence>
+        {gachaState === "drawing" && (
+          <DrawAnimation onComplete={handleAnimationComplete} />
+        )}
+      </AnimatePresence>
+
+      {/* Reveal State */}
+      <AnimatePresence>
+        {gachaState === "reveal" && drawnCards.length === 1 && (
+          <GachaCardReveal
+            card={drawnCards[0].card}
+            isNew={drawnCards[0].isNew}
+            onNext={handleSingleRevealNext}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* 10-pull Grid Reveal */}
+      <AnimatePresence>
+        {gachaState === "reveal" && drawnCards.length > 1 && showGrid && (
+          <motion.div
+            className="fixed inset-0 z-50 flex flex-col bg-black/95"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="flex items-center justify-center py-4">
+              <h2 className="text-[18px] font-bold text-white">
+                ガチャ結果
+              </h2>
+            </div>
+
+            {/* Card grid */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <div className="grid grid-cols-2 gap-3">
+                {drawnCards.map((result, i) => {
+                  const cfg = RARITY_CONFIG[result.card.rarity];
+                  return (
+                    <motion.button
+                      key={i}
+                      className={`relative overflow-hidden rounded-xl card-glow-${result.card.rarity}`}
+                      style={{ aspectRatio: "3/4" }}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.08, duration: 0.3 }}
+                      onClick={() => handleGridCardTap(i)}
+                    >
+                      {/* Card bg */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background: `linear-gradient(160deg, ${result.card.memberColor}40 0%, ${result.card.memberColor} 50%, ${result.card.memberColor}90 100%)`,
+                        }}
+                      />
+                      <div className="card-holo-overlay" />
+
+                      {/* Rarity badge */}
+                      <div className="absolute right-2 top-2 z-10">
+                        <div
+                          className="rounded-full px-1.5 py-0.5 text-[9px] font-bold"
+                          style={{
+                            backgroundColor: `${cfg.color}30`,
+                            color: cfg.color,
+                            border: `1px solid ${cfg.color}50`,
+                          }}
+                        >
+                          {cfg.labelEn}
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-3">
+                        <p
+                          className="text-center text-[16px] font-black text-white"
+                          style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+                        >
+                          {result.card.memberName}
+                        </p>
+                        <p className="mt-1 text-center text-[10px] text-white/60">
+                          {result.card.groupName}
+                        </p>
+                      </div>
+
+                      {/* NEW badge */}
+                      {result.isNew && (
+                        <div className="absolute left-2 top-2 z-10 rounded-full bg-gradient-to-r from-yellow-500 to-amber-400 px-1.5 py-0.5 text-[9px] font-black text-black">
+                          NEW
+                        </div>
+                      )}
+
+                      {/* Border */}
+                      <div
+                        className="absolute inset-0 rounded-xl"
+                        style={{ border: `1px solid ${cfg.color}30` }}
+                      />
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="border-t border-white/[0.06] bg-gray-900 px-4 pb-6 pt-4">
+              <p className="mb-4 text-center text-[13px] text-white/60">
+                NEW: {summary.newCount}枚 / 重複: {summary.dupeCount}枚
+                {summary.dupeCount > 0 && (
+                  <span className="ml-1 text-gold-300">
+                    (+{summary.dupeCount * 50}コイン返還)
+                  </span>
+                )}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleRetry}
+                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.05] py-3 text-[14px] font-bold text-white transition-colors active:bg-white/[0.08]"
+                >
+                  もう一回
+                </button>
+                <button
+                  onClick={() => router.push("/collection")}
+                  className="flex-1 rounded-xl py-3 text-[14px] font-bold text-white"
+                  style={{
+                    background: "linear-gradient(135deg, #ec6d81, #d4576b)",
+                  }}
+                >
+                  コレクションへ
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 10-pull individual card reveal */}
+      <AnimatePresence>
+        {gachaState === "reveal" && drawnCards.length > 1 && !showGrid && (
+          <GachaCardReveal
+            card={drawnCards[revealIndex].card}
+            isNew={drawnCards[revealIndex].isNew}
+            onNext={handleGridRevealNext}
           />
         )}
       </AnimatePresence>
