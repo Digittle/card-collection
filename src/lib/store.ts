@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
   LAST_FREE_GACHA: "starto_last_free_gacha",
   ACTIVITY_LOG: "starto_activity_log",
   GEKIOSHI_CARD: "starto_gekioshi_card",
+  GACHA_PITY: "starto_gacha_pity",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
@@ -173,6 +174,20 @@ export function getGekioshiCardId(): string | null {
 
 export function setGekioshiCardId(cardId: string | null): void {
   setItem(STORAGE_KEYS.GEKIOSHI_CARD, cardId);
+}
+
+// Gacha pity counter
+export function getGachaPityCount(): number {
+  return getItem<number>(STORAGE_KEYS.GACHA_PITY, 0);
+}
+
+export function incrementGachaPity(count: number): void {
+  const current = getGachaPityCount();
+  setItem(STORAGE_KEYS.GACHA_PITY, current + count);
+}
+
+export function resetGachaPity(): void {
+  setItem(STORAGE_KEYS.GACHA_PITY, 0);
 }
 
 // Clear all data

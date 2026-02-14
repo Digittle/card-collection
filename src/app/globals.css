@@ -278,3 +278,47 @@ a,
   0% { transform: rotate(var(--orb-start)) translateX(60px) scale(1); }
   100% { transform: rotate(var(--orb-start)) translateX(0px) scale(2); opacity: 0; }
 }
+
+/* ========= Gacha Landing Effects ========= */
+
+@keyframes particleRise {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+.gacha-particle {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(246, 171, 0, 0.8), rgba(246, 171, 0, 0));
+  pointer-events: none;
+  animation: particleRise 6s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringRotateReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}

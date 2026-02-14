@@ -4,11 +4,12 @@ import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Coins, Check, ShoppingBag, Camera, X, BookOpen, Palette, ChevronDown, Sparkles } from "lucide-react";
+import { Coins, Check, ShoppingBag, Camera, X, BookOpen, Palette } from "lucide-react";
 import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
 import { CardDrawingCanvas } from "@/components/card/CardDrawingCanvas";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
+import { GachaLanding } from "@/components/gacha/GachaLanding";
 import { DrawAnimation } from "@/components/gacha/DrawAnimation";
 import { GachaCardReveal } from "@/components/gacha/GachaCardReveal";
 import { ALL_CARDS, drawGacha } from "@/lib/cards-data";
@@ -26,6 +27,9 @@ import {
   canDoFreeGacha,
   markFreeGachaUsed,
   addCoins,
+  getGachaPityCount,
+  incrementGachaPity,
+  resetGachaPity,
 } from "@/lib/store";
 import { Card, RARITY_CONFIG, Rarity, RARITY_ORDER, GACHA_COST_SINGLE, GACHA_COST_TEN } from "@/types";
 
@@ -57,12 +61,14 @@ function ShopInner() {
   const [purchaseCard, setPurchaseCard] = useState<Card | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
+  // Pity state
+  const [pityCount, setPityCount] = useState(0);
+
   // Gacha state
   const [gachaState, setGachaState] = useState<GachaState>("select");
   const [freeAvailable, setFreeAvailable] = useState(false);
   const [drawnCards, setDrawnCards] = useState<DrawnResult[]>([]);
   const [revealIndex, setRevealIndex] = useState(0);
-  const [showRates, setShowRates] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
 
   useEffect(() => {
@@ -78,6 +84,7 @@ function ShopInner() {
     setCoinsState(getCoins());
     setOwnedIds(new Set(getCards().map((c) => c.id)));
     setFreeAvailable(canDoFreeGacha());
+    setPityCount(getGachaPityCount());
     setMounted(true);
   }, [router, searchParams]);
 
@@ -85,6 +92,7 @@ function ShopInner() {
     setCoinsState(getCoins());
     setFreeAvailable(canDoFreeGacha());
     setOwnedIds(new Set(getCards().map((c) => c.id)));
+    setPityCount(getGachaPityCount());
   }, []);
 
   const filteredCards = useMemo(() => {
@@ -138,6 +146,13 @@ function ShopInner() {
     if (dupeCount > 0) {
       addCoins(dupeCount * 50);
     }
+
+    // Track pity
+    incrementGachaPity(cards.length);
+    if (cards.some(c => c.rarity === 'ur' || c.rarity === 'legend')) {
+      resetGachaPity();
+    }
+    setPityCount(getGachaPityCount());
 
     setDrawnCards(results);
     setRevealIndex(0);
@@ -225,191 +240,12 @@ function ShopInner() {
 
       {/* Gacha Tab Content */}
       {activeTab === "gacha" && gachaState === "select" && (
-        <div className="px-4 pt-4">
-          {/* Gacha Banner */}
-          <motion.div
-            className="relative overflow-hidden rounded-2xl"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div
-              className="relative flex flex-col items-center justify-center py-12"
-              style={{
-                background: "linear-gradient(135deg, #60A5FA20 0%, #EC489920 25%, #F59E0B20 50%, #22C55E20 75%, #8B5CF620 100%)",
-              }}
-            >
-              {/* Decorative sparkles */}
-              <div className="absolute inset-0 overflow-hidden">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute"
-                    style={{
-                      left: `${15 + i * 18}%`,
-                      top: `${20 + (i % 3) * 25}%`,
-                    }}
-                    animate={{
-                      opacity: [0.2, 0.8, 0.2],
-                      scale: [0.8, 1.2, 0.8],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      delay: i * 0.4,
-                    }}
-                  >
-                    <Sparkles className="h-4 w-4 text-gray-300" />
-                  </motion.div>
-                ))}
-              </div>
-
-              <Sparkles className="mb-3 h-8 w-8 text-gold-300" />
-              <h2 className="text-[20px] font-black text-gray-900">
-                STARTO ガチャ
-              </h2>
-              <p className="mt-1 text-[13px] text-gray-500">
-                推しのカードを引こう
-              </p>
-            </div>
-            <div className="absolute inset-0 rounded-2xl border border-gray-200" />
-          </motion.div>
-
-          {/* Rate Info */}
-          <motion.div
-            className="mt-4"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <button
-              onClick={() => setShowRates(!showRates)}
-              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3"
-            >
-              <span className="text-[13px] font-medium text-gray-500">
-                排出確率
-              </span>
-              <ChevronDown
-                className={`h-4 w-4 text-gray-400 transition-transform ${showRates ? "rotate-180" : ""}`}
-              />
-            </button>
-            <AnimatePresence>
-              {showRates && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="space-y-1.5 px-4 pb-3 pt-2">
-                    {RARITY_ORDER.map((rarity) => {
-                      const cfg = RARITY_CONFIG[rarity];
-                      return (
-                        <div
-                          key={rarity}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="inline-block h-2.5 w-2.5 rounded-full"
-                              style={{ backgroundColor: cfg.color }}
-                            />
-                            <span className="text-[12px] text-gray-500">
-                              {cfg.labelEn} {cfg.label}
-                            </span>
-                          </div>
-                          <span className="text-[12px] font-bold tabular-nums text-gray-700">
-                            {(cfg.probability * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Draw Buttons */}
-          <div className="mt-6 space-y-3">
-            {/* Free gacha */}
-            {freeAvailable && (
-              <motion.button
-                onClick={() => handleDraw(1, true)}
-                className="w-full rounded-xl py-3.5 text-center font-bold text-white shadow-lg"
-                style={{
-                  background: "linear-gradient(135deg, #22C55E, #16A34A)",
-                  boxShadow: "0 4px 20px rgba(34,197,94,0.3)",
-                }}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <span className="text-[15px]">無料1回ガチャ</span>
-                <span className="ml-2 text-[12px] text-white/70">
-                  1日1回
-                </span>
-              </motion.button>
-            )}
-
-            {/* Single draw */}
-            <motion.button
-              onClick={() => handleDraw(1, false)}
-              disabled={coins < GACHA_COST_SINGLE}
-              className="w-full rounded-xl border border-gray-200 bg-white py-3.5 text-center font-bold text-gray-900 transition-colors disabled:opacity-40"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <span className="text-[15px]">1回ガチャ</span>
-              <span className="ml-2 text-[13px] text-gray-500">
-                {GACHA_COST_SINGLE.toLocaleString()}コイン
-              </span>
-            </motion.button>
-
-            {/* Ten pull */}
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <button
-                onClick={() => handleDraw(10, false)}
-                disabled={coins < GACHA_COST_TEN}
-                className="w-full rounded-xl py-4 text-center font-bold text-white shadow-lg disabled:opacity-40"
-                style={{
-                  background: "linear-gradient(135deg, #F59E0B, #D97706)",
-                  boxShadow: "0 4px 20px rgba(245,158,11,0.3)",
-                }}
-              >
-                <span className="text-[16px]">10連ガチャ</span>
-                <span className="ml-2 text-[13px] text-white/80">
-                  {GACHA_COST_TEN.toLocaleString()}コイン
-                </span>
-              </button>
-              {/* SR guaranteed badge */}
-              <div className="absolute -right-1 -top-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-lg">
-                SR以上1枚確定!
-              </div>
-            </motion.div>
-
-            {/* Insufficient coins warning */}
-            {coins < GACHA_COST_SINGLE && !freeAvailable && (
-              <motion.p
-                className="text-center text-[12px] text-red-500"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                コイン不足 - プログラムで獲得しよう
-              </motion.p>
-            )}
-          </div>
-
-          {/* Bottom padding */}
-          <div className="h-8" />
-        </div>
+        <GachaLanding
+          coins={coins}
+          freeAvailable={freeAvailable}
+          onDraw={handleDraw}
+          pityCount={pityCount}
+        />
       )}
 
       {/* Shop Tab Content */}
