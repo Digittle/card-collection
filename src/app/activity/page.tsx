@@ -284,12 +284,12 @@ export default function ActivityPage() {
                             initial={{ width: 0 }} animate={{ width: `${t.percentage}%` }}
                             transition={{ duration: 0.8, ease: "easeOut", delay: index * 0.1 }} />
                         </div>
-                        <span className="text-[10px] tabular-nums text-gray-400 shrink-0">{t.score.toLocaleString()} pts</span>
+                        <span className="text-[12px] tabular-nums text-gray-500 shrink-0">{t.score.toLocaleString()} pts</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end ml-3">
                       <span className="text-[20px] font-black tabular-nums" style={{ color }}>{t.percentage}%</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide ${
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold tracking-wide ${
                         trendDir === "up" ? "bg-emerald-50 text-emerald-500 border border-emerald-100"
                         : trendDir === "down" ? "bg-red-50 text-red-500 border border-red-100"
                         : "bg-gray-50 text-gray-400 border border-gray-100"

@@ -234,12 +234,20 @@ export default function LandingPage() {
         </motion.button>
 
         <motion.p
-          className="mt-8 text-[13px] text-gray-400"
+          className="mt-8 text-[13px] text-gray-500"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
           無料ではじめられます
+        </motion.p>
+        <motion.p
+          className="mt-2 text-[12px] text-gray-500"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+        >
+          登録不要・ブラウザで遊べます
         </motion.p>
       </motion.div>
     </div>

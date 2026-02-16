@@ -12,6 +12,8 @@ const STORAGE_KEYS = {
   GACHA_PITY: "starto_gacha_pity",
   GACHA_COUNT: "starto_gacha_count",
   PURCHASE_COUNT: "starto_purchase_count",
+  DAILY_LOGIN_DATE: "starto_daily_login_date",
+  LOGIN_STREAK: "starto_login_streak",
 } as const;
 
 function getItem<T>(key: string, fallback: T): T {
@@ -227,4 +229,55 @@ export function getCollectionStats() {
     totalMembers: members.size,
     newCards: cards.filter((c) => c.isNew).length,
   };
+}
+
+// Daily login bonus
+const DAILY_BONUS_COINS = 500;
+const STREAK_BONUS = [0, 0, 100, 200, 300, 500, 500, 1000]; // day 1-7+
+
+export function getLoginStreak(): number {
+  return getItem<number>(STORAGE_KEYS.LOGIN_STREAK, 0);
+}
+
+export function getLastLoginDate(): string | null {
+  return getItem<string | null>(STORAGE_KEYS.DAILY_LOGIN_DATE, null);
+}
+
+export function claimDailyBonus(): { claimed: boolean; coins: number; streak: number; streakBonus: number } {
+  const today = new Date().toDateString();
+  const lastDate = getLastLoginDate();
+
+  if (lastDate === today) {
+    return { claimed: false, coins: 0, streak: getLoginStreak(), streakBonus: 0 };
+  }
+
+  // Calculate streak
+  let streak = getLoginStreak();
+  if (lastDate) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (new Date(lastDate).toDateString() === yesterday.toDateString()) {
+      streak += 1;
+    } else {
+      streak = 1; // reset streak
+    }
+  } else {
+    streak = 1;
+  }
+
+  setItem(STORAGE_KEYS.LOGIN_STREAK, streak);
+  setItem(STORAGE_KEYS.DAILY_LOGIN_DATE, today);
+
+  const streakIdx = Math.min(streak, STREAK_BONUS.length - 1);
+  const streakBonus = STREAK_BONUS[streakIdx];
+  const totalBonus = DAILY_BONUS_COINS + streakBonus;
+  addCoins(totalBonus);
+
+  return { claimed: true, coins: totalBonus, streak, streakBonus };
+}
+
+export function canClaimDailyBonus(): boolean {
+  const today = new Date().toDateString();
+  const lastDate = getLastLoginDate();
+  return lastDate !== today;
 }

@@ -71,9 +71,10 @@ export function FeaturedBanner() {
 
           <Link
             href="/gacha"
-            className="relative z-10 mt-3 text-sm font-semibold text-white/90 transition-colors hover:text-white"
+            className="relative z-10 mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white/20 backdrop-blur-sm px-4 py-2 text-[13px] font-bold text-white shadow-sm border border-white/30 transition-all hover:bg-white/30 active:bg-white/40"
           >
-            ガチャで入手 →
+            ガチャで入手
+            <span className="text-[14px]">→</span>
           </Link>
         </motion.div>
       </AnimatePresence>

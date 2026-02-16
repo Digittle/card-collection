@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Header } from "@/components/layout/Header";
-import { getUser, getCards, getGachaCount, getPurchaseCount } from "@/lib/store";
+import { getUser, getCards, getCoins, getGachaCount, getPurchaseCount } from "@/lib/store";
 import { getMemberById } from "@/lib/groups-data";
 import { getTierInfo, TierInfo } from "@/lib/tier";
 import { RARITY_CONFIG, RARITY_ORDER, OwnedCard, TierLevel } from "@/types";
@@ -35,12 +35,14 @@ export default function MyPage() {
   const [daysSinceReg, setDaysSinceReg] = useState(0);
   const [gachaCount, setGachaCountState] = useState(0);
   const [purchaseCount, setPurchaseCountState] = useState(0);
+  const [coins, setCoinsState] = useState(0);
 
   useEffect(() => {
     const user = getUser();
     if (!user) { router.replace("/"); return; }
 
     setUserName(user.displayName);
+    setCoinsState(getCoins());
     const cards = getCards();
     setOwnedCards(cards);
 
@@ -105,7 +107,7 @@ export default function MyPage() {
 
   return (
     <AppShell>
-      <Header title="マイページ" />
+      <Header title="マイページ" coins={coins} />
 
       <div className="px-4 py-5 space-y-5">
         {/* Tier Hero Card */}
@@ -143,7 +145,7 @@ export default function MyPage() {
               </div>
               {/* Days badge */}
               <div className="rounded-full bg-white/15 px-3 py-1 backdrop-blur-sm">
-                <span className="text-[12px] font-bold text-white">推し活 {daysSinceReg}日目</span>
+                <span className="text-[12px] font-bold text-white">ログイン {daysSinceReg}日目</span>
               </div>
             </div>
 

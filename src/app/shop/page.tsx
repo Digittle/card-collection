@@ -72,6 +72,7 @@ function ShopInner() {
   const [drawnCards, setDrawnCards] = useState<DrawnResult[]>([]);
   const [revealIndex, setRevealIndex] = useState(0);
   const [showGrid, setShowGrid] = useState(false);
+  const [highestRarity, setHighestRarity] = useState<Rarity>("normal");
 
   useEffect(() => {
     const user = getUser();
@@ -161,6 +162,11 @@ function ShopInner() {
     setDrawnCards(results);
     setRevealIndex(0);
     setShowGrid(false);
+    // Calculate highest rarity for draw animation
+    const maxRarity = results.reduce<Rarity>((max, r) => {
+      return RARITY_ORDER.indexOf(r.card.rarity) > RARITY_ORDER.indexOf(max) ? r.card.rarity : max;
+    }, "normal");
+    setHighestRarity(maxRarity);
     setGachaState("drawing");
     setCoinsState(getCoins());
     setFreeAvailable(canDoFreeGacha());
@@ -423,7 +429,7 @@ function ShopInner() {
       {/* Drawing Animation */}
       <AnimatePresence>
         {gachaState === "drawing" && (
-          <DrawAnimation onComplete={handleAnimationComplete} />
+          <DrawAnimation onComplete={handleAnimationComplete} rarity={highestRarity} />
         )}
       </AnimatePresence>
 

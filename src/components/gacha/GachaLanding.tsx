@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Coins, ChevronDown } from "lucide-react";
@@ -17,6 +17,23 @@ interface GachaLandingProps {
 
 export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaLandingProps) {
   const [showRates, setShowRates] = useState(false);
+  const [countdown, setCountdown] = useState("");
+
+  // Countdown to end of current 6-hour rotation period
+  useEffect(() => {
+    const update = () => {
+      const now = Date.now();
+      const periodMs = 6 * 60 * 60 * 1000;
+      const remaining = periodMs - (now % periodMs);
+      const h = Math.floor(remaining / (60 * 60 * 1000));
+      const m = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+      const s = Math.floor((remaining % (60 * 1000)) / 1000);
+      setCountdown(`${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const featuredCard = useMemo(() => {
     const hourSeed = Math.floor(Date.now() / (1000 * 60 * 60 * 6));
@@ -69,6 +86,7 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
           style={{ transform: "rotate(-2deg)", transformOrigin: "left center" }}
         >
           期間限定ピックアップ
+          {countdown && <span className="ml-2 text-white/80 tabular-nums">{countdown}</span>}
         </div>
       </div>
 
@@ -203,8 +221,8 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
         </AnimatePresence>
       </div>
 
-      {/* Draw Buttons */}
-      <div className="mt-auto px-4 pb-6 pt-4">
+      {/* Draw Buttons - pb-24 to avoid bottom nav overlap */}
+      <div className="mt-auto px-4 pb-24 pt-4">
         {freeAvailable && (
           <motion.button
             onClick={() => onDraw(1, true)}

@@ -10,6 +10,7 @@ import { getCardById as storeGetCardById, getUser, updateCardMemo, addCardImage,
 import { getCardById as catalogGetCardById } from "@/lib/cards-data";
 import { CardPhotoCamera } from "@/components/card/CardPhotoCamera";
 import { CardDrawingCanvas } from "@/components/card/CardDrawingCanvas";
+import { useHoloEffect } from "@/hooks/useHoloEffect";
 
 export default function CardDetailPage() {
   const params = useParams();
@@ -25,6 +26,8 @@ export default function CardDetailPage() {
   const [showDrawing, setShowDrawing] = useState(false);
   const [isGekioshi, setIsGekioshi] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cardVisualRef = useRef<HTMLDivElement>(null);
+  const holoTransform = useHoloEffect(cardVisualRef);
 
   const viewerCount = useMemo(() => Math.floor(Math.random() * 26) + 5, []);
 
@@ -180,10 +183,13 @@ export default function CardDetailPage() {
       <div className="relative z-10 flex flex-col items-center px-5 pb-24 pt-20">
         {/* Card visual */}
         <motion.div
+          ref={cardVisualRef}
           className={`card-glow-${card.rarity} relative aspect-[5/7] w-full max-w-[280px] overflow-hidden rounded-2xl border-2`}
           style={{
             background: `linear-gradient(135deg, ${card.memberColor}40 0%, ${card.memberColor}90 100%)`,
             borderColor: `${config.glowColor}66`,
+            transform: `perspective(800px) rotateX(${holoTransform.rotateX}deg) rotateY(${holoTransform.rotateY}deg)`,
+            transition: "transform 0.1s ease-out",
           }}
           initial={{ opacity: 0, scale: 0.85, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -199,7 +205,7 @@ export default function CardDetailPage() {
               priority
             />
           )}
-          <div className="card-holo-overlay" style={{ opacity: 0.4 }} />
+          <div className="card-holo-overlay" style={{ opacity: 0.4, backgroundPosition: `${holoTransform.gradientX}% ${holoTransform.gradientY}%` }} />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pt-20">
             <p className="text-[28px] font-bold leading-tight text-white drop-shadow-lg">
               {card.memberName}

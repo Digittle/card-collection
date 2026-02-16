@@ -90,12 +90,8 @@ function CollectionBookInner() {
     return GROUPS.filter(g => g.id !== tanmouGroupId);
   }, [tanmouGroupId]);
 
-  // If no tanmou group, expand the first group by default
-  useEffect(() => {
-    if (mounted && !tanmouGroupId && GROUPS.length > 0) {
-      setExpandedGroups(new Set([GROUPS[0].id]));
-    }
-  }, [mounted, tanmouGroupId]);
+  // Default: all groups collapsed (tanmou group is always expanded separately)
+  // No auto-expand needed
 
   // Tanmou group data
   const tanmouSeries = useMemo(() => {
@@ -271,6 +267,30 @@ function CollectionBookInner() {
             );
           })}
         </section>
+
+        {/* Complete reward hint */}
+        <div className="px-4 mt-5">
+          <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Trophy className="h-4 w-4 text-amber-500" />
+              <span className="text-[13px] font-bold text-amber-700">コンプリート報酬</span>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] text-gray-600">シリーズ完成</span>
+                <span className="text-[12px] font-bold text-amber-600">+1,000 コイン</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] text-gray-600">グループ全カード</span>
+                <span className="text-[12px] font-bold text-amber-600">+5,000 コイン + 限定称号</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] text-gray-600">全カードコンプ</span>
+                <span className="text-[12px] font-bold text-amber-600">+50,000 コイン + ★特別カード</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Empty state when no cards at all */}
         {overallOwned === 0 && (
