@@ -9,7 +9,6 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  Swords,
   BarChart3,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -20,9 +19,7 @@ import {
   getGroupActivities,
   GroupActivityData,
   calculateTerritoryPercentages,
-  generateTerritoryShifts,
   TerritoryData,
-  TerritoryShift,
 } from "@/lib/activity-simulator";
 
 type Period = "today" | "week" | "all";
@@ -120,7 +117,6 @@ export default function ActivityPage() {
   const [period, setPeriod] = useState<Period>("today");
   const [activities, setActivities] = useState<GroupActivityData[]>([]);
   const [territories, setTerritories] = useState<TerritoryData[]>([]);
-  const [battleLog, setBattleLog] = useState<TerritoryShift[]>([]);
   const [tick, setTick] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<keyof GroupActivityData>("gachaDraws");
 
@@ -143,8 +139,6 @@ export default function ActivityPage() {
     const terr = calculateTerritoryPercentages(acts);
     setTerritories(terr);
 
-    const shiftSeed = Math.floor(Date.now() / (1000 * 60 * 5)) + tick;
-    setBattleLog(generateTerritoryShifts(shiftSeed));
   }, [period, tick]);
 
   useEffect(() => {
@@ -309,37 +303,6 @@ export default function ActivityPage() {
                 </motion.div>
               );
             })}
-          </div>
-        </section>
-
-        {/* Battle Log */}
-        <section className="px-4 mb-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Swords className="h-4 w-4 text-gray-900" />
-            <span className="text-[14px] font-bold text-gray-900">バトルログ</span>
-          </div>
-          <div className="space-y-2">
-            <AnimatePresence mode="popLayout">
-              {battleLog.map((shift, i) => {
-                const color = getGroupColor(shift.attackerGroupId);
-                const minutesAgo = Math.round((Date.now() - new Date(shift.timestamp).getTime()) / 60000);
-                const timeLabel = minutesAgo < 1 ? "たった今" : minutesAgo < 60 ? `${minutesAgo}分前` : `${Math.floor(minutesAgo / 60)}時間前`;
-                return (
-                  <motion.div key={shift.id}
-                    className="relative flex items-center gap-3 rounded-xl border border-gray-200 bg-white shadow-sm px-3.5 py-2.5 overflow-hidden"
-                    initial={{ opacity: 0, x: -30, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: 30, scale: 0.95 }}
-                    transition={{ delay: i * 0.05, type: "spring", stiffness: 300 }}>
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ backgroundColor: color }} />
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${color}15` }}>
-                      <Swords className="h-3 w-3" style={{ color }} />
-                    </div>
-                    <p className="flex-1 min-w-0 text-[12px] text-gray-600 truncate">{shift.message}</p>
-                    <span className="text-[10px] text-gray-300 shrink-0 tabular-nums">{timeLabel}</span>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
           </div>
         </section>
 
