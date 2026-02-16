@@ -31,32 +31,41 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
   const featuredConfig = RARITY_CONFIG[featuredCard.rarity];
 
   return (
-    <div className="relative min-h-[calc(100vh-180px)] overflow-hidden bg-gradient-to-b from-[#0a0e27] to-[#030712] flex flex-col">
-      {/* Particles */}
-      {Array.from({ length: 15 }).map((_, i) => (
-        <div
+    <div className="relative min-h-[calc(100vh-180px)] overflow-hidden bg-gradient-to-b from-[#F8F0F2] via-[#FFF5F0] to-[#F4F5F6] flex flex-col">
+      {/* Soft decorative particles */}
+      {Array.from({ length: 10 }).map((_, i) => (
+        <motion.div
           key={i}
-          className="gacha-particle"
+          className="absolute rounded-full pointer-events-none"
           style={{
-            left: `${5 + (i * 6.3) % 90}%`,
-            animationDelay: `${(i * 0.7) % 5}s`,
-            animationDuration: `${4 + (i % 3) * 2}s`,
-            width: `${2 + (i % 3)}px`,
-            height: `${2 + (i % 3)}px`,
+            left: `${5 + (i * 9) % 90}%`,
+            top: `${10 + (i * 13) % 70}%`,
+            width: `${3 + (i % 3)}px`,
+            height: `${3 + (i % 3)}px`,
+            background: i % 2 === 0 ? "#ec6d8140" : "#f6ab0040",
+          }}
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 4 + (i % 3) * 2,
+            repeat: Infinity,
+            delay: i * 0.5,
           }}
         />
       ))}
 
       {/* Coin Display */}
-      <div className="absolute top-3 right-4 z-20 flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-sm px-3 py-1.5 border border-white/10">
-        <Coins className="h-3.5 w-3.5 text-gold-300" />
-        <span className="text-[13px] font-bold tabular-nums text-gold-300">{coins.toLocaleString()}</span>
+      <div className="absolute top-3 right-4 z-20 flex items-center gap-1.5 rounded-full bg-white/70 backdrop-blur-sm px-3 py-1.5 border border-gray-200 shadow-sm">
+        <Coins className="h-3.5 w-3.5 text-gold-500" />
+        <span className="text-[13px] font-bold tabular-nums text-gold-600">{coins.toLocaleString()}</span>
       </div>
 
       {/* Limited Ribbon */}
       <div className="absolute top-4 left-0 z-20">
         <div
-          className="bg-gradient-to-r from-red-600 to-red-500 px-4 py-1 text-[11px] font-bold text-white shadow-lg"
+          className="bg-gradient-to-r from-primary-500 to-primary-400 px-4 py-1 text-[11px] font-bold text-white shadow-lg rounded-r-full"
           style={{ transform: "rotate(-2deg)", transformOrigin: "left center" }}
         >
           期間限定ピックアップ
@@ -72,8 +81,8 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
             viewBox="0 0 200 200"
             style={{ filter: "blur(1px)" }}
           >
-            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#ring1)" strokeWidth="0.5" opacity="0.6" />
-            <circle cx="100" cy="100" r="80" fill="none" stroke="url(#ring1)" strokeWidth="0.3" opacity="0.3" strokeDasharray="8 12" />
+            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#ring1)" strokeWidth="0.5" opacity="0.4" />
+            <circle cx="100" cy="100" r="80" fill="none" stroke="url(#ring1)" strokeWidth="0.3" opacity="0.2" strokeDasharray="8 12" />
             <defs>
               <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#f6ab00" />
@@ -87,10 +96,10 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
             viewBox="0 0 200 200"
             style={{ filter: "blur(2px)" }}
           >
-            <circle cx="100" cy="100" r="95" fill="none" stroke="url(#ring2)" strokeWidth="0.3" opacity="0.4" strokeDasharray="4 16" />
+            <circle cx="100" cy="100" r="95" fill="none" stroke="url(#ring2)" strokeWidth="0.3" opacity="0.3" strokeDasharray="4 16" />
             <defs>
               <linearGradient id="ring2" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#60a5fa" />
+                <stop offset="0%" stopColor="#ec6d81" />
                 <stop offset="100%" stopColor="#f6ab00" />
               </linearGradient>
             </defs>
@@ -99,10 +108,10 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
 
         {/* Character Image */}
         <div
-          className="relative z-10 aspect-[5/7] w-[200px] overflow-hidden rounded-2xl animate-[gentleFloat_6s_ease-in-out_infinite]"
+          className="relative z-10 aspect-[5/7] w-[200px] overflow-hidden rounded-2xl animate-[gentleFloat_6s_ease-in-out_infinite] shadow-2xl"
           style={{
-            background: `linear-gradient(135deg, ${featuredCard.memberColor}40 0%, ${featuredCard.memberColor}90 100%)`,
-            boxShadow: `0 0 40px ${featuredCard.memberColor}40, 0 0 80px ${featuredCard.memberColor}20`,
+            background: `linear-gradient(135deg, ${featuredCard.memberColor}30 0%, ${featuredCard.memberColor}70 100%)`,
+            boxShadow: `0 8px 32px ${featuredCard.memberColor}25, 0 0 60px ${featuredCard.memberColor}15`,
           }}
         >
           {featuredCard.memberImage && (
@@ -119,14 +128,14 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
 
         {/* Card Title + Rarity */}
         <div className="relative z-10 mt-3 text-center">
-          <p className="text-[15px] font-bold text-white drop-shadow-md">
+          <p className="text-[15px] font-bold text-gray-800">
             {featuredCard.title}
           </p>
           <p className="mt-0.5 text-[11px]" style={{ color: featuredConfig.color }}>
             {"★".repeat(featuredConfig.stars)}
           </p>
           {featuredGroup && (
-            <p className="mt-0.5 text-[11px] text-white/40">{featuredGroup.name}</p>
+            <p className="mt-0.5 text-[11px] text-gray-400">{featuredGroup.name}</p>
           )}
         </div>
       </div>
@@ -134,30 +143,30 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
       {/* Pity Progress Bar */}
       <div className="mx-6 mt-4">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[11px] text-white/50">天井カウンター</span>
-          <span className="text-[12px] font-bold text-gold-300">{pityCount}/50</span>
+          <span className="text-[11px] text-gray-400">天井カウンター</span>
+          <span className="text-[12px] font-bold text-primary-500">{pityCount}/50</span>
         </div>
-        <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+        <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
           <motion.div
             className="h-full rounded-full"
-            style={{ background: "linear-gradient(90deg, #f6ab00, #FF5C00)" }}
+            style={{ background: "linear-gradient(90deg, #ec6d81, #f6ab00)" }}
             initial={{ width: 0 }}
             animate={{ width: `${(pityCount / 50) * 100}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
         </div>
-        <p className="mt-1 text-[10px] text-white/30">50回でUR以上1枚確定</p>
+        <p className="mt-1 text-[10px] text-gray-300">50回でUR以上1枚確定</p>
       </div>
 
       {/* Rate Info Accordion */}
       <div className="mx-6 mt-4">
         <button
           onClick={() => setShowRates(!showRates)}
-          className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 backdrop-blur-sm"
+          className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white/60 px-4 py-2.5 backdrop-blur-sm"
         >
-          <span className="text-[12px] font-medium text-white/50">排出確率</span>
+          <span className="text-[12px] font-medium text-gray-500">排出確率</span>
           <ChevronDown
-            className={`h-3.5 w-3.5 text-white/40 transition-transform ${showRates ? "rotate-180" : ""}`}
+            className={`h-3.5 w-3.5 text-gray-400 transition-transform ${showRates ? "rotate-180" : ""}`}
           />
         </button>
         <AnimatePresence>
@@ -178,11 +187,11 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
                           className="inline-block h-2.5 w-2.5 rounded-full"
                           style={{ backgroundColor: cfg.color }}
                         />
-                        <span className="text-[12px] text-white/50">
+                        <span className="text-[12px] text-gray-500">
                           {cfg.labelEn} {cfg.label}
                         </span>
                       </div>
-                      <span className="text-[12px] font-bold tabular-nums text-white/70">
+                      <span className="text-[12px] font-bold tabular-nums text-gray-700">
                         {(cfg.probability * 100).toFixed(0)}%
                       </span>
                     </div>
@@ -199,10 +208,10 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
         {freeAvailable && (
           <motion.button
             onClick={() => onDraw(1, true)}
-            className="mb-3 w-full rounded-xl py-3.5 text-center font-bold text-white"
+            className="mb-3 w-full rounded-xl py-3.5 text-center font-bold text-white shadow-lg"
             style={{
               background: "linear-gradient(135deg, #22C55E, #16A34A)",
-              boxShadow: "0 0 20px rgba(34,197,94,0.3)",
+              boxShadow: "0 4px 16px rgba(34,197,94,0.3)",
             }}
             whileTap={{ scale: 0.97 }}
           >
@@ -215,11 +224,11 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
           <motion.button
             onClick={() => onDraw(1, false)}
             disabled={coins < GACHA_COST_SINGLE}
-            className="flex-1 rounded-xl border border-white/15 bg-white/10 py-3.5 text-center font-bold text-white backdrop-blur-sm transition-all disabled:opacity-30 active:brightness-125"
+            className="flex-1 rounded-xl border border-gray-200 bg-white py-3.5 text-center font-bold text-gray-700 shadow-sm transition-all disabled:opacity-30 active:bg-gray-50"
             whileTap={{ scale: 0.97 }}
           >
             <div className="text-[14px]">1回引く</div>
-            <div className="text-[11px] text-white/50">{GACHA_COST_SINGLE.toLocaleString()} コイン</div>
+            <div className="text-[11px] text-gray-400">{GACHA_COST_SINGLE.toLocaleString()} コイン</div>
           </motion.button>
 
           <div className="relative flex-[1.4]">
@@ -229,14 +238,14 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
               className="w-full rounded-xl py-3.5 text-center font-black text-black shadow-lg disabled:opacity-30 active:brightness-110"
               style={{
                 background: "linear-gradient(135deg, #f6ab00, #fdd780, #f6ab00)",
-                boxShadow: "0 0 24px rgba(246,171,0,0.4), 0 0 48px rgba(246,171,0,0.15)",
+                boxShadow: "0 4px 20px rgba(246,171,0,0.35)",
               }}
               whileTap={{ scale: 0.97 }}
               animate={{
                 boxShadow: [
-                  "0 0 24px rgba(246,171,0,0.4)",
-                  "0 0 32px rgba(246,171,0,0.6)",
-                  "0 0 24px rgba(246,171,0,0.4)",
+                  "0 4px 20px rgba(246,171,0,0.35)",
+                  "0 4px 28px rgba(246,171,0,0.5)",
+                  "0 4px 20px rgba(246,171,0,0.35)",
                 ],
               }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -252,7 +261,7 @@ export function GachaLanding({ coins, freeAvailable, onDraw, pityCount }: GachaL
         </div>
 
         {coins < GACHA_COST_SINGLE && !freeAvailable && (
-          <p className="mt-3 text-center text-[12px] text-red-400/80">コイン不足です</p>
+          <p className="mt-3 text-center text-[12px] text-red-400">コイン不足です</p>
         )}
       </div>
     </div>
