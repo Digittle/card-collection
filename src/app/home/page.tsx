@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Heart, Sparkles, Star, ChevronRight, LayoutGrid, Calendar } from "lucide-react";
+import { Clock, Heart, Sparkles, Star, ChevronRight, LayoutGrid } from "lucide-react";
 import { MEMBERS, GROUPS } from "@/lib/groups-data";
 import { ALL_CARDS, getCardsByGroup } from "@/lib/cards-data";
 import { RARITY_CONFIG } from "@/types";
@@ -15,7 +15,6 @@ import { Header } from "@/components/layout/Header";
 import { FeaturedBanner } from "@/components/home/FeaturedBanner";
 import { ActivityFeed } from "@/components/home/ActivityFeed";
 import { getUser, getCoins, getCards, getGekioshiCardId, canDoFreeGacha, canClaimDailyBonus } from "@/lib/store";
-import { getCheckinStats } from "@/lib/checkin-store";
 import { OnboardingOverlay } from "@/components/home/OnboardingOverlay";
 import { FirstGachaBanner, FreeGachaBadge } from "@/components/home/GachaPromoBanner";
 import { DailyBonusModal } from "@/components/home/DailyBonusModal";
@@ -29,12 +28,6 @@ export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showDailyBonus, setShowDailyBonus] = useState(false);
   const [freeGachaAvailable, setFreeGachaAvailable] = useState(false);
-  const [checkinStats, setCheckinStats] = useState({
-    totalCount: 0,
-    todaysCount: 0,
-    streak: 0,
-    canCheckinToday: true,
-  });
 
   useEffect(() => {
     const u = getUser();
@@ -45,7 +38,6 @@ export default function HomePage() {
     setUserState(u);
     setCoins(getCoins());
     setFreeGachaAvailable(canDoFreeGacha());
-    setCheckinStats(getCheckinStats());
     setReady(true);
 
     // Show onboarding if first time
@@ -148,44 +140,6 @@ export default function HomePage() {
                 </div>
               );
             })}
-          </div>
-        </div>
-      </Link>
-    </div>
-  );
-
-  // Check-in feature section
-  const checkinSection = (
-    <div className="px-4 mt-4 mb-2">
-      <Link href="/checkin">
-        <div className="rounded-2xl border border-gray-200 bg-gradient-to-r from-primary-50 to-amber-50 p-4 shadow-sm transition-colors active:bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-amber-500 rounded-xl flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[14px] font-bold text-gray-900">推し活チェックイン</span>
-                  {checkinStats.canCheckinToday && (
-                    <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
-                      NEW
-                    </span>
-                  )}
-                </div>
-                <div className="text-[12px] text-gray-600">
-                  {checkinStats.totalCount > 0 ? (
-                    `${checkinStats.totalCount}回チェックイン • ${checkinStats.streak}日連続`
-                  ) : (
-                    "推し活を記録してカードを集めよう"
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 text-gray-400">
-              <span className="text-[12px]">開始</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </div>
           </div>
         </div>
       </Link>
@@ -434,9 +388,6 @@ export default function HomePage() {
 
         {/* === Priority 5: Compact Collection + Quick Links === */}
         {compactCollectionProgress}
-        
-        {/* === Check-in Feature === */}
-        {checkinSection}
 
         {/* Quick links row: History + Activity */}
         <div className="px-4 mt-2 mb-4 flex gap-3">
