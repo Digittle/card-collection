@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 560" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a1a28"/>
+      <stop offset="100%" stop-color="#28201a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="560" rx="20" fill="url(#bg)"/>
+  <path d="M200 140 L100 250 L150 240 L120 320 L200 280 L280 320 L250 240 L300 250 Z" fill="#887755" opacity="0.8"/>
+  <circle cx="190" cy="195" r="6" fill="#ffdd00"/>
+  <circle cx="210" cy="195" r="6" fill="#ffdd00"/>
+  <path d="M195 210 L200 220 L205 210" fill="#ff8800"/>
+  <path d="M140 300 L200 260 L260 300" stroke="#ffdd0040" stroke-width="1" fill="none" stroke-dasharray="3 3"/>
+  <text x="200" y="440" text-anchor="middle" fill="#ccaa66" font-size="28" font-weight="bold" font-family="serif">Thunder Hawk</text>
+  <text x="200" y="470" text-anchor="middle" fill="#88775580" font-size="14" font-family="sans-serif">Mythical Creatures #7</text>
+  <text x="200" y="530" text-anchor="middle" fill="#aaaaaa" font-size="12" font-family="sans-serif">COMMON</text>
+</svg>
